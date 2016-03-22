@@ -385,7 +385,7 @@ def print_list(test_list):
         print "    %s" % _test_name(test_class)
 
 
-def main(tests, extra_tests=[]):
+def main(tests, extra_tests=None):
     """Main entry point for test suites based on ComfyChair.
 
     inputs:
@@ -403,6 +403,8 @@ by default runs all tests in the suggested order.
 
 Calls sys.exit() on completion.
 """
+    if extra_tests is None:
+        extra_tests = []
     from sys import argv
     import getopt, sys
 

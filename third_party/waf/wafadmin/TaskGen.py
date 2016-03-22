@@ -245,7 +245,7 @@ class task_gen(object):
 	def get_tgen_by_name(self, name):
 		return self.bld.get_tgen_by_name(name)
 
-	def find_sources_in_dirs(self, dirnames, excludes=[], exts=[]):
+	def find_sources_in_dirs(self, dirnames, excludes=None, exts=None):
 		"""
 		The attributes "excludes" and "exts" must be lists to avoid the confusion
 		find_sources_in_dirs('a', 'b', 'c') <-> find_sources_in_dirs('a b c')
@@ -256,6 +256,10 @@ class task_gen(object):
 
 		# TODO: remove in Waf 1.6
 		"""
+		if excludes is None:
+			excludes = []
+		if exts is None:
+			exts = []
 
 		err_msg = "'%s' attribute must be a list"
 		if not isinstance(excludes, list):
@@ -349,11 +353,15 @@ def declare_order(*k):
 			task_gen.prec[f2].append(f1)
 
 def declare_chain(name='', action='', ext_in='', ext_out='', reentrant=True, color='BLUE',
-	install=0, before=[], after=[], decider=None, rule=None, scan=None):
+	install=0, before=None, after=None, decider=None, rule=None, scan=None):
 	"""
 	see Tools/flex.py for an example
 	while i do not like such wrappers, some people really do
 	"""
+	if before is None:
+		before = []
+	if after is None:
+		after = []
 
 	action = action or rule
 	if isinstance(action, str):

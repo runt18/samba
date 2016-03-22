@@ -124,7 +124,9 @@ def planperltestsuite(name, path):
         skiptestsuite(name, "Test::More not available")
 
 
-def planpythontestsuite(env, module, name=None, extra_path=[]):
+def planpythontestsuite(env, module, name=None, extra_path=None):
+    if extra_path is None:
+        extra_path = []
     if name is None:
         name = module
     pypath = list(extra_path)

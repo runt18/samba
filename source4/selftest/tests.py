@@ -457,7 +457,13 @@ for env in ["ad_dc:local", "ad_dc_ntvfs:local", "s4member:local", "nt4_dc:local"
         skiptestsuite("samba.nss.test using winbind(%s)" % env, "nsstest not available")
 
 subunitrun = valgrindify(python) + " " + os.path.join(samba4srcdir, "scripting/bin/subunitrun")
-def planoldpythontestsuite(env, module, name=None, extra_path=[], environ={}, extra_args=[]):
+def planoldpythontestsuite(env, module, name=None, extra_path=None, environ=None, extra_args=None):
+    if extra_path is None:
+        extra_path = []
+    if environ is None:
+        environ = {}
+    if extra_args is None:
+        extra_args = []
     environ = dict(environ)
     py_path = list(extra_path)
     if py_path:

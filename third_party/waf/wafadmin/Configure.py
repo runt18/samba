@@ -56,7 +56,7 @@ def find_file(filename, path_list):
 			return directory
 	return ''
 
-def find_program_impl(env, filename, path_list=[], var=None, environ=None):
+def find_program_impl(env, filename, path_list=None, var=None, environ=None):
 	"""find a program in folders path_lst, and sets env[var]
 	@param env: environment
 	@param filename: name of the program to search for
@@ -65,6 +65,8 @@ def find_program_impl(env, filename, path_list=[], var=None, environ=None):
 	@return: either the value that is referenced with [var] in env or os.environ
          or the first occurrence filename or '' if filename could not be found
 """
+	if path_list is None:
+		path_list = []
 
 	if not environ:
 		environ = os.environ
@@ -355,8 +357,10 @@ class ConfigurationContext(Utils.Context):
 		self.log.write('\n')
 		Utils.pprint(color, msg)
 
-	def find_program(self, filename, path_list=[], var=None, mandatory=False):
+	def find_program(self, filename, path_list=None, var=None, mandatory=False):
 		"wrapper that adds a configuration message"
+		if path_list is None:
+			path_list = []
 
 		ret = None
 		if var:

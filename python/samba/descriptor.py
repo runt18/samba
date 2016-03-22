@@ -43,13 +43,17 @@ def sddl2binary(sddl_in, domain_sid, name_map):
     sec = security.descriptor.from_sddl(sddl, domain_sid)
     return ndr_pack(sec)
 
-def get_empty_descriptor(domain_sid, name_map={}):
+def get_empty_descriptor(domain_sid, name_map=None):
+    if name_map is None:
+        name_map = {}
     sddl= ""
     return sddl2binary(sddl, domain_sid, name_map)
 
 # "get_schema_descriptor" is located in "schema.py"
 
-def get_config_descriptor(domain_sid, name_map={}):
+def get_config_descriptor(domain_sid, name_map=None):
+    if name_map is None:
+        name_map = {}
     sddl = "O:EAG:EAD:(OA;;CR;1131f6aa-9c07-11d1-f79f-00c04fc2dcd2;;ED)" \
            "(OA;;CR;1131f6ab-9c07-11d1-f79f-00c04fc2dcd2;;ED)" \
            "(OA;;CR;1131f6ac-9c07-11d1-f79f-00c04fc2dcd2;;ED)" \
@@ -67,7 +71,9 @@ def get_config_descriptor(domain_sid, name_map={}):
            "(OU;SA;CR;45ec5156-db7e-47bb-b53f-dbeb2d03c40f;;WD)"
     return sddl2binary(sddl, domain_sid, name_map)
 
-def get_config_partitions_descriptor(domain_sid, name_map={}):
+def get_config_partitions_descriptor(domain_sid, name_map=None):
+    if name_map is None:
+        name_map = {}
     sddl = "D:" \
     "(A;;LCLORC;;;AU)" \
     "(OA;;RP;e48d0154-bcf8-11d1-8702-00c04fb96050;;AU)" \
@@ -84,7 +90,9 @@ def get_config_partitions_descriptor(domain_sid, name_map={}):
     "(AU;CISA;WPCRCCDCWOWDSDDT;;;WD)"
     return sddl2binary(sddl, domain_sid, name_map)
 
-def get_config_sites_descriptor(domain_sid, name_map={}):
+def get_config_sites_descriptor(domain_sid, name_map=None):
+    if name_map is None:
+        name_map = {}
     sddl = "D:" \
     "(A;;RPLCLORC;;;AU)" \
     "(OA;CIIO;SW;d31a8757-2447-4545-8081-3bb610cacbf2;f0f8ffab-1191-11d0-a060-00aa006c33ed;ER)" \
@@ -98,35 +106,45 @@ def get_config_sites_descriptor(domain_sid, name_map={}):
     "(OU;CIIOSA;WP;3e10944c-c354-11d0-aff8-0000f80367c1;b7b13124-b82e-11d0-afee-0000f80367c1;WD)"
     return sddl2binary(sddl, domain_sid, name_map)
 
-def get_config_ntds_quotas_descriptor(domain_sid, name_map={}):
+def get_config_ntds_quotas_descriptor(domain_sid, name_map=None):
+    if name_map is None:
+        name_map = {}
     sddl = "D:" \
     "(A;;RPWPCRCCDCLCLORCWOWDSDDTSW;;;EA)" \
     "(A;;RPLCLORC;;;BA)" \
     "(OA;;CR;4ecc03fe-ffc0-4947-b630-eb672a8a9dbc;;WD)"
     return sddl2binary(sddl, domain_sid, name_map)
 
-def get_config_delete_protected1_descriptor(domain_sid, name_map={}):
+def get_config_delete_protected1_descriptor(domain_sid, name_map=None):
+    if name_map is None:
+        name_map = {}
     sddl = "D:AI" \
     "(A;;RPLCLORC;;;AU)" \
     "(A;;RPWPCRCCLCLORCWOWDSW;;;EA)" \
     "(A;;RPWPCRCCDCLCLORCWOWDSDDTSW;;;SY)"
     return sddl2binary(sddl, domain_sid, name_map)
 
-def get_config_delete_protected1wd_descriptor(domain_sid, name_map={}):
+def get_config_delete_protected1wd_descriptor(domain_sid, name_map=None):
+    if name_map is None:
+        name_map = {}
     sddl = "D:AI" \
     "(A;;RPLCLORC;;;WD)" \
     "(A;;RPWPCRCCLCLORCWOWDSW;;;EA)" \
     "(A;;RPWPCRCCDCLCLORCWOWDSDDTSW;;;SY)"
     return sddl2binary(sddl, domain_sid, name_map)
 
-def get_config_delete_protected2_descriptor(domain_sid, name_map={}):
+def get_config_delete_protected2_descriptor(domain_sid, name_map=None):
+    if name_map is None:
+        name_map = {}
     sddl = "D:AI" \
     "(A;;RPLCLORC;;;AU)" \
     "(A;;RPWPCRCCDCLCLORCWOWDSW;;;EA)" \
     "(A;;RPWPCRCCDCLCLORCWOWDSDDTSW;;;SY)"
     return sddl2binary(sddl, domain_sid, name_map)
 
-def get_domain_descriptor(domain_sid, name_map={}):
+def get_domain_descriptor(domain_sid, name_map=None):
+    if name_map is None:
+        name_map = {}
     sddl= "O:BAG:BAD:AI(OA;CIIO;RP;4c164200-20c0-11d0-a768-00aa006e0529;4828cc14-1437-45bc-9b07-ad6f015e5f28;RU)" \
         "(OA;CIIO;RP;4c164200-20c0-11d0-a768-00aa006e0529;bf967aba-0de6-11d0-a285-00aa003049e2;RU)" \
     "(OA;CIIO;RP;5f202010-79a5-11d0-9020-00c04fc2d4cf;4828cc14-1437-45bc-9b07-ad6f015e5f28;RU)" \
@@ -178,7 +196,9 @@ def get_domain_descriptor(domain_sid, name_map={}):
     "(AU;SA;CR;;;DU)(AU;SA;CR;;;BA)(AU;SA;WPWOWD;;;WD)"
     return sddl2binary(sddl, domain_sid, name_map)
 
-def get_domain_infrastructure_descriptor(domain_sid, name_map={}):
+def get_domain_infrastructure_descriptor(domain_sid, name_map=None):
+    if name_map is None:
+        name_map = {}
     sddl = "D:" \
     "(A;;RPLCLORC;;;AU)" \
     "(A;;RPWPCRCCLCLORCWOWDSW;;;DA)" \
@@ -187,7 +207,9 @@ def get_domain_infrastructure_descriptor(domain_sid, name_map={}):
     "(AU;SA;WPCR;;;WD)"
     return sddl2binary(sddl, domain_sid, name_map)
 
-def get_domain_builtin_descriptor(domain_sid, name_map={}):
+def get_domain_builtin_descriptor(domain_sid, name_map=None):
+    if name_map is None:
+        name_map = {}
     sddl = "D:" \
     "(OA;CIIO;RP;4c164200-20c0-11d0-a768-00aa006e0529;4828cc14-1437-45bc-9b07-ad6f015e5f28;RU)" \
     "(OA;CIIO;RP;4c164200-20c0-11d0-a768-00aa006e0529;bf967aba-0de6-11d0-a285-00aa003049e2;RU)" \
@@ -243,7 +265,9 @@ def get_domain_builtin_descriptor(domain_sid, name_map={}):
     "(AU;SA;WPWOWD;;;WD)"
     return sddl2binary(sddl, domain_sid, name_map)
 
-def get_domain_computers_descriptor(domain_sid, name_map={}):
+def get_domain_computers_descriptor(domain_sid, name_map=None):
+    if name_map is None:
+        name_map = {}
     sddl = "D:" \
     "(A;;RPWPCRCCDCLCLORCWOWDSDDTSW;;;SY)" \
     "(A;;RPWPCRCCDCLCLORCWOWDSW;;;DA)" \
@@ -256,7 +280,9 @@ def get_domain_computers_descriptor(domain_sid, name_map={}):
     "S:"
     return sddl2binary(sddl, domain_sid, name_map)
 
-def get_domain_users_descriptor(domain_sid, name_map={}):
+def get_domain_users_descriptor(domain_sid, name_map=None):
+    if name_map is None:
+        name_map = {}
     sddl = "D:" \
     "(A;;RPWPCRCCDCLCLORCWOWDSDDTSW;;;SY)" \
     "(A;;RPWPCRCCDCLCLORCWOWDSW;;;DA)" \
@@ -268,7 +294,9 @@ def get_domain_users_descriptor(domain_sid, name_map={}):
     "S:"
     return sddl2binary(sddl, domain_sid, name_map)
 
-def get_domain_controllers_descriptor(domain_sid, name_map={}):
+def get_domain_controllers_descriptor(domain_sid, name_map=None):
+    if name_map is None:
+        name_map = {}
     sddl = "D:" \
     "(A;;RPLCLORC;;;AU)" \
     "(A;;RPWPCRCCLCLORCWOWDSW;;;DA)" \
@@ -279,21 +307,27 @@ def get_domain_controllers_descriptor(domain_sid, name_map={}):
     "(AU;CISA;WP;;;WD)"
     return sddl2binary(sddl, domain_sid, name_map)
 
-def get_domain_delete_protected1_descriptor(domain_sid, name_map={}):
+def get_domain_delete_protected1_descriptor(domain_sid, name_map=None):
+    if name_map is None:
+        name_map = {}
     sddl = "D:AI" \
     "(A;;RPLCLORC;;;AU)" \
     "(A;;RPWPCRCCLCLORCWOWDSW;;;DA)" \
     "(A;;RPWPCRCCDCLCLORCWOWDSDDTSW;;;SY)"
     return sddl2binary(sddl, domain_sid, name_map)
 
-def get_domain_delete_protected2_descriptor(domain_sid, name_map={}):
+def get_domain_delete_protected2_descriptor(domain_sid, name_map=None):
+    if name_map is None:
+        name_map = {}
     sddl = "D:AI" \
     "(A;;RPLCLORC;;;AU)" \
     "(A;;RPWPCRCCDCLCLORCWOWDSW;;;DA)" \
     "(A;;RPWPCRCCDCLCLORCWOWDSDDTSW;;;SY)"
     return sddl2binary(sddl, domain_sid, name_map)
 
-def get_dns_partition_descriptor(domain_sid, name_map={}):
+def get_dns_partition_descriptor(domain_sid, name_map=None):
+    if name_map is None:
+        name_map = {}
     sddl = "O:SYG:BAD:AI" \
     "(OA;CIIO;RP;4c164200-20c0-11d0-a768-00aa006e0529;4828cc14-1437-45bc-9b07-ad6f015e5f28;RU)" \
     "(OA;CIIO;RP;4c164200-20c0-11d0-a768-00aa006e0529;bf967aba-0de6-11d0-a285-00aa003049e2;RU)" \
@@ -347,13 +381,17 @@ def get_dns_partition_descriptor(domain_sid, name_map={}):
     "(AU;SA;CR;;;DU)(AU;SA;CR;;;BA)(AU;SA;WPWOWD;;;WD)"
     return sddl2binary(sddl, domain_sid, name_map)
 
-def get_dns_forest_microsoft_dns_descriptor(domain_sid, name_map={}):
+def get_dns_forest_microsoft_dns_descriptor(domain_sid, name_map=None):
+    if name_map is None:
+        name_map = {}
     sddl = "O:SYG:SYD:AI" \
     "(A;;RPWPCRCCDCLCLORCWOWDSDDTSW;;;SY)" \
     "(A;CI;RPWPCRCCDCLCRCWOWDSDDTSW;;;ED)"
     return sddl2binary(sddl, domain_sid, name_map)
 
-def get_dns_domain_microsoft_dns_descriptor(domain_sid, name_map={}):
+def get_dns_domain_microsoft_dns_descriptor(domain_sid, name_map=None):
+    if name_map is None:
+        name_map = {}
     sddl = "O:SYG:SYD:AI" \
     "(A;;RPWPCRCCDCLCLORCWOWDSDDTSW;;;DA)" \
     "(A;CI;RPWPCRCCDCLCRCWOWDSDDTSW;;;DnsAdmins)" \
@@ -361,7 +399,9 @@ def get_dns_domain_microsoft_dns_descriptor(domain_sid, name_map={}):
     "(A;CI;RPWPCRCCDCLCRCWOWDSDDTSW;;;ED)"
     return sddl2binary(sddl, domain_sid, name_map)
 
-def get_paritions_crossref_subdomain_descriptor(domain_sid, name_map={}):
+def get_paritions_crossref_subdomain_descriptor(domain_sid, name_map=None):
+    if name_map is None:
+        name_map = {}
     sddl = "O:SubdomainAdminsG:SubdomainAdminsD:AI" \
     "(A;;RPWPCRCCLCLORCWOWDSW;;;SubdomainAdmins)"
     "(A;;RPLCLORC;;;AU)"

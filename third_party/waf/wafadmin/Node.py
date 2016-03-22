@@ -533,8 +533,10 @@ class Node(object):
 						yield node
 		raise StopIteration
 
-	def find_iter(self, in_pat=['*'], ex_pat=exclude_pats, prune_pat=prune_pats, src=True, bld=True, dir=False, maxdepth=25, flat=False):
+	def find_iter(self, in_pat=None, ex_pat=exclude_pats, prune_pat=prune_pats, src=True, bld=True, dir=False, maxdepth=25, flat=False):
 		"""find nodes recursively, this returns everything but folders by default; same gotcha as ant_glob"""
+		if in_pat is None:
+			in_pat = ['*']
 
 		if not (src or bld or dir):
 			raise StopIteration
@@ -621,7 +623,9 @@ class Node(object):
 				nacc = []
 			return [nacc, nrej]
 
-		def ant_iter(nodi, maxdepth=25, pats=[]):
+		def ant_iter(nodi, maxdepth=25, pats=None):
+			if pats is None:
+				pats = []
 			nodi.__class__.bld.rescan(nodi)
 			tmp = list(nodi.__class__.bld.cache_dir_contents[nodi.id])
 			tmp.sort()

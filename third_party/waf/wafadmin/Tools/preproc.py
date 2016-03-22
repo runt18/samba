@@ -292,8 +292,10 @@ def paste_tokens(t1, t2):
 		raise PreprocError('tokens do not make a valid paste %r and %r' % (t1, t2))
 	return (p1, t1[1] + t2[1])
 
-def reduce_tokens(lst, defs, ban=[]):
+def reduce_tokens(lst, defs, ban=None):
 	"""replace the tokens in lst, using the macros provided in defs, and a list of macros that cannot be re-applied"""
+	if ban is None:
+		ban = []
 	i = 0
 
 	while i < len(lst):
@@ -777,11 +779,13 @@ class c_parser(object):
 			if re_pragma_once.match(line.lower()):
 				self.ban_includes.add(self.curfile)
 
-def get_deps(node, env, nodepaths=[]):
+def get_deps(node, env, nodepaths=None):
 	"""
 	Get the dependencies using a c/c++ preprocessor, this is required for finding dependencies of the kind
 	#include some_macro()
 	"""
+	if nodepaths is None:
+		nodepaths = []
 
 	gruik = c_parser(nodepaths)
 	gruik.start(node, env)
@@ -801,10 +805,14 @@ def lines_includes(filename):
 	code = re_cpp.sub(repl, code)
 	return [(m.group(2), m.group(3)) for m in re.finditer(re_inc, code)]
 
-def get_deps_simple(node, env, nodepaths=[], defines={}):
+def get_deps_simple(node, env, nodepaths=None, defines=None):
 	"""
 	Get the dependencies by just looking recursively at the #include statements
 	"""
+	if nodepaths is None:
+		nodepaths = []
+	if defines is None:
+		defines = {}
 
 	nodes = []
 	names = []

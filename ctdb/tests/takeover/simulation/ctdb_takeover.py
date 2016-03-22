@@ -41,7 +41,9 @@ import re
 
 options = None
 
-def process_args(extra_options=[]):
+def process_args(extra_options=None):
+    if extra_options is None:
+        extra_options = []
     global options
 
     parser = OptionParser(option_list=extra_options)

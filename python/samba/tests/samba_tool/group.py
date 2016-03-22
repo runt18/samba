@@ -138,8 +138,10 @@ class GroupCmdTestCase(SambaToolCmdTest):
             name = groupobj.get("samAccountName", idx=0)
             found = self.assertMatch(out, name, "group '%s' not found" % name)
 
-    def _randomGroup(self, base={}):
+    def _randomGroup(self, base=None):
         """create a group with random attribute values, you can specify base attributes"""
+        if base is None:
+            base = {}
         group = {
             "name": self.randomName(),
             "description": self.randomName(count=100),
