@@ -130,7 +130,7 @@ class FixedOffset(tzinfo):
         return ZERO
 
     def __repr__(self):
-        return "<FixedOffset %r %r>" % (self.__name, self.__offset)
+        return "<FixedOffset {0!r} {1!r}>".format(self.__name, self.__offset)
 
 def to_int(d, key, default_to_zero=False, default=None, required=True):
     """Pull a value from the dict and convert to int
@@ -145,7 +145,7 @@ def to_int(d, key, default_to_zero=False, default=None, required=True):
         return 0
     if value is None:
         if required:
-            raise ParseError("Unable to read %s from %s" % (key, d))
+            raise ParseError("Unable to read {0!s} from {1!s}".format(key, d))
     else:
         return int(value)
 
@@ -164,7 +164,7 @@ def parse_timezone(matches, default_timezone=UTC):
     sign = matches["tz_sign"]
     hours = to_int(matches, "tz_hour")
     minutes = to_int(matches, "tz_minute", default_to_zero=True)
-    description = "%s%02d:%02d" % (sign, hours, minutes)
+    description = "{0!s}{1:02d}:{2:02d}".format(sign, hours, minutes)
     if sign == "-":
         hours = -hours
         minutes = -minutes
@@ -188,16 +188,16 @@ def parse_date(datestring, default_timezone=UTC):
 
     """
     if not isinstance(datestring, _basestring):
-        raise ParseError("Expecting a string %r" % datestring)
+        raise ParseError("Expecting a string {0!r}".format(datestring))
     m = ISO8601_REGEX.match(datestring)
     if not m:
-        raise ParseError("Unable to parse date string %r" % datestring)
+        raise ParseError("Unable to parse date string {0!r}".format(datestring))
     groups = m.groupdict()
     LOG.debug("Parsed %s into %s with default timezone %s", datestring, groups, default_timezone)
 
     tz = parse_timezone(groups, default_timezone=default_timezone)
 
-    groups["second_fraction"] = int(Decimal("0.%s" % (groups["second_fraction"] or 0)) * Decimal("1000000.0"))
+    groups["second_fraction"] = int(Decimal("0.{0!s}".format((groups["second_fraction"] or 0))) * Decimal("1000000.0"))
 
     try:
         return datetime(

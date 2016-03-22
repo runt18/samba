@@ -4,9 +4,9 @@ from ctdb_takeover import Cluster, Node, process_args
 
 process_args()
 
-addresses10 = ['10.4.20.%d' % n for n in range(154, 168)]
-addresses172a = ['172.20.106.%d' % n for n in range(110, 124)]
-addresses172b = ['172.20.107.%d' % n for n in range(110, 117)]
+addresses10 = ['10.4.20.{0:d}'.format(n) for n in range(154, 168)]
+addresses172a = ['172.20.106.{0:d}'.format(n) for n in range(110, 124)]
+addresses172b = ['172.20.107.{0:d}'.format(n) for n in range(110, 117)]
 
 c = Cluster()
 

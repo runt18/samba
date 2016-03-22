@@ -31,8 +31,8 @@ class UserCmdTestCase(SambaToolCmdTest):
 
     def setUp(self):
         super(UserCmdTestCase, self).setUp()
-        self.samdb = self.getSamDB("-H", "ldap://%s" % os.environ["DC_SERVER"],
-            "-U%s%%%s" % (os.environ["DC_USERNAME"], os.environ["DC_PASSWORD"]))
+        self.samdb = self.getSamDB("-H", "ldap://{0!s}".format(os.environ["DC_SERVER"]),
+            "-U{0!s}%{1!s}".format(os.environ["DC_USERNAME"], os.environ["DC_PASSWORD"]))
         self.users = []
         self.users.append(self._randomUser({"name": "sambatool1", "company": "comp1"}))
         self.users.append(self._randomUser({"name": "sambatool2", "company": "comp1"}))
@@ -49,7 +49,7 @@ class UserCmdTestCase(SambaToolCmdTest):
 
             self.assertCmdSuccess(result)
             self.assertEquals(err,"","Shouldn't be any error messages")
-            self.assertIn("User '%s' created successfully" % user["name"], out)
+            self.assertIn("User '{0!s}' created successfully".format(user["name"]), out)
 
             user["checkUserFn"](user)
 
@@ -80,23 +80,23 @@ class UserCmdTestCase(SambaToolCmdTest):
         for user in self.users:
             (result, out, err) =  self.runsubcmd("user", "add", user["name"], user["password"],
                                                  "--use-username-as-cn",
-                                                 "--surname=%s" % user["surname"],
-                                                 "--given-name=%s" % user["given-name"],
-                                                 "--job-title=%s" % user["job-title"],
-                                                 "--department=%s" % user["department"],
-                                                 "--description=%s" % user["description"],
-                                                 "--company=%s" % user["company"],
-                                                 "-H", "ldap://%s" % os.environ["DC_SERVER"],
-                                                 "-U%s%%%s" % (os.environ["DC_USERNAME"], os.environ["DC_PASSWORD"]))
+                                                 "--surname={0!s}".format(user["surname"]),
+                                                 "--given-name={0!s}".format(user["given-name"]),
+                                                 "--job-title={0!s}".format(user["job-title"]),
+                                                 "--department={0!s}".format(user["department"]),
+                                                 "--description={0!s}".format(user["description"]),
+                                                 "--company={0!s}".format(user["company"]),
+                                                 "-H", "ldap://{0!s}".format(os.environ["DC_SERVER"]),
+                                                 "-U{0!s}%{1!s}".format(os.environ["DC_USERNAME"], os.environ["DC_PASSWORD"]))
 
             self.assertCmdSuccess(result)
             self.assertEquals(err,"","Shouldn't be any error messages")
-            self.assertIn("User '%s' created successfully" % user["name"], out)
+            self.assertIn("User '{0!s}' created successfully".format(user["name"]), out)
 
             found = self._find_user(user["name"])
 
-            self.assertEquals("%s" % found.get("cn"), "%(name)s" % user)
-            self.assertEquals("%s" % found.get("name"), "%(name)s" % user)
+            self.assertEquals("{0!s}".format(found.get("cn")), "{name!s}".format(**user))
+            self.assertEquals("{0!s}".format(found.get("name")), "{name!s}".format(**user))
 
 
 
@@ -105,9 +105,9 @@ class UserCmdTestCase(SambaToolCmdTest):
             newpasswd = self.randomPass()
             (result, out, err) = self.runsubcmd("user", "setpassword",
                                                 user["name"],
-                                                "--newpassword=%s" % newpasswd,
-                                                "-H", "ldap://%s" % os.environ["DC_SERVER"],
-                                                "-U%s%%%s" % (os.environ["DC_USERNAME"], os.environ["DC_PASSWORD"]))
+                                                "--newpassword={0!s}".format(newpasswd),
+                                                "-H", "ldap://{0!s}".format(os.environ["DC_SERVER"]),
+                                                "-U{0!s}%{1!s}".format(os.environ["DC_USERNAME"], os.environ["DC_PASSWORD"]))
             # self.assertCmdSuccess(result, "Ensure setpassword runs")
             self.assertEquals(err,"","setpassword with url")
             self.assertMatch(out, "Changed password OK", "setpassword with url")
@@ -116,7 +116,7 @@ class UserCmdTestCase(SambaToolCmdTest):
             newpasswd = self.randomPass()
             (result, out, err) = self.runsubcmd("user", "setpassword",
                                                 user["name"],
-                                                "--newpassword=%s" % newpasswd)
+                                                "--newpassword={0!s}".format(newpasswd))
             # self.assertCmdSuccess(result, "Ensure setpassword runs")
             self.assertEquals(err,"","setpassword without url")
             self.assertMatch(out, "Changed password OK", "setpassword without url")
@@ -125,10 +125,10 @@ class UserCmdTestCase(SambaToolCmdTest):
             newpasswd = self.randomPass()
             (result, out, err) = self.runsubcmd("user", "setpassword",
                                                 user["name"],
-                                                "--newpassword=%s" % newpasswd,
+                                                "--newpassword={0!s}".format(newpasswd),
                                                 "--must-change-at-next-login",
-                                                "-H", "ldap://%s" % os.environ["DC_SERVER"],
-                                                "-U%s%%%s" % (os.environ["DC_USERNAME"], os.environ["DC_PASSWORD"]))
+                                                "-H", "ldap://{0!s}".format(os.environ["DC_SERVER"]),
+                                                "-U{0!s}%{1!s}".format(os.environ["DC_USERNAME"], os.environ["DC_PASSWORD"]))
             # self.assertCmdSuccess(result, "Ensure setpassword runs")
             self.assertEquals(err,"","setpassword with forced change")
             self.assertMatch(out, "Changed password OK", "setpassword with forced change")
@@ -142,15 +142,15 @@ class UserCmdTestCase(SambaToolCmdTest):
         for user in self.users:
             (result, out, err) = self.runsubcmd("user", "setexpiry", user["name"],
                                                 "--days=2",
-                                                "-H", "ldap://%s" % os.environ["DC_SERVER"],
-                                                "-U%s%%%s" % (os.environ["DC_USERNAME"], os.environ["DC_PASSWORD"]))
+                                                "-H", "ldap://{0!s}".format(os.environ["DC_SERVER"]),
+                                                "-U{0!s}%{1!s}".format(os.environ["DC_USERNAME"], os.environ["DC_PASSWORD"]))
             self.assertCmdSuccess(result, "Can we run setexpiry with names")
-            self.assertIn("Expiry for user '%s' set to 2 days." % user["name"], out)
+            self.assertIn("Expiry for user '{0!s}' set to 2 days.".format(user["name"]), out)
 
         for user in self.users:
             found = self._find_user(user["name"])
 
-            expires = nttime2unix(int("%s" % found.get("accountExpires")))
+            expires = nttime2unix(int("{0!s}".format(found.get("accountExpires"))))
             self.assertWithin(expires, twodays, 5, "Ensure account expires is within 5 seconds of the expected time")
 
         # TODO: renable this after the filter case is sorted out
@@ -162,29 +162,28 @@ class UserCmdTestCase(SambaToolCmdTest):
         (result, out, err) = self.runsubcmd("user", "setexpiry",
                                                 "--filter", "(&(objectClass=user)(company=comp2))",
                                                 "--days=4",
-                                                "-H", "ldap://%s" % os.environ["DC_SERVER"],
-                                                "-U%s%%%s" % (os.environ["DC_USERNAME"], os.environ["DC_PASSWORD"]))
+                                                "-H", "ldap://{0!s}".format(os.environ["DC_SERVER"]),
+                                                "-U{0!s}%{1!s}".format(os.environ["DC_USERNAME"], os.environ["DC_PASSWORD"]))
         self.assertCmdSuccess(result, "Can we run setexpiry with a filter")
 
         for user in self.users:
             found = self._find_user(user["name"])
-            if ("%s" % found.get("company")) == "comp2":
-                expires = nttime2unix(int("%s" % found.get("accountExpires")))
+            if ("{0!s}".format(found.get("company"))) == "comp2":
+                expires = nttime2unix(int("{0!s}".format(found.get("accountExpires"))))
                 self.assertWithin(expires, fourdays, 5, "Ensure account expires is within 5 seconds of the expected time")
             else:
-                expires = nttime2unix(int("%s" % found.get("accountExpires")))
+                expires = nttime2unix(int("{0!s}".format(found.get("accountExpires"))))
                 self.assertWithin(expires, twodays, 5, "Ensure account expires is within 5 seconds of the expected time")
 
 
     def test_list(self):
         (result, out, err) = self.runsubcmd("user", "list",
-                                            "-H", "ldap://%s" % os.environ["DC_SERVER"],
-                                            "-U%s%%%s" % (os.environ["DC_USERNAME"],
+                                            "-H", "ldap://{0!s}".format(os.environ["DC_SERVER"]),
+                                            "-U{0!s}%{1!s}".format(os.environ["DC_USERNAME"],
                                                           os.environ["DC_PASSWORD"]))
         self.assertCmdSuccess(result, "Error running list")
 
-        search_filter = ("(&(objectClass=user)(userAccountControl:%s:=%u))" %
-                         (ldb.OID_COMPARATOR_AND, dsdb.UF_NORMAL_ACCOUNT))
+        search_filter = ("(&(objectClass=user)(userAccountControl:{0!s}:={1:d}))".format(ldb.OID_COMPARATOR_AND, dsdb.UF_NORMAL_ACCOUNT))
 
         userlist = self.samdb.search(base=self.samdb.domain_dn(),
                                      scope=ldb.SCOPE_SUBTREE,
@@ -196,7 +195,7 @@ class UserCmdTestCase(SambaToolCmdTest):
         for userobj in userlist:
             name = userobj.get("samaccountname", idx=0)
             found = self.assertMatch(out, name,
-                                     "user '%s' not found" % name)
+                                     "user '{0!s}' not found".format(name))
     def test_getpwent(self):
         try:
             import pwd
@@ -230,21 +229,21 @@ class UserCmdTestCase(SambaToolCmdTest):
                         })
         # check if --rfc2307-from-nss sets the same values as we got from pwd.getpwuid()
         (result, out, err) = self.runsubcmd("user", "add", user["name"], user["password"],
-                                                "--surname=%s" % user["surname"],
-                                                "--given-name=%s" % user["given-name"],
-                                                "--job-title=%s" % user["job-title"],
-                                                "--department=%s" % user["department"],
-                                                "--description=%s" % user["description"],
-                                                "--company=%s" % user["company"],
-                                                "--gecos=%s" % user["gecos"],
+                                                "--surname={0!s}".format(user["surname"]),
+                                                "--given-name={0!s}".format(user["given-name"]),
+                                                "--job-title={0!s}".format(user["job-title"]),
+                                                "--department={0!s}".format(user["department"]),
+                                                "--description={0!s}".format(user["description"]),
+                                                "--company={0!s}".format(user["company"]),
+                                                "--gecos={0!s}".format(user["gecos"]),
                                                 "--rfc2307-from-nss",
-                                                "-H", "ldap://%s" % os.environ["DC_SERVER"],
-                                                "-U%s%%%s" % (os.environ["DC_USERNAME"], os.environ["DC_PASSWORD"]))
+                                                "-H", "ldap://{0!s}".format(os.environ["DC_SERVER"]),
+                                                "-U{0!s}%{1!s}".format(os.environ["DC_USERNAME"], os.environ["DC_PASSWORD"]))
 
-        msg = "command should return %s" % err
+        msg = "command should return {0!s}".format(err)
         self.assertCmdSuccess(result, msg)
         self.assertEquals(err,"","Shouldn't be any error messages")
-        self.assertIn("User '%s' created successfully" % user["name"], out)
+        self.assertIn("User '{0!s}' created successfully".format(user["name"]), out)
 
         self._check_posix_user(user)
         self.runsubcmd("user", "delete", user["name"])
@@ -256,25 +255,25 @@ class UserCmdTestCase(SambaToolCmdTest):
         # create a user with posix attributes from nss but override all of them with the
         # random ones just obtained
         (result, out, err) = self.runsubcmd("user", "add", user["name"], user["password"],
-                                                "--surname=%s" % user["surname"],
-                                                "--given-name=%s" % user["given-name"],
-                                                "--job-title=%s" % user["job-title"],
-                                                "--department=%s" % user["department"],
-                                                "--description=%s" % user["description"],
-                                                "--company=%s" % user["company"],
+                                                "--surname={0!s}".format(user["surname"]),
+                                                "--given-name={0!s}".format(user["given-name"]),
+                                                "--job-title={0!s}".format(user["job-title"]),
+                                                "--department={0!s}".format(user["department"]),
+                                                "--description={0!s}".format(user["description"]),
+                                                "--company={0!s}".format(user["company"]),
                                                 "--rfc2307-from-nss",
-                                                "--gecos=%s" % user["gecos"],
-                                                "--login-shell=%s" % user["loginShell"],
-                                                "--uid=%s" % user["uid"],
-                                                "--uid-number=%s" % user["uidNumber"],
-                                                "--gid-number=%s" % user["gidNumber"],
-                                                "-H", "ldap://%s" % os.environ["DC_SERVER"],
-                                                "-U%s%%%s" % (os.environ["DC_USERNAME"], os.environ["DC_PASSWORD"]))
+                                                "--gecos={0!s}".format(user["gecos"]),
+                                                "--login-shell={0!s}".format(user["loginShell"]),
+                                                "--uid={0!s}".format(user["uid"]),
+                                                "--uid-number={0!s}".format(user["uidNumber"]),
+                                                "--gid-number={0!s}".format(user["gidNumber"]),
+                                                "-H", "ldap://{0!s}".format(os.environ["DC_SERVER"]),
+                                                "-U{0!s}%{1!s}".format(os.environ["DC_USERNAME"], os.environ["DC_PASSWORD"]))
 
-        msg = "command should return %s" % err
+        msg = "command should return {0!s}".format(err)
         self.assertCmdSuccess(result, msg)
         self.assertEquals(err,"","Shouldn't be any error messages")
-        self.assertIn("User '%s' created successfully" % user["name"], out)
+        self.assertIn("User '{0!s}' created successfully".format(user["name"]), out)
 
         self._check_posix_user(user)
         self.runsubcmd("user", "delete", user["name"])
@@ -322,52 +321,52 @@ class UserCmdTestCase(SambaToolCmdTest):
         """ check if a user from SamDB has the same attributes as its template """
         found = self._find_user(user["name"])
 
-        self.assertEquals("%s" % found.get("name"), "%(given-name)s %(surname)s" % user)
-        self.assertEquals("%s" % found.get("title"), user["job-title"])
-        self.assertEquals("%s" % found.get("company"), user["company"])
-        self.assertEquals("%s" % found.get("description"), user["description"])
-        self.assertEquals("%s" % found.get("department"), user["department"])
+        self.assertEquals("{0!s}".format(found.get("name")), "{given-name!s} {surname!s}".format(**user))
+        self.assertEquals("{0!s}".format(found.get("title")), user["job-title"])
+        self.assertEquals("{0!s}".format(found.get("company")), user["company"])
+        self.assertEquals("{0!s}".format(found.get("description")), user["description"])
+        self.assertEquals("{0!s}".format(found.get("department")), user["department"])
 
     def _check_posix_user(self, user):
         """ check if a posix_user from SamDB has the same attributes as its template """
         found = self._find_user(user["name"])
 
-        self.assertEquals("%s" % found.get("loginShell"), user["loginShell"])
-        self.assertEquals("%s" % found.get("gecos"), user["gecos"])
-        self.assertEquals("%s" % found.get("uidNumber"), "%s" % user["uidNumber"])
-        self.assertEquals("%s" % found.get("gidNumber"), "%s" % user["gidNumber"])
-        self.assertEquals("%s" % found.get("uid"), user["uid"])
+        self.assertEquals("{0!s}".format(found.get("loginShell")), user["loginShell"])
+        self.assertEquals("{0!s}".format(found.get("gecos")), user["gecos"])
+        self.assertEquals("{0!s}".format(found.get("uidNumber")), "{0!s}".format(user["uidNumber"]))
+        self.assertEquals("{0!s}".format(found.get("gidNumber")), "{0!s}".format(user["gidNumber"]))
+        self.assertEquals("{0!s}".format(found.get("uid")), user["uid"])
         self._check_user(user)
 
     def _create_user(self, user):
         return self.runsubcmd("user", "add", user["name"], user["password"],
-                                                "--surname=%s" % user["surname"],
-                                                "--given-name=%s" % user["given-name"],
-                                                "--job-title=%s" % user["job-title"],
-                                                "--department=%s" % user["department"],
-                                                "--description=%s" % user["description"],
-                                                "--company=%s" % user["company"],
-                                                "-H", "ldap://%s" % os.environ["DC_SERVER"],
-                                                "-U%s%%%s" % (os.environ["DC_USERNAME"], os.environ["DC_PASSWORD"]))
+                                                "--surname={0!s}".format(user["surname"]),
+                                                "--given-name={0!s}".format(user["given-name"]),
+                                                "--job-title={0!s}".format(user["job-title"]),
+                                                "--department={0!s}".format(user["department"]),
+                                                "--description={0!s}".format(user["description"]),
+                                                "--company={0!s}".format(user["company"]),
+                                                "-H", "ldap://{0!s}".format(os.environ["DC_SERVER"]),
+                                                "-U{0!s}%{1!s}".format(os.environ["DC_USERNAME"], os.environ["DC_PASSWORD"]))
     def _create_posix_user(self, user):
         """ create a new user with RFC2307 attributes """
         return self.runsubcmd("user", "create", user["name"], user["password"],
-                                                "--surname=%s" % user["surname"],
-                                                "--given-name=%s" % user["given-name"],
-                                                "--job-title=%s" % user["job-title"],
-                                                "--department=%s" % user["department"],
-                                                "--description=%s" % user["description"],
-                                                "--company=%s" % user["company"],
-                                                "--gecos=%s" % user["gecos"],
-                                                "--login-shell=%s" % user["loginShell"],
-                                                "--uid=%s" % user["uid"],
-                                                "--uid-number=%s" % user["uidNumber"],
-                                                "--gid-number=%s" % user["gidNumber"],
-                                                "-H", "ldap://%s" % os.environ["DC_SERVER"],
-                                                "-U%s%%%s" % (os.environ["DC_USERNAME"], os.environ["DC_PASSWORD"]))
+                                                "--surname={0!s}".format(user["surname"]),
+                                                "--given-name={0!s}".format(user["given-name"]),
+                                                "--job-title={0!s}".format(user["job-title"]),
+                                                "--department={0!s}".format(user["department"]),
+                                                "--description={0!s}".format(user["description"]),
+                                                "--company={0!s}".format(user["company"]),
+                                                "--gecos={0!s}".format(user["gecos"]),
+                                                "--login-shell={0!s}".format(user["loginShell"]),
+                                                "--uid={0!s}".format(user["uid"]),
+                                                "--uid-number={0!s}".format(user["uidNumber"]),
+                                                "--gid-number={0!s}".format(user["gidNumber"]),
+                                                "-H", "ldap://{0!s}".format(os.environ["DC_SERVER"]),
+                                                "-U{0!s}%{1!s}".format(os.environ["DC_USERNAME"], os.environ["DC_PASSWORD"]))
 
     def _find_user(self, name):
-        search_filter = "(&(sAMAccountName=%s)(objectCategory=%s,%s))" % (ldb.binary_encode(name), "CN=Person,CN=Schema,CN=Configuration", self.samdb.domain_dn())
+        search_filter = "(&(sAMAccountName={0!s})(objectCategory={1!s},{2!s}))".format(ldb.binary_encode(name), "CN=Person,CN=Schema,CN=Configuration", self.samdb.domain_dn())
         userlist = self.samdb.search(base=self.samdb.domain_dn(),
                                   scope=ldb.SCOPE_SUBTREE,
                                   expression=search_filter, attrs=[])

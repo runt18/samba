@@ -23,7 +23,7 @@ lockfile = os.environ.get('WAFLOCK', '.lock-wscript')
 try: cache_global = os.path.abspath(os.environ['WAFCACHE'])
 except KeyError: cache_global = ''
 platform = Utils.unversioned_sys_platform()
-conf_file = 'conf-runs-%s-%d.pickle' % (platform, ABI)
+conf_file = 'conf-runs-{0!s}-{1:d}.pickle'.format(platform, ABI)
 
 remote_repo = ['http://waf.googlecode.com/svn/']
 """remote directory for the plugins"""
@@ -81,22 +81,22 @@ def get_usage(self):
 		just = max([len(x) for x in optlst])
 
 		for x in optlst:
-			cmds_str.append('  %s: %s' % (x.ljust(just), tbl[x].__doc__))
+			cmds_str.append('  {0!s}: {1!s}'.format(x.ljust(just), tbl[x].__doc__))
 		ret = '\n'.join(cmds_str)
 	else:
 		ret = ' '.join(cmds)
 	return '''waf [command] [options]
 
 Main commands (example: ./waf build -j4)
-%s
-''' % ret
+{0!s}
+'''.format(ret)
 
 
 setattr(optparse.OptionParser, 'get_usage', get_usage)
 
 def create_parser(module=None):
 	Logs.debug('options: create_parser is called')
-	parser = optparse.OptionParser(conflict_handler="resolve", version = 'waf %s (%s)' % (WAFVERSION, WAFREVISION))
+	parser = optparse.OptionParser(conflict_handler="resolve", version = 'waf {0!s} ({1!s})'.format(WAFVERSION, WAFREVISION))
 
 	parser.formatter.width = Utils.get_term_cols()
 	p = parser.add_option
@@ -104,7 +104,7 @@ def create_parser(module=None):
 	p('-j', '--jobs',
 		type    = 'int',
 		default = default_jobs,
-		help    = 'amount of parallel jobs (%r)' % default_jobs,
+		help    = 'amount of parallel jobs ({0!r})'.format(default_jobs),
 		dest    = 'jobs')
 
 	p('-k', '--keep',
@@ -156,7 +156,7 @@ def create_parser(module=None):
 		help    = 'top dir for the project (configuration)',
 		dest    = 'srcdir')
 	gr.add_option('--prefix',
-		help    = 'installation prefix (configuration) [default: %r]' % default_prefix,
+		help    = 'installation prefix (configuration) [default: {0!r}]'.format(default_prefix),
 		default = default_prefix,
 		dest    = 'prefix')
 
@@ -169,7 +169,7 @@ def create_parser(module=None):
 	gr = optparse.OptionGroup(parser, 'installation options')
 	parser.add_option_group(gr)
 	gr.add_option('--destdir',
-		help    = 'installation root [default: %r]' % default_destdir,
+		help    = 'installation root [default: {0!r}]'.format(default_destdir),
 		default = default_destdir,
 		dest    = 'destdir')
 	gr.add_option('-f', '--force',
@@ -265,7 +265,7 @@ class Handler(Utils.Context):
 		Utils.python_24_guard()
 
 		if not k[0]:
-			raise Utils.WscriptError('invalid tool_options call %r %r' % (k, kw))
+			raise Utils.WscriptError('invalid tool_options call {0!r} {1!r}'.format(k, kw))
 		tools = Utils.to_list(k[0])
 
 		# TODO waf 1.6 remove the global variable tooldir

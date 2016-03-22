@@ -30,14 +30,14 @@ opts = parser.parse_args()[0]
 def printdirsync(ctl):
         arr = ctl.split(':')
         if arr[0] == 'dirsync':
-            print "Need to continue: %s" % arr[1]
+            print "Need to continue: {0!s}".format(arr[1])
             cookie = ndr_unpack(drsblobs.ldapControlDirSyncCookie, base64.b64decode(arr[3]))
-            print "DC's NTDS guid: %s " % cookie.blob.guid1
-            print "highest usn %s" % cookie.blob.highwatermark.highest_usn
-            print "tmp higest usn %s" % cookie.blob.highwatermark.tmp_highest_usn
-            print "reserved usn %s" % cookie.blob.highwatermark.reserved_usn
+            print "DC's NTDS guid: {0!s} ".format(cookie.blob.guid1)
+            print "highest usn {0!s}".format(cookie.blob.highwatermark.highest_usn)
+            print "tmp higest usn {0!s}".format(cookie.blob.highwatermark.tmp_highest_usn)
+            print "reserved usn {0!s}".format(cookie.blob.highwatermark.reserved_usn)
             if cookie.blob.extra_length >0:
-                print "highest usn in extra %s" % cookie.blob.extra.ctr.cursors[0].highest_usn
+                print "highest usn in extra {0!s}".format(cookie.blob.extra.ctr.cursors[0].highest_usn)
         return cookie
 
 remote_ldb= Ldb("ldap://" + opts.host + ":389", credentials=creds, lp=lp)
@@ -67,18 +67,18 @@ cookie = None
 if (len(ctrls)):
     for ctl in ctrls:
         cookie = printdirsync(ctl)
-    print "Returned %d entries" % len(msgs)
+    print "Returned {0:d} entries".format(len(msgs))
 
 savedcookie = cookie
 
 print ""
 print "Getting allusers with cookie"
-controls=["dirsync:1:1:50:%s" % base64.b64encode(ndr_pack(cookie))]
+controls=["dirsync:1:1:50:{0!s}".format(base64.b64encode(ndr_pack(cookie)))]
 (msgs, ctrls) = remote_ldb.searchex(expression="(samaccountname=*)", base=base, attrs=["objectClass"], controls=controls)
 if (len(ctrls)):
     for ctl in ctrls:
         cookie = printdirsync(ctl)
-    print "Returned %d entries" % len(msgs)
+    print "Returned {0:d} entries".format(len(msgs))
 
 cookie = savedcookie
 cookie.blob.guid1 = misc.GUID("128a99bf-e2df-4832-ac0a-1fb625e530db")
@@ -87,7 +87,7 @@ if cookie.blob.extra_length > 0:
 
 print ""
 print "Getting all the entries"
-controls=["dirsync:1:1:50:%s" % base64.b64encode(ndr_pack(cookie))]
+controls=["dirsync:1:1:50:{0!s}".format(base64.b64encode(ndr_pack(cookie)))]
 (msgs, ctrls) = remote_ldb.searchex(expression="(objectclass=*)", base=base, controls=controls)
 cont = 0
 if (len(ctrls)):
@@ -95,7 +95,7 @@ if (len(ctrls)):
         cookie = printdirsync(ctl)
     if cookie != None:
         cont = (ctl.split(':'))[1]
-    print "Returned %d entries" % len(msgs)
+    print "Returned {0:d} entries".format(len(msgs))
 
 usn = cookie.blob.highwatermark.tmp_highest_usn
 if cookie.blob.extra_length > 0:
@@ -104,53 +104,53 @@ else:
     bigusn  = usn + 1000
 while (cont == "1"):
     print ""
-    controls=["dirsync:1:1:50:%s" % base64.b64encode(ndr_pack(cookie))]
+    controls=["dirsync:1:1:50:{0!s}".format(base64.b64encode(ndr_pack(cookie)))]
     (msgs, ctrls) = remote_ldb.searchex(expression="(objectclass=*)", base=base, controls=controls)
     if (len(ctrls)):
         for ctl in ctrls:
             cookie = printdirsync(ctl)
         if cookie != None:
             cont = (ctl.split(':'))[1]
-        print "Returned %d entries" % len(msgs)
+        print "Returned {0:d} entries".format(len(msgs))
 
 print ""
-print "Getting with cookie but usn changed to %d we should use the one in extra" % (bigusn - 1)
+print "Getting with cookie but usn changed to {0:d} we should use the one in extra".format((bigusn - 1))
 cookie.blob.highwatermark.highest_usn = 0
 cookie.blob.highwatermark.tmp_highest_usn = usn - 2
 if cookie.blob.extra_length > 0:
     print "here"
     cookie.blob.extra.ctr.cursors[0].highest_usn = bigusn - 1
-controls=["dirsync:1:1:50:%s" % base64.b64encode(ndr_pack(cookie))]
+controls=["dirsync:1:1:50:{0!s}".format(base64.b64encode(ndr_pack(cookie)))]
 (msgs, ctrls) = remote_ldb.searchex(expression="(objectclass=*)", base=base, controls=controls)
 if (len(ctrls)):
     for ctl in ctrls:
         cookie = printdirsync(ctl)
-    print "Returned %d entries" % len(msgs)
+    print "Returned {0:d} entries".format(len(msgs))
 
 print ""
-print "Getting with cookie but usn %d changed and extra/cursor GUID too" % (usn - 2)
+print "Getting with cookie but usn {0:d} changed and extra/cursor GUID too".format((usn - 2))
 print " so that it's (tmp)highest_usn that drives the limit"
 cookie.blob.highwatermark.highest_usn = 0
 cookie.blob.highwatermark.tmp_highest_usn = usn - 2
 if cookie.blob.extra_length > 0:
     cookie.blob.extra.ctr.cursors[0].source_dsa_invocation_id = misc.GUID("128a99bf-e2df-4832-ac0a-1fb625e530db")
     cookie.blob.extra.ctr.cursors[0].highest_usn = bigusn - 1
-controls=["dirsync:1:1:50:%s" % base64.b64encode(ndr_pack(cookie))]
+controls=["dirsync:1:1:50:{0!s}".format(base64.b64encode(ndr_pack(cookie)))]
 (msgs, ctrls) = remote_ldb.searchex(expression="(objectclass=*)", base=base, controls=controls)
 if (len(ctrls)):
     for ctl in ctrls:
         cookie = printdirsync(ctl)
-    print "Returned %d entries" % len(msgs)
+    print "Returned {0:d} entries".format(len(msgs))
 
 print ""
-print "Getting with cookie but usn changed to %d" % (usn - 2)
+print "Getting with cookie but usn changed to {0:d}".format((usn - 2))
 cookie.blob.highwatermark.highest_usn = 0
 cookie.blob.highwatermark.tmp_highest_usn = (usn - 2)
 if cookie.blob.extra_length > 0:
     cookie.blob.extra.ctr.cursors[0].highest_usn = (usn - 2)
-controls=["dirsync:1:1:50:%s" % base64.b64encode(ndr_pack(cookie))]
+controls=["dirsync:1:1:50:{0!s}".format(base64.b64encode(ndr_pack(cookie)))]
 (msgs, ctrls) = remote_ldb.searchex(expression="(objectclass=*)", base=base, controls=controls)
 if (len(ctrls)):
     for ctl in ctrls:
         cookie = printdirsync(ctl)
-    print "Returned %d entries" % len(msgs)
+    print "Returned {0:d} entries".format(len(msgs))

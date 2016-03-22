@@ -63,7 +63,7 @@ def get_source_file_contents():
             f = open(fname, 'rb')
         except IOError, e:
             if e.errno == errno.ENOENT:
-                warnings.warn("source file %s broken link?" % fname)
+                warnings.warn("source file {0!s} broken link?".format(fname))
                 continue
             else:
                 raise
@@ -149,10 +149,10 @@ class TestSource(TestCase):
             dict_[fname].append(line_no)
 
     def _format_message(self, dict_, message):
-        files = ["%s: %s" % (f, ', '.join([str(i + 1) for i in lines]))
+        files = ["{0!s}: {1!s}".format(f, ', '.join([str(i + 1) for i in lines]))
                 for f, lines in dict_.items()]
         files.sort()
-        return message + '\n\n    %s' % ('\n    '.join(files))
+        return message + '\n\n    {0!s}'.format(('\n    '.join(files)))
 
     def _iter_source_files_lines(self):
         for fname, text in get_source_file_contents():

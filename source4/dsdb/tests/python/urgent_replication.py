@@ -45,7 +45,7 @@ class UrgentReplicationTests(samba.tests.TestCase):
         self.ldb = samba.tests.connect_samdb(host, global_schema=False)
         self.base_dn = self.ldb.domain_dn()
 
-        print "baseDN: %s\n" % self.base_dn
+        print "baseDN: {0!s}\n".format(self.base_dn)
 
     def test_nonurgent_object(self):
         """Test if the urgent replication is not activated when handling a non urgent object."""
@@ -76,15 +76,15 @@ class UrgentReplicationTests(samba.tests.TestCase):
     def test_nTDSDSA_object(self):
         """Test if the urgent replication is activated when handling a nTDSDSA object."""
         self.ldb.add({
-            "dn": "cn=test server,cn=Servers,cn=Default-First-Site-Name,cn=Sites,%s" %
-                self.ldb.get_config_basedn(),
+            "dn": "cn=test server,cn=Servers,cn=Default-First-Site-Name,cn=Sites,{0!s}".format(
+                self.ldb.get_config_basedn()),
             "objectclass":"server",
             "cn":"test server",
             "name":"test server",
             "systemFlags":"50000000"}, ["relax:0"])
 
         self.ldb.add_ldif(
-            """dn: cn=NTDS Settings test,cn=test server,cn=Servers,cn=Default-First-Site-Name,cn=Sites,cn=Configuration,%s""" % (self.base_dn) + """
+            """dn: cn=NTDS Settings test,cn=test server,cn=Servers,cn=Default-First-Site-Name,cn=Sites,cn=Configuration,{0!s}""".format((self.base_dn)) + """
 objectclass: nTDSDSA
 cn: NTDS Settings test
 options: 1
@@ -148,7 +148,7 @@ systemFlags: 33554432""", ["relax:0"])
 
         try:
             self.ldb.add_ldif(
-                              """dn: CN=test attributeSchema,cn=Schema,CN=Configuration,%s""" % self.base_dn + """
+                              """dn: CN=test attributeSchema,cn=Schema,CN=Configuration,{0!s}""".format(self.base_dn) + """
 objectClass: attributeSchema
 cn: test attributeSchema
 instanceType: 4
@@ -184,7 +184,7 @@ name: test attributeSchema""")
         """Test if the urgent replication is activated when handling a classSchema object."""
         try:
             self.ldb.add_ldif(
-                            """dn: CN=test classSchema,CN=Schema,CN=Configuration,%s""" % self.base_dn + """
+                            """dn: CN=test classSchema,CN=Schema,CN=Configuration,{0!s}""".format(self.base_dn) + """
 objectClass: classSchema
 cn: test classSchema
 instanceType: 4
@@ -252,7 +252,7 @@ defaultHidingValue: TRUE""")
     def test_rIDManager_object(self):
         """Test if the urgent replication is activated when handling a rIDManager object."""
         self.ldb.add_ldif(
-            """dn: CN=RID Manager test,CN=System,%s""" % self.base_dn + """
+            """dn: CN=RID Manager test,CN=System,{0!s}""".format(self.base_dn) + """
 objectClass: rIDManager
 cn: RID Manager test
 instanceType: 4

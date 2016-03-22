@@ -8,8 +8,8 @@ from ctdb_takeover import Cluster, Node, process_args
 
 process_args()
 
-addresses20 = ['192.168.20.%d' % n for n in range(1, 13)]
-addresses128 = ['192.168.128.%d' % n for n in range(1, 5)]
+addresses20 = ['192.168.20.{0:d}'.format(n) for n in range(1, 13)]
+addresses128 = ['192.168.128.{0:d}'.format(n) for n in range(1, 5)]
 
 c = Cluster()
 

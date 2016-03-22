@@ -52,7 +52,7 @@ def checkset_backend(lp, backend, eadbfile):
         else:
             return (samba.xattr_tdb, os.path.abspath(os.path.join(lp.get("state dir"), "xattr.tdb")))
     else:
-        raise XattrBackendError("Invalid xattr backend choice %s"%backend)
+        raise XattrBackendError("Invalid xattr backend choice {0!s}".format(backend))
 
 def getdosinfo(lp, file):
     try:
@@ -73,7 +73,7 @@ def getntacl(lp, file, backend=None, eadbfile=None, direct_db_access=True, servi
             except Exception:
                 # FIXME: Don't catch all exceptions, just those related to opening
                 # xattrdb
-                print "Fail to open %s" % dbname
+                print "Fail to open {0!s}".format(dbname)
                 attribute = samba.xattr_native.wrap_getxattr(file,
                                                              xattr.XATTR_NTACL_NAME)
         else:
@@ -114,8 +114,8 @@ def setntacl(lp, file, sddl, domsid, backend=None, eadbfile=None, use_ntvfs=True
             # Check if this particular owner SID was domain admins,
             # because we special-case this as mapping to
             # 'administrator' instead.
-            if sd.owner_sid == security.dom_sid("%s-%d" % (domsid, security.DOMAIN_RID_ADMINS)):
-                administrator = security.dom_sid("%s-%d" % (domsid, security.DOMAIN_RID_ADMINISTRATOR))
+            if sd.owner_sid == security.dom_sid("{0!s}-{1:d}".format(domsid, security.DOMAIN_RID_ADMINS)):
+                administrator = security.dom_sid("{0!s}-{1:d}".format(domsid, security.DOMAIN_RID_ADMINISTRATOR))
                 (admin_id, admin_type) = passdb.sid_to_id(administrator)
 
                 # Confirm we have a UID for administrator
@@ -130,7 +130,7 @@ def setntacl(lp, file, sddl, domsid, backend=None, eadbfile=None, use_ntvfs=True
                     # and then set an NTVFS ACL (which does not set the posix ACL) to pretend the owner really was set
                     use_ntvfs = True
                 else:
-                    raise XattrBackendError("Unable to find UID for domain administrator %s, got id %d of type %d" % (administrator, admin_id, admin_type))
+                    raise XattrBackendError("Unable to find UID for domain administrator {0!s}, got id {1:d} of type {2:d}".format(administrator, admin_id, admin_type))
             else:
                 # For all other owning users, reset the owner to root
                 # and then set the ACL without changing the owner
@@ -152,7 +152,7 @@ def setntacl(lp, file, sddl, domsid, backend=None, eadbfile=None, use_ntvfs=True
             except Exception:
                 # FIXME: Don't catch all exceptions, just those related to opening
                 # xattrdb
-                print "Fail to open %s" % dbname
+                print "Fail to open {0!s}".format(dbname)
                 samba.xattr_native.wrap_setxattr(file, xattr.XATTR_NTACL_NAME,
                                                  ndr_pack(ntacl))
         else:

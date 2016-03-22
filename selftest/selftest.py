@@ -82,7 +82,7 @@ opts, args = parser.parse_args()
 subunit_ops = subunithelper.SubunitOps(sys.stdout)
 
 def handle_signal(sig, frame):
-    sys.stderr.write("Exiting early because of signal %s.\n" % sig)
+    sys.stderr.write("Exiting early because of signal {0!s}.\n".format(sig))
     sys.exit(1)
 
 for sig in (signal.SIGINT, signal.SIGQUIT, signal.SIGTERM, signal.SIGPIPE):
@@ -99,7 +99,7 @@ def setup_pcap(name):
     fname = "".join([x for x in name if x.isalnum() or x == '-'])
 
     pcap_file = os.path.join(
-        os.environ["SOCKET_WRAPPER_PCAP_DIR"], "%s.pcap" % fname)
+        os.environ["SOCKET_WRAPPER_PCAP_DIR"], "{0!s}.pcap".format(fname))
 
     socket_wrapper.setup_pcap(pcap_file)
     return pcap_file
@@ -135,7 +135,7 @@ def run_testsuite(name, cmd, subunit_ops, env=None):
     cleanup_pcap(pcap_file, exitcode)
 
     if not opts.socket_wrapper_keep_pcap and pcap_file is not None:
-        sys.stdout.write("PCAP FILE: %s\n" % pcap_file)
+        sys.stdout.write("PCAP FILE: {0!s}\n".format(pcap_file))
 
     if exitcode != 0 and opts.one:
         sys.exit(1)
@@ -208,7 +208,7 @@ else:
 
 def prefix_pathvar(name, newpath):
     if name in os.environ:
-        os.environ[name] = "%s:%s" % (newpath, os.environ[name])
+        os.environ[name] = "{0!s}:{1!s}".format(newpath, os.environ[name])
     else:
         os.environ[name] = newpath
 prefix_pathvar("PKG_CONFIG_PATH", os.path.join(bindir_abs, "pkgconfig"))
@@ -224,7 +224,7 @@ if opts.socket_wrapper_pcap:
 
 if opts.socket_wrapper:
     socket_wrapper_dir = socket_wrapper.setup_dir(os.path.join(prefix_abs, "w"), opts.socket_wrapper_pcap)
-    sys.stdout.write("SOCKET_WRAPPER_DIR=%s\n" % socket_wrapper_dir)
+    sys.stdout.write("SOCKET_WRAPPER_DIR={0!s}\n".format(socket_wrapper_dir))
 elif not opts.list:
     if os.getuid() != 0:
         warnings.warn("not using socket wrapper, but also not running as root. Will not be able to listen on proper ports")
@@ -340,7 +340,7 @@ for testsuite in available:
 
 if restricted_mgr is not None:
     for name in restricted_mgr.iter_unused():
-        sys.stdout.write("No test or testsuite found matching %s\n" % name)
+        sys.stdout.write("No test or testsuite found matching {0!s}\n".format(name))
 if todo == []:
     sys.stderr.write("No tests to run\n")
     sys.exit(1)
@@ -426,7 +426,7 @@ def switch_env(name, prefix):
         write_clientconf(conffile, clientdir, testenv_vars)
         os.environ["SMB_CONF_PATH"] = conffile
     else:
-        raise Exception("Unknown option[%s] for envname[%s]" % (option,
+        raise Exception("Unknown option[{0!s}] for envname[{1!s}]".format(option,
             envname))
 
     for name in exported_envvars:
@@ -474,13 +474,13 @@ elif opts.list:
     for (name, envname, cmd, supports_loadfile, supports_idlist, subtests) in todo:
         cmd = expand_command_list(cmd)
         if cmd is None:
-            warnings.warn("Unable to list tests in %s" % name)
+            warnings.warn("Unable to list tests in {0!s}".format(name))
             continue
 
         exitcode = subprocess.call(cmd, shell=True)
 
         if exitcode != 0:
-            sys.stderr.write("%s exited with exit code %s\n" % (cmd, exitcode))
+            sys.stderr.write("{0!s} exited with exit code {1!s}\n".format(cmd, exitcode))
             sys.exit(1)
 else:
     for (name, envname, cmd, supports_loadfile, supports_idlist, subtests) in todo:
@@ -489,13 +489,13 @@ else:
         except UnsupportedEnvironment:
             subunit_ops.start_testsuite(name)
             subunit_ops.end_testsuite(name, "skip",
-                "environment %s is unknown in this test backend - skipping" % envname)
+                "environment {0!s} is unknown in this test backend - skipping".format(envname))
             continue
         except Exception, e:
             subunit_ops.start_testsuite(name)
             traceback.print_exc()
             subunit_ops.end_testsuite(name, "error",
-                "unable to set up environment %s: %s" % (envname, e))
+                "unable to set up environment {0!s}: {1!s}".format(envname, e))
             continue
 
         cmd, tmpf = expand_command_run(cmd, supports_loadfile, supports_idlist,

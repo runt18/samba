@@ -39,7 +39,7 @@ class SSHFP(dns.rdata.Rdata):
         self.fingerprint = fingerprint
 
     def to_text(self, origin=None, relativize=True, **kw):
-        return '%d %d %s' % (self.algorithm,
+        return '{0:d} {1:d} {2!s}'.format(self.algorithm,
                              self.fp_type,
                              dns.rdata._hexify(self.fingerprint,
                                                chunksize=128))

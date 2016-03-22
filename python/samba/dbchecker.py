@@ -74,7 +74,7 @@ class dbcheck(object):
         self.reset_all_well_known_acls = False
         self.in_transaction = in_transaction
         self.infrastructure_dn = ldb.Dn(samdb, "CN=Infrastructure," + samdb.domain_dn())
-        self.naming_dn = ldb.Dn(samdb, "CN=Partitions,%s" % samdb.get_config_basedn())
+        self.naming_dn = ldb.Dn(samdb, "CN=Partitions,{0!s}".format(samdb.get_config_basedn()))
         self.schema_dn = samdb.get_schema_basedn()
         self.rid_dn = ldb.Dn(samdb, "CN=RID Manager$,CN=System," + samdb.domain_dn())
         self.ntds_dsa = ldb.Dn(samdb, samdb.get_dsServiceName())
@@ -86,7 +86,7 @@ class dbcheck(object):
 
         self.name_map = {}
         try:
-            res = samdb.search(base="CN=DnsAdmins,CN=Users,%s" % samdb.domain_dn(), scope=ldb.SCOPE_BASE,
+            res = samdb.search(base="CN=DnsAdmins,CN=Users,{0!s}".format(samdb.domain_dn()), scope=ldb.SCOPE_BASE,
                            attrs=["objectSid"])
             dnsadmins_sid = ndr_unpack(security.dom_sid, res[0]["objectSid"][0])
             self.name_map['DnsAdmins'] = str(dnsadmins_sid)
@@ -134,7 +134,7 @@ class dbcheck(object):
         if attrs is None:
             attrs = ['*']
         res = self.samdb.search(base=DN, scope=scope, attrs=['dn'], controls=controls)
-        self.report('Checking %u objects' % len(res))
+        self.report('Checking {0:d} objects'.format(len(res)))
         error_count = 0
 
         for object in res:
@@ -147,7 +147,7 @@ class dbcheck(object):
         if error_count != 0 and not self.fix:
             self.report("Please use --fix to fix these errors")
 
-        self.report('Checked %u objects (%u errors)' % (len(res), error_count))
+        self.report('Checked {0:d} objects ({1:d} errors)'.format(len(res), error_count))
         return error_count
 
     def report(self, msg):
@@ -191,12 +191,12 @@ class dbcheck(object):
     def do_delete(self, dn, controls, msg):
         '''delete dn with optional verbose output'''
         if self.verbose:
-            self.report("delete DN %s" % dn)
+            self.report("delete DN {0!s}".format(dn))
         try:
-            controls = controls + ["local_oid:%s:0" % dsdb.DSDB_CONTROL_DBCHECK]
+            controls = controls + ["local_oid:{0!s}:0".format(dsdb.DSDB_CONTROL_DBCHECK)]
             self.samdb.delete(dn, controls=controls)
         except Exception, err:
-            self.report("%s : %s" % (msg, err))
+            self.report("{0!s} : {1!s}".format(msg, err))
             return False
         return True
 
@@ -205,84 +205,84 @@ class dbcheck(object):
         if self.verbose:
             self.report(self.samdb.write_ldif(m, ldb.CHANGETYPE_MODIFY))
         try:
-            controls = controls + ["local_oid:%s:0" % dsdb.DSDB_CONTROL_DBCHECK]
+            controls = controls + ["local_oid:{0!s}:0".format(dsdb.DSDB_CONTROL_DBCHECK)]
             self.samdb.modify(m, controls=controls, validate=validate)
         except Exception, err:
-            self.report("%s : %s" % (msg, err))
+            self.report("{0!s} : {1!s}".format(msg, err))
             return False
         return True
 
     def do_rename(self, from_dn, to_rdn, to_base, controls, msg):
         '''perform a modify with optional verbose output'''
         if self.verbose:
-            self.report("""dn: %s
+            self.report("""dn: {0!s}
 changeType: modrdn
-newrdn: %s
+newrdn: {1!s}
 deleteOldRdn: 1
-newSuperior: %s""" % (str(from_dn), str(to_rdn), str(to_base)))
+newSuperior: {2!s}""".format(str(from_dn), str(to_rdn), str(to_base)))
         try:
             to_dn = to_rdn + to_base
-            controls = controls + ["local_oid:%s:0" % dsdb.DSDB_CONTROL_DBCHECK]
+            controls = controls + ["local_oid:{0!s}:0".format(dsdb.DSDB_CONTROL_DBCHECK)]
             self.samdb.rename(from_dn, to_dn, controls=controls)
         except Exception, err:
-            self.report("%s : %s" % (msg, err))
+            self.report("{0!s} : {1!s}".format(msg, err))
             return False
         return True
 
     def err_empty_attribute(self, dn, attrname):
         '''fix empty attributes'''
-        self.report("ERROR: Empty attribute %s in %s" % (attrname, dn))
-        if not self.confirm_all('Remove empty attribute %s from %s?' % (attrname, dn), 'remove_all_empty_attributes'):
-            self.report("Not fixing empty attribute %s" % attrname)
+        self.report("ERROR: Empty attribute {0!s} in {1!s}".format(attrname, dn))
+        if not self.confirm_all('Remove empty attribute {0!s} from {1!s}?'.format(attrname, dn), 'remove_all_empty_attributes'):
+            self.report("Not fixing empty attribute {0!s}".format(attrname))
             return
 
         m = ldb.Message()
         m.dn = dn
         m[attrname] = ldb.MessageElement('', ldb.FLAG_MOD_DELETE, attrname)
         if self.do_modify(m, ["relax:0", "show_recycled:1"],
-                          "Failed to remove empty attribute %s" % attrname, validate=False):
-            self.report("Removed empty attribute %s" % attrname)
+                          "Failed to remove empty attribute {0!s}".format(attrname), validate=False):
+            self.report("Removed empty attribute {0!s}".format(attrname))
 
     def err_normalise_mismatch(self, dn, attrname, values):
         '''fix attribute normalisation errors'''
-        self.report("ERROR: Normalisation error for attribute %s in %s" % (attrname, dn))
+        self.report("ERROR: Normalisation error for attribute {0!s} in {1!s}".format(attrname, dn))
         mod_list = []
         for val in values:
             normalised = self.samdb.dsdb_normalise_attributes(
                 self.samdb_schema, attrname, [val])
             if len(normalised) != 1:
-                self.report("Unable to normalise value '%s'" % val)
+                self.report("Unable to normalise value '{0!s}'".format(val))
                 mod_list.append((val, ''))
             elif (normalised[0] != val):
-                self.report("value '%s' should be '%s'" % (val, normalised[0]))
+                self.report("value '{0!s}' should be '{1!s}'".format(val, normalised[0]))
                 mod_list.append((val, normalised[0]))
-        if not self.confirm_all('Fix normalisation for %s from %s?' % (attrname, dn), 'fix_all_normalisation'):
-            self.report("Not fixing attribute %s" % attrname)
+        if not self.confirm_all('Fix normalisation for {0!s} from {1!s}?'.format(attrname, dn), 'fix_all_normalisation'):
+            self.report("Not fixing attribute {0!s}".format(attrname))
             return
 
         m = ldb.Message()
         m.dn = dn
         for i in range(0, len(mod_list)):
             (val, nval) = mod_list[i]
-            m['value_%u' % i] = ldb.MessageElement(val, ldb.FLAG_MOD_DELETE, attrname)
+            m['value_{0:d}'.format(i)] = ldb.MessageElement(val, ldb.FLAG_MOD_DELETE, attrname)
             if nval != '':
-                m['normv_%u' % i] = ldb.MessageElement(nval, ldb.FLAG_MOD_ADD,
+                m['normv_{0:d}'.format(i)] = ldb.MessageElement(nval, ldb.FLAG_MOD_ADD,
                     attrname)
 
         if self.do_modify(m, ["relax:0", "show_recycled:1"],
-                          "Failed to normalise attribute %s" % attrname,
+                          "Failed to normalise attribute {0!s}".format(attrname),
                           validate=False):
-            self.report("Normalised attribute %s" % attrname)
+            self.report("Normalised attribute {0!s}".format(attrname))
 
     def err_normalise_mismatch_replace(self, dn, attrname, values):
         '''fix attribute normalisation errors'''
         normalised = self.samdb.dsdb_normalise_attributes(self.samdb_schema, attrname, values)
-        self.report("ERROR: Normalisation error for attribute '%s' in '%s'" % (attrname, dn))
-        self.report("Values/Order of values do/does not match: %s/%s!" % (values, list(normalised)))
+        self.report("ERROR: Normalisation error for attribute '{0!s}' in '{1!s}'".format(attrname, dn))
+        self.report("Values/Order of values do/does not match: {0!s}/{1!s}!".format(values, list(normalised)))
         if list(normalised) == values:
             return
-        if not self.confirm_all("Fix normalisation for '%s' from '%s'?" % (attrname, dn), 'fix_all_normalisation'):
-            self.report("Not fixing attribute '%s'" % attrname)
+        if not self.confirm_all("Fix normalisation for '{0!s}' from '{1!s}'?".format(attrname, dn), 'fix_all_normalisation'):
+            self.report("Not fixing attribute '{0!s}'".format(attrname))
             return
 
         m = ldb.Message()
@@ -290,37 +290,37 @@ newSuperior: %s""" % (str(from_dn), str(to_rdn), str(to_base)))
         m[attrname] = ldb.MessageElement(normalised, ldb.FLAG_MOD_REPLACE, attrname)
 
         if self.do_modify(m, ["relax:0", "show_recycled:1"],
-                          "Failed to normalise attribute %s" % attrname,
+                          "Failed to normalise attribute {0!s}".format(attrname),
                           validate=False):
-            self.report("Normalised attribute %s" % attrname)
+            self.report("Normalised attribute {0!s}".format(attrname))
 
     def is_deleted_objects_dn(self, dsdb_dn):
         '''see if a dsdb_Dn is the special Deleted Objects DN'''
-        return dsdb_dn.prefix == "B:32:%s:" % dsdb.DS_GUID_DELETED_OBJECTS_CONTAINER
+        return dsdb_dn.prefix == "B:32:{0!s}:".format(dsdb.DS_GUID_DELETED_OBJECTS_CONTAINER)
 
     def err_missing_objectclass(self, dn):
         """handle object without objectclass"""
-        self.report("ERROR: missing objectclass in object %s.  If you have another working DC, please run 'samba-tool drs replicate --full-sync --local <destinationDC> <sourceDC> %s'" % (dn, self.samdb.get_nc_root(dn)))
-        if not self.confirm_all("If you cannot re-sync from another DC, do you wish to delete object '%s'?" % dn, 'fix_all_missing_objectclass'):
-            self.report("Not deleting object with missing objectclass '%s'" % dn)
+        self.report("ERROR: missing objectclass in object {0!s}.  If you have another working DC, please run 'samba-tool drs replicate --full-sync --local <destinationDC> <sourceDC> {1!s}'".format(dn, self.samdb.get_nc_root(dn)))
+        if not self.confirm_all("If you cannot re-sync from another DC, do you wish to delete object '{0!s}'?".format(dn), 'fix_all_missing_objectclass'):
+            self.report("Not deleting object with missing objectclass '{0!s}'".format(dn))
             return
         if self.do_delete(dn, ["relax:0"],
-                          "Failed to remove DN %s" % dn):
-            self.report("Removed DN %s" % dn)
+                          "Failed to remove DN {0!s}".format(dn)):
+            self.report("Removed DN {0!s}".format(dn))
 
     def err_deleted_dn(self, dn, attrname, val, dsdb_dn, correct_dn):
         """handle a DN pointing to a deleted object"""
-        self.report("ERROR: target DN is deleted for %s in object %s - %s" % (attrname, dn, val))
-        self.report("Target GUID points at deleted DN %s" % correct_dn)
+        self.report("ERROR: target DN is deleted for {0!s} in object {1!s} - {2!s}".format(attrname, dn, val))
+        self.report("Target GUID points at deleted DN {0!s}".format(correct_dn))
         if not self.confirm_all('Remove DN link?', 'remove_all_deleted_DN_links'):
             self.report("Not removing")
             return
         m = ldb.Message()
         m.dn = dn
         m['old_value'] = ldb.MessageElement(val, ldb.FLAG_MOD_DELETE, attrname)
-        if self.do_modify(m, ["show_recycled:1", "local_oid:%s:0" % dsdb.DSDB_CONTROL_DBCHECK],
-                          "Failed to remove deleted DN attribute %s" % attrname):
-            self.report("Removed deleted DN on attribute %s" % attrname)
+        if self.do_modify(m, ["show_recycled:1", "local_oid:{0!s}:0".format(dsdb.DSDB_CONTROL_DBCHECK)],
+                          "Failed to remove deleted DN attribute {0!s}".format(attrname)):
+            self.report("Removed deleted DN on attribute {0!s}".format(attrname))
 
     def err_missing_dn_GUID(self, dn, attrname, val, dsdb_dn):
         """handle a missing target DN (both GUID and DN string form are missing)"""
@@ -333,23 +333,23 @@ newSuperior: %s""" % (str(from_dn), str(to_rdn), str(to_base)))
 
     def err_incorrect_dn_GUID(self, dn, attrname, val, dsdb_dn, errstr):
         """handle a missing GUID extended DN component"""
-        self.report("ERROR: %s component for %s in object %s - %s" % (errstr, attrname, dn, val))
+        self.report("ERROR: {0!s} component for {1!s} in object {2!s} - {3!s}".format(errstr, attrname, dn, val))
         controls=["extended_dn:1:1", "show_recycled:1"]
         try:
             res = self.samdb.search(base=str(dsdb_dn.dn), scope=ldb.SCOPE_BASE,
                                     attrs=[], controls=controls)
         except ldb.LdbError, (enum, estr):
-            self.report("unable to find object for DN %s - (%s)" % (dsdb_dn.dn, estr))
+            self.report("unable to find object for DN {0!s} - ({1!s})".format(dsdb_dn.dn, estr))
             self.err_missing_dn_GUID(dn, attrname, val, dsdb_dn)
             return
         if len(res) == 0:
-            self.report("unable to find object for DN %s" % dsdb_dn.dn)
+            self.report("unable to find object for DN {0!s}".format(dsdb_dn.dn))
             self.err_missing_dn_GUID(dn, attrname, val, dsdb_dn)
             return
         dsdb_dn.dn = res[0].dn
 
-        if not self.confirm_all('Change DN to %s?' % str(dsdb_dn), 'fix_all_DN_GUIDs'):
-            self.report("Not fixing %s" % errstr)
+        if not self.confirm_all('Change DN to {0!s}?'.format(str(dsdb_dn)), 'fix_all_DN_GUIDs'):
+            self.report("Not fixing {0!s}".format(errstr))
             return
         m = ldb.Message()
         m.dn = dn
@@ -357,16 +357,16 @@ newSuperior: %s""" % (str(from_dn), str(to_rdn), str(to_base)))
         m['new_value'] = ldb.MessageElement(str(dsdb_dn), ldb.FLAG_MOD_ADD, attrname)
 
         if self.do_modify(m, ["show_recycled:1"],
-                          "Failed to fix %s on attribute %s" % (errstr, attrname)):
-            self.report("Fixed %s on attribute %s" % (errstr, attrname))
+                          "Failed to fix {0!s} on attribute {1!s}".format(errstr, attrname)):
+            self.report("Fixed {0!s} on attribute {1!s}".format(errstr, attrname))
 
     def err_incorrect_binary_dn(self, dn, attrname, val, dsdb_dn, errstr):
         """handle an incorrect binary DN component"""
-        self.report("ERROR: %s binary component for %s in object %s - %s" % (errstr, attrname, dn, val))
+        self.report("ERROR: {0!s} binary component for {1!s} in object {2!s} - {3!s}".format(errstr, attrname, dn, val))
         controls=["extended_dn:1:1", "show_recycled:1"]
 
-        if not self.confirm_all('Change DN to %s?' % str(dsdb_dn), 'fix_all_binary_dn'):
-            self.report("Not fixing %s" % errstr)
+        if not self.confirm_all('Change DN to {0!s}?'.format(str(dsdb_dn)), 'fix_all_binary_dn'):
+            self.report("Not fixing {0!s}".format(errstr))
             return
         m = ldb.Message()
         m.dn = dn
@@ -374,101 +374,101 @@ newSuperior: %s""" % (str(from_dn), str(to_rdn), str(to_base)))
         m['new_value'] = ldb.MessageElement(str(dsdb_dn), ldb.FLAG_MOD_ADD, attrname)
 
         if self.do_modify(m, ["show_recycled:1"],
-                          "Failed to fix %s on attribute %s" % (errstr, attrname)):
-            self.report("Fixed %s on attribute %s" % (errstr, attrname))
+                          "Failed to fix {0!s} on attribute {1!s}".format(errstr, attrname)):
+            self.report("Fixed {0!s} on attribute {1!s}".format(errstr, attrname))
 
     def err_dn_target_mismatch(self, dn, attrname, val, dsdb_dn, correct_dn, errstr):
         """handle a DN string being incorrect"""
-        self.report("ERROR: incorrect DN string component for %s in object %s - %s" % (attrname, dn, val))
+        self.report("ERROR: incorrect DN string component for {0!s} in object {1!s} - {2!s}".format(attrname, dn, val))
         dsdb_dn.dn = correct_dn
 
-        if not self.confirm_all('Change DN to %s?' % str(dsdb_dn), 'fix_all_target_mismatch'):
-            self.report("Not fixing %s" % errstr)
+        if not self.confirm_all('Change DN to {0!s}?'.format(str(dsdb_dn)), 'fix_all_target_mismatch'):
+            self.report("Not fixing {0!s}".format(errstr))
             return
         m = ldb.Message()
         m.dn = dn
         m['old_value'] = ldb.MessageElement(val, ldb.FLAG_MOD_DELETE, attrname)
         m['new_value'] = ldb.MessageElement(str(dsdb_dn), ldb.FLAG_MOD_ADD, attrname)
         if self.do_modify(m, ["show_recycled:1"],
-                          "Failed to fix incorrect DN string on attribute %s" % attrname):
-            self.report("Fixed incorrect DN string on attribute %s" % (attrname))
+                          "Failed to fix incorrect DN string on attribute {0!s}".format(attrname)):
+            self.report("Fixed incorrect DN string on attribute {0!s}".format((attrname)))
 
     def err_unknown_attribute(self, obj, attrname):
         '''handle an unknown attribute error'''
-        self.report("ERROR: unknown attribute '%s' in %s" % (attrname, obj.dn))
-        if not self.confirm_all('Remove unknown attribute %s' % attrname, 'remove_all_unknown_attributes'):
-            self.report("Not removing %s" % attrname)
+        self.report("ERROR: unknown attribute '{0!s}' in {1!s}".format(attrname, obj.dn))
+        if not self.confirm_all('Remove unknown attribute {0!s}'.format(attrname), 'remove_all_unknown_attributes'):
+            self.report("Not removing {0!s}".format(attrname))
             return
         m = ldb.Message()
         m.dn = obj.dn
         m['old_value'] = ldb.MessageElement([], ldb.FLAG_MOD_DELETE, attrname)
         if self.do_modify(m, ["relax:0", "show_recycled:1"],
-                          "Failed to remove unknown attribute %s" % attrname):
-            self.report("Removed unknown attribute %s" % (attrname))
+                          "Failed to remove unknown attribute {0!s}".format(attrname)):
+            self.report("Removed unknown attribute {0!s}".format((attrname)))
 
     def err_missing_backlink(self, obj, attrname, val, backlink_name, target_dn):
         '''handle a missing backlink value'''
-        self.report("ERROR: missing backlink attribute '%s' in %s for link %s in %s" % (backlink_name, target_dn, attrname, obj.dn))
-        if not self.confirm_all('Fix missing backlink %s' % backlink_name, 'fix_all_missing_backlinks'):
-            self.report("Not fixing missing backlink %s" % backlink_name)
+        self.report("ERROR: missing backlink attribute '{0!s}' in {1!s} for link {2!s} in {3!s}".format(backlink_name, target_dn, attrname, obj.dn))
+        if not self.confirm_all('Fix missing backlink {0!s}'.format(backlink_name), 'fix_all_missing_backlinks'):
+            self.report("Not fixing missing backlink {0!s}".format(backlink_name))
             return
         m = ldb.Message()
         m.dn = obj.dn
         m['old_value'] = ldb.MessageElement(val, ldb.FLAG_MOD_DELETE, attrname)
         m['new_value'] = ldb.MessageElement(val, ldb.FLAG_MOD_ADD, attrname)
         if self.do_modify(m, ["show_recycled:1"],
-                          "Failed to fix missing backlink %s" % backlink_name):
-            self.report("Fixed missing backlink %s" % (backlink_name))
+                          "Failed to fix missing backlink {0!s}".format(backlink_name)):
+            self.report("Fixed missing backlink {0!s}".format((backlink_name)))
 
     def err_incorrect_rmd_flags(self, obj, attrname, revealed_dn):
         '''handle a incorrect RMD_FLAGS value'''
         rmd_flags = int(revealed_dn.dn.get_extended_component("RMD_FLAGS"))
-        self.report("ERROR: incorrect RMD_FLAGS value %u for attribute '%s' in %s for link %s" % (rmd_flags, attrname, obj.dn, revealed_dn.dn.extended_str()))
-        if not self.confirm_all('Fix incorrect RMD_FLAGS %u' % rmd_flags, 'fix_rmd_flags'):
-            self.report("Not fixing incorrect RMD_FLAGS %u" % rmd_flags)
+        self.report("ERROR: incorrect RMD_FLAGS value {0:d} for attribute '{1!s}' in {2!s} for link {3!s}".format(rmd_flags, attrname, obj.dn, revealed_dn.dn.extended_str()))
+        if not self.confirm_all('Fix incorrect RMD_FLAGS {0:d}'.format(rmd_flags), 'fix_rmd_flags'):
+            self.report("Not fixing incorrect RMD_FLAGS {0:d}".format(rmd_flags))
             return
         m = ldb.Message()
         m.dn = obj.dn
         m['old_value'] = ldb.MessageElement(str(revealed_dn), ldb.FLAG_MOD_DELETE, attrname)
         if self.do_modify(m, ["show_recycled:1", "reveal_internals:0", "show_deleted:0"],
-                          "Failed to fix incorrect RMD_FLAGS %u" % rmd_flags):
-            self.report("Fixed incorrect RMD_FLAGS %u" % (rmd_flags))
+                          "Failed to fix incorrect RMD_FLAGS {0:d}".format(rmd_flags)):
+            self.report("Fixed incorrect RMD_FLAGS {0:d}".format((rmd_flags)))
 
     def err_orphaned_backlink(self, obj, attrname, val, link_name, target_dn):
         '''handle a orphaned backlink value'''
-        self.report("ERROR: orphaned backlink attribute '%s' in %s for link %s in %s" % (attrname, obj.dn, link_name, target_dn))
-        if not self.confirm_all('Remove orphaned backlink %s' % link_name, 'fix_all_orphaned_backlinks'):
-            self.report("Not removing orphaned backlink %s" % link_name)
+        self.report("ERROR: orphaned backlink attribute '{0!s}' in {1!s} for link {2!s} in {3!s}".format(attrname, obj.dn, link_name, target_dn))
+        if not self.confirm_all('Remove orphaned backlink {0!s}'.format(link_name), 'fix_all_orphaned_backlinks'):
+            self.report("Not removing orphaned backlink {0!s}".format(link_name))
             return
         m = ldb.Message()
         m.dn = obj.dn
         m['value'] = ldb.MessageElement(val, ldb.FLAG_MOD_DELETE, attrname)
         if self.do_modify(m, ["show_recycled:1", "relax:0"],
-                          "Failed to fix orphaned backlink %s" % link_name):
-            self.report("Fixed orphaned backlink %s" % (link_name))
+                          "Failed to fix orphaned backlink {0!s}".format(link_name)):
+            self.report("Fixed orphaned backlink {0!s}".format((link_name)))
 
     def err_no_fsmoRoleOwner(self, obj):
         '''handle a missing fSMORoleOwner'''
-        self.report("ERROR: fSMORoleOwner not found for role %s" % (obj.dn))
+        self.report("ERROR: fSMORoleOwner not found for role {0!s}".format((obj.dn)))
         res = self.samdb.search("",
                                 scope=ldb.SCOPE_BASE, attrs=["dsServiceName"])
         assert len(res) == 1
         serviceName = res[0]["dsServiceName"][0]
-        if not self.confirm_all('Sieze role %s onto current DC by adding fSMORoleOwner=%s' % (obj.dn, serviceName), 'seize_fsmo_role'):
-            self.report("Not Siezing role %s onto current DC by adding fSMORoleOwner=%s" % (obj.dn, serviceName))
+        if not self.confirm_all('Sieze role {0!s} onto current DC by adding fSMORoleOwner={1!s}'.format(obj.dn, serviceName), 'seize_fsmo_role'):
+            self.report("Not Siezing role {0!s} onto current DC by adding fSMORoleOwner={1!s}".format(obj.dn, serviceName))
             return
         m = ldb.Message()
         m.dn = obj.dn
         m['value'] = ldb.MessageElement(serviceName, ldb.FLAG_MOD_ADD, 'fSMORoleOwner')
         if self.do_modify(m, [],
-                          "Failed to sieze role %s onto current DC by adding fSMORoleOwner=%s" % (obj.dn, serviceName)):
-            self.report("Siezed role %s onto current DC by adding fSMORoleOwner=%s" % (obj.dn, serviceName))
+                          "Failed to sieze role {0!s} onto current DC by adding fSMORoleOwner={1!s}".format(obj.dn, serviceName)):
+            self.report("Siezed role {0!s} onto current DC by adding fSMORoleOwner={1!s}".format(obj.dn, serviceName))
 
     def err_missing_parent(self, obj):
         '''handle a missing parent'''
-        self.report("ERROR: parent object not found for %s" % (obj.dn))
-        if not self.confirm_all('Move object %s into LostAndFound?' % (obj.dn), 'move_to_lost_and_found'):
-            self.report('Not moving object %s into LostAndFound' % (obj.dn))
+        self.report("ERROR: parent object not found for {0!s}".format((obj.dn)))
+        if not self.confirm_all('Move object {0!s} into LostAndFound?'.format((obj.dn)), 'move_to_lost_and_found'):
+            self.report('Not moving object {0!s} into LostAndFound'.format((obj.dn)))
             return
 
         keep_transaction = True
@@ -479,16 +479,16 @@ newSuperior: %s""" % (str(from_dn), str(to_rdn), str(to_base)))
             new_dn = ldb.Dn(self.samdb, str(obj.dn))
             new_dn.remove_base_components(len(new_dn) - 1)
             if self.do_rename(obj.dn, new_dn, lost_and_found, ["show_deleted:0", "relax:0"],
-                              "Failed to rename object %s into lostAndFound at %s" % (obj.dn, new_dn + lost_and_found)):
-                self.report("Renamed object %s into lostAndFound at %s" % (obj.dn, new_dn + lost_and_found))
+                              "Failed to rename object {0!s} into lostAndFound at {1!s}".format(obj.dn, new_dn + lost_and_found)):
+                self.report("Renamed object {0!s} into lostAndFound at {1!s}".format(obj.dn, new_dn + lost_and_found))
 
                 m = ldb.Message()
                 m.dn = obj.dn
                 m['lastKnownParent'] = ldb.MessageElement(str(obj.dn.parent()), ldb.FLAG_MOD_REPLACE, 'lastKnownParent')
 
                 if self.do_modify(m, [],
-                                  "Failed to set lastKnownParent on lostAndFound object at %s" % (new_dn + lost_and_found)):
-                    self.report("Set lastKnownParent on lostAndFound object at %s" % (new_dn + lost_and_found))
+                                  "Failed to set lastKnownParent on lostAndFound object at {0!s}".format((new_dn + lost_and_found))):
+                    self.report("Set lastKnownParent on lostAndFound object at {0!s}".format((new_dn + lost_and_found)))
                     keep_transaction = True
         except:
             self.samdb.transaction_cancel()
@@ -508,55 +508,55 @@ newSuperior: %s""" % (str(from_dn), str(to_rdn), str(to_base)))
 
         attributes = ""
         if rdn_val != name_val:
-            attributes += "%s=%r " % (rdn_attr, rdn_val)
-        attributes += "name=%r" % (name_val)
+            attributes += "{0!s}={1!r} ".format(rdn_attr, rdn_val)
+        attributes += "name={0!r}".format((name_val))
 
-        self.report("ERROR: wrong dn[%s] %s new_dn[%s]" % (obj.dn, attributes, new_dn))
-        if not self.confirm_all("Rename %s to %s?" % (obj.dn, new_dn), 'fix_dn'):
-            self.report("Not renaming %s to %s" % (obj.dn, new_dn))
+        self.report("ERROR: wrong dn[{0!s}] {1!s} new_dn[{2!s}]".format(obj.dn, attributes, new_dn))
+        if not self.confirm_all("Rename {0!s} to {1!s}?".format(obj.dn, new_dn), 'fix_dn'):
+            self.report("Not renaming {0!s} to {1!s}".format(obj.dn, new_dn))
             return
 
         if self.do_rename(obj.dn, new_rdn, new_parent, ["show_recycled:1", "relax:0"],
-                          "Failed to rename object %s into %s" % (obj.dn, new_dn)):
-            self.report("Renamed %s into %s" % (obj.dn, new_dn))
+                          "Failed to rename object {0!s} into {1!s}".format(obj.dn, new_dn)):
+            self.report("Renamed {0!s} into {1!s}".format(obj.dn, new_dn))
 
     def err_wrong_instancetype(self, obj, calculated_instancetype):
         '''handle a wrong instanceType'''
-        self.report("ERROR: wrong instanceType %s on %s, should be %d" % (obj["instanceType"], obj.dn, calculated_instancetype))
-        if not self.confirm_all('Change instanceType from %s to %d on %s?' % (obj["instanceType"], calculated_instancetype, obj.dn), 'fix_instancetype'):
-            self.report('Not changing instanceType from %s to %d on %s' % (obj["instanceType"], calculated_instancetype, obj.dn))
+        self.report("ERROR: wrong instanceType {0!s} on {1!s}, should be {2:d}".format(obj["instanceType"], obj.dn, calculated_instancetype))
+        if not self.confirm_all('Change instanceType from {0!s} to {1:d} on {2!s}?'.format(obj["instanceType"], calculated_instancetype, obj.dn), 'fix_instancetype'):
+            self.report('Not changing instanceType from {0!s} to {1:d} on {2!s}'.format(obj["instanceType"], calculated_instancetype, obj.dn))
             return
 
         m = ldb.Message()
         m.dn = obj.dn
         m['value'] = ldb.MessageElement(str(calculated_instancetype), ldb.FLAG_MOD_REPLACE, 'instanceType')
-        if self.do_modify(m, ["local_oid:%s:0" % dsdb.DSDB_CONTROL_DBCHECK_MODIFY_RO_REPLICA],
-                          "Failed to correct missing instanceType on %s by setting instanceType=%d" % (obj.dn, calculated_instancetype)):
-            self.report("Corrected instancetype on %s by setting instanceType=%d" % (obj.dn, calculated_instancetype))
+        if self.do_modify(m, ["local_oid:{0!s}:0".format(dsdb.DSDB_CONTROL_DBCHECK_MODIFY_RO_REPLICA)],
+                          "Failed to correct missing instanceType on {0!s} by setting instanceType={1:d}".format(obj.dn, calculated_instancetype)):
+            self.report("Corrected instancetype on {0!s} by setting instanceType={1:d}".format(obj.dn, calculated_instancetype))
 
     def err_short_userParameters(self, obj, attrname, value):
         # This is a truncated userParameters due to a pre 4.1 replication bug
-        self.report("ERROR: incorrect userParameters value on object %s.  If you have another working DC that does not give this warning, please run 'samba-tool drs replicate --full-sync --local <destinationDC> <sourceDC> %s'" % (obj.dn, self.samdb.get_nc_root(obj.dn)))
+        self.report("ERROR: incorrect userParameters value on object {0!s}.  If you have another working DC that does not give this warning, please run 'samba-tool drs replicate --full-sync --local <destinationDC> <sourceDC> {1!s}'".format(obj.dn, self.samdb.get_nc_root(obj.dn)))
 
     def err_base64_userParameters(self, obj, attrname, value):
         '''handle a wrong userParameters'''
-        self.report("ERROR: wrongly formatted userParameters %s on %s, should not be base64-encoded" % (value, obj.dn))
-        if not self.confirm_all('Convert userParameters from base64 encoding on %s?' % (obj.dn), 'fix_base64_userparameters'):
-            self.report('Not changing userParameters from base64 encoding on %s' % (obj.dn))
+        self.report("ERROR: wrongly formatted userParameters {0!s} on {1!s}, should not be base64-encoded".format(value, obj.dn))
+        if not self.confirm_all('Convert userParameters from base64 encoding on {0!s}?'.format((obj.dn)), 'fix_base64_userparameters'):
+            self.report('Not changing userParameters from base64 encoding on {0!s}'.format((obj.dn)))
             return
 
         m = ldb.Message()
         m.dn = obj.dn
         m['value'] = ldb.MessageElement(b64decode(obj[attrname][0]), ldb.FLAG_MOD_REPLACE, 'userParameters')
         if self.do_modify(m, [],
-                          "Failed to correct base64-encoded userParameters on %s by converting from base64" % (obj.dn)):
-            self.report("Corrected base64-encoded userParameters on %s by converting from base64" % (obj.dn))
+                          "Failed to correct base64-encoded userParameters on {0!s} by converting from base64".format((obj.dn))):
+            self.report("Corrected base64-encoded userParameters on {0!s} by converting from base64".format((obj.dn)))
 
     def err_utf8_userParameters(self, obj, attrname, value):
         '''handle a wrong userParameters'''
-        self.report("ERROR: wrongly formatted userParameters on %s, should not be psudo-UTF8 encoded" % (obj.dn))
-        if not self.confirm_all('Convert userParameters from UTF8 encoding on %s?' % (obj.dn), 'fix_utf8_userparameters'):
-            self.report('Not changing userParameters from UTF8 encoding on %s' % (obj.dn))
+        self.report("ERROR: wrongly formatted userParameters on {0!s}, should not be psudo-UTF8 encoded".format((obj.dn)))
+        if not self.confirm_all('Convert userParameters from UTF8 encoding on {0!s}?'.format((obj.dn)), 'fix_utf8_userparameters'):
+            self.report('Not changing userParameters from UTF8 encoding on {0!s}'.format((obj.dn)))
             return
 
         m = ldb.Message()
@@ -564,14 +564,14 @@ newSuperior: %s""" % (str(from_dn), str(to_rdn), str(to_base)))
         m['value'] = ldb.MessageElement(obj[attrname][0].decode('utf8').encode('utf-16-le'),
                                         ldb.FLAG_MOD_REPLACE, 'userParameters')
         if self.do_modify(m, [],
-                          "Failed to correct psudo-UTF8 encoded userParameters on %s by converting from UTF8" % (obj.dn)):
-            self.report("Corrected psudo-UTF8 encoded userParameters on %s by converting from UTF8" % (obj.dn))
+                          "Failed to correct psudo-UTF8 encoded userParameters on {0!s} by converting from UTF8".format((obj.dn))):
+            self.report("Corrected psudo-UTF8 encoded userParameters on {0!s} by converting from UTF8".format((obj.dn)))
 
     def err_doubled_userParameters(self, obj, attrname, value):
         '''handle a wrong userParameters'''
-        self.report("ERROR: wrongly formatted userParameters on %s, should not be double UTF16 encoded" % (obj.dn))
-        if not self.confirm_all('Convert userParameters from doubled UTF-16 encoding on %s?' % (obj.dn), 'fix_doubled_userparameters'):
-            self.report('Not changing userParameters from doubled UTF-16 encoding on %s' % (obj.dn))
+        self.report("ERROR: wrongly formatted userParameters on {0!s}, should not be double UTF16 encoded".format((obj.dn)))
+        if not self.confirm_all('Convert userParameters from doubled UTF-16 encoding on {0!s}?'.format((obj.dn)), 'fix_doubled_userparameters'):
+            self.report('Not changing userParameters from doubled UTF-16 encoding on {0!s}'.format((obj.dn)))
             return
 
         m = ldb.Message()
@@ -579,12 +579,12 @@ newSuperior: %s""" % (str(from_dn), str(to_rdn), str(to_base)))
         m['value'] = ldb.MessageElement(obj[attrname][0].decode('utf-16-le').decode('utf-16-le').encode('utf-16-le'),
                                         ldb.FLAG_MOD_REPLACE, 'userParameters')
         if self.do_modify(m, [],
-                          "Failed to correct doubled-UTF16 encoded userParameters on %s by converting" % (obj.dn)):
-            self.report("Corrected doubled-UTF16 encoded userParameters on %s by converting" % (obj.dn))
+                          "Failed to correct doubled-UTF16 encoded userParameters on {0!s} by converting".format((obj.dn))):
+            self.report("Corrected doubled-UTF16 encoded userParameters on {0!s} by converting".format((obj.dn)))
 
     def err_odd_userParameters(self, obj, attrname):
         # This is a truncated userParameters due to a pre 4.1 replication bug
-        self.report("ERROR: incorrect userParameters value on object %s (odd length).  If you have another working DC that does not give this warning, please run 'samba-tool drs replicate --full-sync --local <destinationDC> <sourceDC> %s'" % (obj.dn, self.samdb.get_nc_root(obj.dn)))
+        self.report("ERROR: incorrect userParameters value on object {0!s} (odd length).  If you have another working DC that does not give this warning, please run 'samba-tool drs replicate --full-sync --local <destinationDC> <sourceDC> {1!s}'".format(obj.dn, self.samdb.get_nc_root(obj.dn)))
 
     def find_revealed_link(self, dn, attrname, guid):
         '''return a revealed link in an object'''
@@ -629,7 +629,7 @@ newSuperior: %s""" % (str(from_dn), str(to_rdn), str(to_base)))
 
             # check its the right GUID
             try:
-                res = self.samdb.search(base="<GUID=%s>" % guidstr, scope=ldb.SCOPE_BASE,
+                res = self.samdb.search(base="<GUID={0!s}>".format(guidstr), scope=ldb.SCOPE_BASE,
                                         attrs=attrs, controls=["extended_dn:1:1", "show_recycled:1"])
             except ldb.LdbError, (enum, estr):
                 error_count += 1
@@ -637,8 +637,8 @@ newSuperior: %s""" % (str(from_dn), str(to_rdn), str(to_base)))
                 continue
 
             if fixing_msDS_HasInstantiatedNCs:
-                dsdb_dn.prefix = "B:8:%08X:" % int(res[0]['instanceType'][0])
-                dsdb_dn.binary = "%08X" % int(res[0]['instanceType'][0])
+                dsdb_dn.prefix = "B:8:{0:08X}:".format(int(res[0]['instanceType'][0]))
+                dsdb_dn.binary = "{0:08X}".format(int(res[0]['instanceType'][0]))
 
                 if str(dsdb_dn) != val:
                     error_count +=1
@@ -733,8 +733,8 @@ newSuperior: %s""" % (str(from_dn), str(to_rdn), str(to_base)))
         nmsg.dn = dn
         nmsg[attr] = ldb.MessageElement(msg[attr], ldb.FLAG_MOD_REPLACE, attr)
         if self.do_modify(nmsg, ["relax:0", "provision:0", "show_recycled:1"],
-                          "Failed to fix metadata for attribute %s" % attr):
-            self.report("Fixed metadata for attribute %s" % attr)
+                          "Failed to fix metadata for attribute {0!s}".format(attr)):
+            self.report("Fixed metadata for attribute {0!s}".format(attr))
 
     def ace_get_effective_inherited_type(self, ace):
         if ace.flags & security.SEC_ACE_FLAG_INHERIT_ONLY:
@@ -762,7 +762,7 @@ newSuperior: %s""" % (str(from_dn), str(to_rdn), str(to_base)))
         if cls in self.class_schemaIDGUID:
             return self.class_schemaIDGUID[cls]
 
-        flt = "(&(ldapDisplayName=%s)(objectClass=classSchema))" % cls
+        flt = "(&(ldapDisplayName={0!s})(objectClass=classSchema))".format(cls)
         res = self.samdb.search(base=self.schema_dn,
                                 expression=flt,
                                 attrs=["schemaIDGUID"])
@@ -882,16 +882,16 @@ newSuperior: %s""" % (str(from_dn), str(to_rdn), str(to_base)))
         sd_val = ndr_pack(sd)
         sd_flags = security.SECINFO_DACL | security.SECINFO_SACL
 
-        if not self.confirm_all('Fix %s on %s?' % (sd_attr, dn), 'fix_ntsecuritydescriptor'):
-            self.report('Not fixing %s on %s\n' % (sd_attr, dn))
+        if not self.confirm_all('Fix {0!s} on {1!s}?'.format(sd_attr, dn), 'fix_ntsecuritydescriptor'):
+            self.report('Not fixing {0!s} on {1!s}\n'.format(sd_attr, dn))
             return
 
         nmsg = ldb.Message()
         nmsg.dn = dn
         nmsg[sd_attr] = ldb.MessageElement(sd_val, ldb.FLAG_MOD_REPLACE, sd_attr)
-        if self.do_modify(nmsg, ["sd_flags:1:%d" % sd_flags],
-                          "Failed to fix attribute %s" % sd_attr):
-            self.report("Fixed attribute '%s' of '%s'\n" % (sd_attr, dn))
+        if self.do_modify(nmsg, ["sd_flags:1:{0:d}".format(sd_flags)],
+                          "Failed to fix attribute {0!s}".format(sd_attr)):
+            self.report("Fixed attribute '{0!s}' of '{1!s}'\n".format(sd_attr, dn))
 
     def err_wrong_default_sd(self, dn, sd, sd_old, diff):
         '''re-write the SD due to not matching the default (optional mode for fixing an incorrect provision)'''
@@ -904,16 +904,16 @@ newSuperior: %s""" % (str(from_dn), str(to_rdn), str(to_base)))
         if sd.group_sid is not None:
             sd_flags |= security.SECINFO_GROUP
 
-        if not self.confirm_all('Reset %s on %s back to provision default?\n%s' % (sd_attr, dn, diff), 'reset_all_well_known_acls'):
-            self.report('Not resetting %s on %s\n' % (sd_attr, dn))
+        if not self.confirm_all('Reset {0!s} on {1!s} back to provision default?\n{2!s}'.format(sd_attr, dn, diff), 'reset_all_well_known_acls'):
+            self.report('Not resetting {0!s} on {1!s}\n'.format(sd_attr, dn))
             return
 
         m = ldb.Message()
         m.dn = dn
         m[sd_attr] = ldb.MessageElement(sd_val, ldb.FLAG_MOD_REPLACE, sd_attr)
-        if self.do_modify(m, ["sd_flags:1:%d" % sd_flags],
-                          "Failed to reset attribute %s" % sd_attr):
-            self.report("Fixed attribute '%s' of '%s'\n" % (sd_attr, dn))
+        if self.do_modify(m, ["sd_flags:1:{0:d}".format(sd_flags)],
+                          "Failed to reset attribute {0!s}".format(sd_attr)):
+            self.report("Fixed attribute '{0!s}' of '{1!s}'\n".format(sd_attr, dn))
 
     def err_missing_sd_owner(self, dn, sd):
         '''re-write the SD due to a missing owner or group'''
@@ -921,8 +921,8 @@ newSuperior: %s""" % (str(from_dn), str(to_rdn), str(to_base)))
         sd_val = ndr_pack(sd)
         sd_flags = security.SECINFO_OWNER | security.SECINFO_GROUP
 
-        if not self.confirm_all('Fix missing owner or group in %s on %s?' % (sd_attr, dn), 'fix_ntsecuritydescriptor_owner_group'):
-            self.report('Not fixing missing owner or group %s on %s\n' % (sd_attr, dn))
+        if not self.confirm_all('Fix missing owner or group in {0!s} on {1!s}?'.format(sd_attr, dn), 'fix_ntsecuritydescriptor_owner_group'):
+            self.report('Not fixing missing owner or group {0!s} on {1!s}\n'.format(sd_attr, dn))
             return
 
         nmsg = ldb.Message()
@@ -941,9 +941,9 @@ newSuperior: %s""" % (str(from_dn), str(to_rdn), str(to_base)))
         #
         # This is important for the dns related naming contexts.
         self.samdb.set_session_info(self.admin_session_info)
-        if self.do_modify(nmsg, ["sd_flags:1:%d" % sd_flags],
-                          "Failed to fix metadata for attribute %s" % sd_attr):
-            self.report("Fixed attribute '%s' of '%s'\n" % (sd_attr, dn))
+        if self.do_modify(nmsg, ["sd_flags:1:{0:d}".format(sd_flags)],
+                          "Failed to fix metadata for attribute {0!s}".format(sd_attr)):
+            self.report("Fixed attribute '{0!s}' of '{1!s}'\n".format(sd_attr, dn))
         self.samdb.set_session_info(self.system_session_info)
 
 
@@ -958,10 +958,9 @@ newSuperior: %s""" % (str(from_dn), str(to_rdn), str(to_base)))
                 continue
 
             found = True
-            self.report('''ERROR: on replPropertyMetaData of %s, the instanceType on attribute 0x%08x,
-                           version %d changed at %s is 00000000-0000-0000-0000-000000000000,
-                           but should be non-zero.  Proposed fix is to set to our invocationID (%s).'''
-                        % (dn, o.attid, o.version,
+            self.report('''ERROR: on replPropertyMetaData of {0!s}, the instanceType on attribute 0x{1:08x},
+                           version {2:d} changed at {3!s} is 00000000-0000-0000-0000-000000000000,
+                           but should be non-zero.  Proposed fix is to set to our invocationID ({4!s}).'''.format(dn, o.attid, o.version,
                            time.ctime(samba.nttime2unix(o.originating_change_time)),
                            self.samdb.get_invocation_id()))
 
@@ -992,18 +991,17 @@ newSuperior: %s""" % (str(from_dn), str(to_rdn), str(to_base)))
             msg = ldb.Message()
             msg.dn = dn
 
-            if not self.confirm_all('Fix %s on %s by setting originating_invocation_id on some elements to our invocationID %s?'
-                                    % (attr, dn, self.samdb.get_invocation_id()), 'fix_replmetadata_zero_invocationid'):
-                self.report('Not fixing %s on %s\n' % (attr, dn))
+            if not self.confirm_all('Fix {0!s} on {1!s} by setting originating_invocation_id on some elements to our invocationID {2!s}?'.format(attr, dn, self.samdb.get_invocation_id()), 'fix_replmetadata_zero_invocationid'):
+                self.report('Not fixing {0!s} on {1!s}\n'.format(attr, dn))
                 return
 
             nmsg = ldb.Message()
             nmsg.dn = dn
             nmsg[attr] = ldb.MessageElement(replBlob, ldb.FLAG_MOD_REPLACE, attr)
-            if self.do_modify(nmsg, ["local_oid:%s:0" % dsdb.DSDB_CONTROL_DBCHECK_MODIFY_RO_REPLICA,
+            if self.do_modify(nmsg, ["local_oid:{0!s}:0".format(dsdb.DSDB_CONTROL_DBCHECK_MODIFY_RO_REPLICA),
                                      "local_oid:1.3.6.1.4.1.7165.4.3.14:0"],
-                              "Failed to fix attribute %s" % attr):
-                self.report("Fixed attribute '%s' of '%s'\n" % (attr, dn))
+                              "Failed to fix attribute {0!s}".format(attr)):
+                self.report("Fixed attribute '{0!s}' of '{1!s}'\n".format(attr, dn))
 
 
     def err_replmetadata_unknown_attid(self, dn, attr, repl_meta_data):
@@ -1015,7 +1013,7 @@ newSuperior: %s""" % (str(from_dn), str(to_rdn), str(to_base)))
             try:
                 att = self.samdb_schema.get_lDAPDisplayName_by_attid(o.attid)
             except KeyError:
-                self.report('ERROR: attributeID 0X%0X is not known in our schema, not fixing %s on %s\n' % (o.attid, attr, dn))
+                self.report('ERROR: attributeID 0X{0:0X} is not known in our schema, not fixing {1!s} on {2!s}\n'.format(o.attid, attr, dn))
                 return
 
 
@@ -1025,10 +1023,9 @@ newSuperior: %s""" % (str(from_dn), str(to_rdn), str(to_base)))
         ctr = repl.ctr
         found = False
 
-        self.report('ERROR: unsorted attributeID values in %s on %s\n' % (attr, dn))
-        if not self.confirm_all('Fix %s on %s by sorting the attribute list?'
-                                % (attr, dn), 'fix_replmetadata_unsorted_attid'):
-            self.report('Not fixing %s on %s\n' % (attr, dn))
+        self.report('ERROR: unsorted attributeID values in {0!s} on {1!s}\n'.format(attr, dn))
+        if not self.confirm_all('Fix {0!s} on {1!s} by sorting the attribute list?'.format(attr, dn), 'fix_replmetadata_unsorted_attid'):
+            self.report('Not fixing {0!s} on {1!s}\n'.format(attr, dn))
             return
 
         # Sort the array, except for the last element
@@ -1039,29 +1036,29 @@ newSuperior: %s""" % (str(from_dn), str(to_rdn), str(to_base)))
         nmsg = ldb.Message()
         nmsg.dn = dn
         nmsg[attr] = ldb.MessageElement(replBlob, ldb.FLAG_MOD_REPLACE, attr)
-        if self.do_modify(nmsg, ["local_oid:%s:0" % dsdb.DSDB_CONTROL_DBCHECK_MODIFY_RO_REPLICA,
+        if self.do_modify(nmsg, ["local_oid:{0!s}:0".format(dsdb.DSDB_CONTROL_DBCHECK_MODIFY_RO_REPLICA),
                                  "local_oid:1.3.6.1.4.1.7165.4.3.14:0",
                                  "local_oid:1.3.6.1.4.1.7165.4.3.25:0"],
-                          "Failed to fix attribute %s" % attr):
-            self.report("Fixed attribute '%s' of '%s'\n" % (attr, dn))
+                          "Failed to fix attribute {0!s}".format(attr)):
+            self.report("Fixed attribute '{0!s}' of '{1!s}'\n".format(attr, dn))
 
 
     def is_deleted_deleted_objects(self, obj):
         faulty = False
         if "description" not in obj:
-            self.report("ERROR: description not present on Deleted Objects container %s" % obj.dn)
+            self.report("ERROR: description not present on Deleted Objects container {0!s}".format(obj.dn))
             faulty = True
         if "showInAdvancedViewOnly" not in obj:
-            self.report("ERROR: showInAdvancedViewOnly not present on Deleted Objects container %s" % obj.dn)
+            self.report("ERROR: showInAdvancedViewOnly not present on Deleted Objects container {0!s}".format(obj.dn))
             faulty = True
         if "objectCategory" not in obj:
-            self.report("ERROR: objectCategory not present on Deleted Objects container %s" % obj.dn)
+            self.report("ERROR: objectCategory not present on Deleted Objects container {0!s}".format(obj.dn))
             faulty = True
         if "isCriticalSystemObject" not in obj:
-            self.report("ERROR: isCriticalSystemObject not present on Deleted Objects container %s" % obj.dn)
+            self.report("ERROR: isCriticalSystemObject not present on Deleted Objects container {0!s}".format(obj.dn))
             faulty = True
         if "isRecycled" in obj:
-            self.report("ERROR: isRecycled present on Deleted Objects container %s" % obj.dn)
+            self.report("ERROR: isRecycled present on Deleted Objects container {0!s}".format(obj.dn))
             faulty = True
         return faulty
 
@@ -1075,20 +1072,19 @@ newSuperior: %s""" % (str(from_dn), str(to_rdn), str(to_base)))
         if "showInAdvancedViewOnly" not in obj:
             nmsg["showInAdvancedViewOnly"] = ldb.MessageElement("TRUE", ldb.FLAG_MOD_REPLACE, "showInAdvancedViewOnly")
         if "objectCategory" not in obj:
-            nmsg["objectCategory"] = ldb.MessageElement("CN=Container,%s" % self.schema_dn, ldb.FLAG_MOD_REPLACE, "objectCategory")
+            nmsg["objectCategory"] = ldb.MessageElement("CN=Container,{0!s}".format(self.schema_dn), ldb.FLAG_MOD_REPLACE, "objectCategory")
         if "isCriticalSystemObject" not in obj:
             nmsg["isCriticalSystemObject"] = ldb.MessageElement("TRUE", ldb.FLAG_MOD_REPLACE, "isCriticalSystemObject")
         if "isRecycled" in obj:
             nmsg["isRecycled"] = ldb.MessageElement("TRUE", ldb.FLAG_MOD_DELETE, "isRecycled")
 
-        if not self.confirm_all('Fix Deleted Objects container %s by restoring default attributes?'
-                                % (dn), 'fix_deleted_deleted_objects'):
-            self.report('Not fixing missing/incorrect attributes on %s\n' % (dn))
+        if not self.confirm_all('Fix Deleted Objects container {0!s} by restoring default attributes?'.format((dn)), 'fix_deleted_deleted_objects'):
+            self.report('Not fixing missing/incorrect attributes on {0!s}\n'.format((dn)))
             return
 
         if self.do_modify(nmsg, ["relax:0"],
-                          "Failed to fix Deleted Objects container  %s" % dn):
-            self.report("Fixed Deleted Objects container '%s'\n" % (dn))
+                          "Failed to fix Deleted Objects container  {0!s}".format(dn)):
+            self.report("Fixed Deleted Objects container '{0!s}'\n".format((dn)))
 
 
     def is_fsmo_role(self, dn):
@@ -1138,7 +1134,7 @@ newSuperior: %s""" % (str(from_dn), str(to_rdn), str(to_base)))
         if attrs is None:
             attrs = ['*']
         if self.verbose:
-            self.report("Checking object %s" % dn)
+            self.report("Checking object {0!s}".format(dn))
         if "dn" in map(str.lower, attrs):
             attrs.append("name")
         if "distinguishedname" in map(str.lower, attrs):
@@ -1164,18 +1160,18 @@ newSuperior: %s""" % (str(from_dn), str(to_rdn), str(to_base)))
                                         "extended_dn:1:1",
                                         "show_recycled:1",
                                         "show_deleted:1",
-                                        "sd_flags:1:%d" % sd_flags,
+                                        "sd_flags:1:{0:d}".format(sd_flags),
                                     ],
                                     attrs=attrs)
         except ldb.LdbError, (enum, estr):
             if enum == ldb.ERR_NO_SUCH_OBJECT:
                 if self.in_transaction:
-                    self.report("ERROR: Object %s disappeared during check" % dn)
+                    self.report("ERROR: Object {0!s} disappeared during check".format(dn))
                     return 1
                 return 0
             raise
         if len(res) != 1:
-            self.report("ERROR: Object %s failed to load during check" % dn)
+            self.report("ERROR: Object {0!s} failed to load during check".format(dn))
             return 1
         obj = res[0]
         error_count = 0
@@ -1189,7 +1185,7 @@ newSuperior: %s""" % (str(from_dn), str(to_rdn), str(to_base)))
             deleted_objects_dn = self.samdb.get_wellknown_dn(nc_dn,
                                                  samba.dsdb.DS_GUID_DELETED_OBJECTS_CONTAINER)
         except KeyError, e:
-            deleted_objects_dn = ldb.Dn(self.samdb, "CN=Deleted Objects,%s" % nc_dn)
+            deleted_objects_dn = ldb.Dn(self.samdb, "CN=Deleted Objects,{0!s}".format(nc_dn))
 
         object_rdn_attr = None
         object_rdn_val = None
@@ -1207,8 +1203,7 @@ newSuperior: %s""" % (str(from_dn), str(to_rdn), str(to_base)))
             if str(attrname).lower() == "name":
                 if len(obj[attrname]) != 1:
                     error_count += 1
-                    self.report("ERROR: Not fixing num_values(%d) for '%s' on '%s'" %
-                                (len(obj[attrname]), attrname, str(obj.dn)))
+                    self.report("ERROR: Not fixing num_values({0:d}) for '{1!s}' on '{2!s}'".format(len(obj[attrname]), attrname, str(obj.dn)))
                 else:
                     name_val = obj[attrname][0]
 
@@ -1216,8 +1211,7 @@ newSuperior: %s""" % (str(from_dn), str(to_rdn), str(to_base)))
                 object_rdn_attr = attrname
                 if len(obj[attrname]) != 1:
                     error_count += 1
-                    self.report("ERROR: Not fixing num_values(%d) for '%s' on '%s'" %
-                                (len(obj[attrname]), attrname, str(obj.dn)))
+                    self.report("ERROR: Not fixing num_values({0:d}) for '{1!s}' on '{2!s}'".format(len(obj[attrname]), attrname, str(obj.dn)))
                 else:
                     object_rdn_val = obj[attrname][0]
 
@@ -1252,13 +1246,11 @@ newSuperior: %s""" % (str(from_dn), str(to_rdn), str(to_base)))
                     rdn_attid = self.samdb_schema.get_attid_from_lDAPDisplayName(dn.get_rdn_name())
                     if list_attid_from_md[-1] != rdn_attid:
                         error_count += 1
-                        self.report("ERROR: Not fixing incorrect final attributeID in '%s' on '%s', it should match the RDN %s" %
-                                    (attrname, str(dn), dn.get_rdn_name()))
+                        self.report("ERROR: Not fixing incorrect final attributeID in '{0!s}' on '{1!s}', it should match the RDN {2!s}".format(attrname, str(dn), dn.get_rdn_name()))
 
                     if list_attid_from_md[0] != 0:
                         error_count += 1
-                        self.report("ERROR: Not fixing incorrect inital attributeID in '%s' on '%s', it should be objectClass" %
-                                    (attrname, str(dn)))
+                        self.report("ERROR: Not fixing incorrect inital attributeID in '{0!s}' on '{1!s}', it should be objectClass".format(attrname, str(dn)))
 
                 got_repl_property_meta_data = True
                 continue
@@ -1380,10 +1372,10 @@ newSuperior: %s""" % (str(from_dn), str(to_rdn), str(to_base)))
         if ("*" in attrs or "name" in map(str.lower, attrs)):
             if name_val is None:
                 error_count += 1
-                self.report("ERROR: Not fixing missing 'name' on '%s'" % (str(obj.dn)))
+                self.report("ERROR: Not fixing missing 'name' on '{0!s}'".format((str(obj.dn))))
             if object_rdn_attr is None:
                 error_count += 1
-                self.report("ERROR: Not fixing missing '%s' on '%s'" % (obj.dn.get_rdn_name(), str(obj.dn)))
+                self.report("ERROR: Not fixing missing '{0!s}' on '{1!s}'".format(obj.dn.get_rdn_name(), str(obj.dn)))
 
         if name_val is not None:
             parent_dn = None
@@ -1392,7 +1384,7 @@ newSuperior: %s""" % (str(from_dn), str(to_rdn), str(to_base)))
                     parent_dn = deleted_objects_dn
             if parent_dn is None:
                 parent_dn = obj.dn.parent()
-            expected_dn = ldb.Dn(self.samdb, "RDN=RDN,%s" % (parent_dn))
+            expected_dn = ldb.Dn(self.samdb, "RDN=RDN,{0!s}".format((parent_dn)))
             expected_dn.set_component(0, obj.dn.get_rdn_name(), name_val)
 
             if obj.dn == deleted_objects_dn:
@@ -1403,7 +1395,7 @@ newSuperior: %s""" % (str(from_dn), str(to_rdn), str(to_base)))
                 self.err_wrong_dn(obj, expected_dn, object_rdn_attr, object_rdn_val, name_val)
             elif obj.dn.get_rdn_value() != object_rdn_val:
                 error_count += 1
-                self.report("ERROR: Not fixing %s=%r on '%s'" % (object_rdn_attr, object_rdn_val, str(obj.dn)))
+                self.report("ERROR: Not fixing {0!s}={1!r} on '{2!s}'".format(object_rdn_attr, object_rdn_val, str(obj.dn)))
 
         show_dn = True
         if got_repl_property_meta_data:
@@ -1414,7 +1406,7 @@ newSuperior: %s""" % (str(from_dn), str(to_rdn), str(to_base)))
                 expectedTimeDo = 2650466015990000000
                 originating = self.get_originating_time(obj["replPropertyMetaData"], isDeletedAttId)
                 if originating != expectedTimeDo:
-                    if self.confirm_all("Fix isDeleted originating_change_time on '%s'" % str(dn), 'fix_time_metadata'):
+                    if self.confirm_all("Fix isDeleted originating_change_time on '{0!s}'".format(str(dn)), 'fix_time_metadata'):
                         nmsg = ldb.Message()
                         nmsg.dn = dn
                         nmsg["isDeleted"] = ldb.MessageElement("TRUE", ldb.FLAG_MOD_REPLACE, "isDeleted")
@@ -1422,16 +1414,16 @@ newSuperior: %s""" % (str(from_dn), str(to_rdn), str(to_base)))
                         self.samdb.modify(nmsg, controls=["provision:0"])
 
                     else:
-                        self.report("Not fixing isDeleted originating_change_time on '%s'" % str(dn))
+                        self.report("Not fixing isDeleted originating_change_time on '{0!s}'".format(str(dn)))
 
             for att in set_attrs_seen.difference(set_attrs_from_md):
                 if show_dn:
-                    self.report("On object %s" % dn)
+                    self.report("On object {0!s}".format(dn))
                     show_dn = False
                 error_count += 1
-                self.report("ERROR: Attribute %s not present in replication metadata" % att)
-                if not self.confirm_all("Fix missing replPropertyMetaData element '%s'" % att, 'fix_all_metadata'):
-                    self.report("Not fixing missing replPropertyMetaData element '%s'" % att)
+                self.report("ERROR: Attribute {0!s} not present in replication metadata".format(att))
+                if not self.confirm_all("Fix missing replPropertyMetaData element '{0!s}'".format(att), 'fix_all_metadata'):
+                    self.report("Not fixing missing replPropertyMetaData element '{0!s}'".format(att))
                     continue
                 self.fix_metadata(dn, att)
 
@@ -1464,10 +1456,10 @@ newSuperior: %s""" % (str(from_dn), str(to_rdn), str(to_base)))
         '''check the @ROOTDSE special object'''
         dn = ldb.Dn(self.samdb, '@ROOTDSE')
         if self.verbose:
-            self.report("Checking object %s" % dn)
+            self.report("Checking object {0!s}".format(dn))
         res = self.samdb.search(base=dn, scope=ldb.SCOPE_BASE)
         if len(res) != 1:
-            self.report("Object %s disappeared during check" % dn)
+            self.report("Object {0!s} disappeared during check".format(dn))
             return 1
         obj = res[0]
         error_count = 0
@@ -1487,7 +1479,7 @@ newSuperior: %s""" % (str(from_dn), str(to_rdn), str(to_base)))
             guid_str = str(ndr_unpack(misc.GUID, res[0]['objectGUID'][0]))
             m = ldb.Message()
             m.dn = dn
-            m['dsServiceName'] = ldb.MessageElement("<GUID=%s>" % guid_str,
+            m['dsServiceName'] = ldb.MessageElement("<GUID={0!s}>".format(guid_str),
                                                     ldb.FLAG_MOD_REPLACE, 'dsServiceName')
             if self.do_modify(m, [], "Failed to change dsServiceName to GUID form", validate=False):
                 self.report("Changed dsServiceName to GUID form")

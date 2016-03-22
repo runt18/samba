@@ -47,7 +47,7 @@ def check_ruby_version(conf, minver=()):
 	try:
 		ver = tuple(map(int, version.split(".")))
 	except:
-		conf.fatal('unsupported ruby version %r' % version)
+		conf.fatal('unsupported ruby version {0!r}'.format(version))
 
 	cver = ''
 	if minver:
@@ -71,7 +71,7 @@ def check_ruby_ext_devel(conf):
 		return Utils.to_list(Utils.cmd_output([conf.env.RUBY, '-rrbconfig', '-e', cmd]))
 
 	def read_config(key):
-		return read_out('puts Config::CONFIG[%r]' % key)
+		return read_out('puts Config::CONFIG[{0!r}]'.format(key))
 
 	ruby = conf.env['RUBY']
 	archdir = read_config('archdir')

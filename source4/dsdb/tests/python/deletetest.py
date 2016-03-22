@@ -52,15 +52,15 @@ class BaseDeleteTests(samba.tests.TestCase):
         self.configuration_dn = self.ldb.get_config_basedn().get_linearized()
 
     def search_guid(self, guid):
-        print "SEARCH by GUID %s" % self.GUID_string(guid)
+        print "SEARCH by GUID {0!s}".format(self.GUID_string(guid))
 
-        res = self.ldb.search(base="<GUID=%s>" % self.GUID_string(guid),
+        res = self.ldb.search(base="<GUID={0!s}>".format(self.GUID_string(guid)),
                          scope=SCOPE_BASE, controls=["show_deleted:1"])
         self.assertEquals(len(res), 1)
         return res[0]
 
     def search_dn(self,dn):
-        print "SEARCH by DN %s" % dn
+        print "SEARCH by DN {0!s}".format(dn)
 
         res = self.ldb.search(expression="(objectClass=*)",
                          base=dn,
@@ -76,7 +76,7 @@ class BasicDeleteTests(BaseDeleteTests):
         super(BasicDeleteTests, self).setUp()
 
     def del_attr_values(self, delObj):
-        print "Checking attributes for %s" % delObj["dn"]
+        print "Checking attributes for {0!s}".format(delObj["dn"])
 
         self.assertEquals(delObj["isDeleted"][0],"TRUE")
         self.assertTrue(not("objectCategory" in delObj))
@@ -107,7 +107,7 @@ class BasicDeleteTests(BaseDeleteTests):
         self.assertEquals(name2, rdn + "\nDEL:" + self.GUID_string(guid))
 
     def delete_deleted(self, ldb, dn):
-        print "Testing the deletion of the already deleted dn %s" % dn
+        print "Testing the deletion of the already deleted dn {0!s}".format(dn)
 
         try:
             ldb.delete(dn)
@@ -219,7 +219,7 @@ class BasicDeleteTests(BaseDeleteTests):
             self.assertEquals(num, ERR_NOT_ALLOWED_ON_NON_LEAF)
 
         res = self.ldb.search("cn=Partitions," + self.configuration_dn, attrs=[],
-                         expression="(nCName=%s)" % self.base_dn)
+                         expression="(nCName={0!s})".format(self.base_dn))
         self.assertEquals(len(res), 1)
 
         try:
@@ -260,13 +260,13 @@ class BasicDeleteTests(BaseDeleteTests):
         grp_name = "g1_" + marker
         site_name = "s1_" + marker
 
-        usr1 = "cn=%s,cn=users,%s" % (usr1_name, self.base_dn)
-        usr2 = "cn=%s,cn=users,%s" % (usr2_name, self.base_dn)
-        grp1 = "cn=%s,cn=users,%s" % (grp_name, self.base_dn)
-        sit1 = "cn=%s,cn=sites,%s" % (site_name, self.configuration_dn)
-        ss1 = "cn=NTDS Site Settings,cn=%s,cn=sites,%s" % (site_name, self.configuration_dn)
-        srv1 = "cn=Servers,cn=%s,cn=sites,%s" % (site_name, self.configuration_dn)
-        srv2 = "cn=TESTSRV,cn=Servers,cn=%s,cn=sites,%s" % (site_name, self.configuration_dn)
+        usr1 = "cn={0!s},cn=users,{1!s}".format(usr1_name, self.base_dn)
+        usr2 = "cn={0!s},cn=users,{1!s}".format(usr2_name, self.base_dn)
+        grp1 = "cn={0!s},cn=users,{1!s}".format(grp_name, self.base_dn)
+        sit1 = "cn={0!s},cn=sites,{1!s}".format(site_name, self.configuration_dn)
+        ss1 = "cn=NTDS Site Settings,cn={0!s},cn=sites,{1!s}".format(site_name, self.configuration_dn)
+        srv1 = "cn=Servers,cn={0!s},cn=sites,{1!s}".format(site_name, self.configuration_dn)
+        srv2 = "cn=TESTSRV,cn=Servers,cn={0!s},cn=sites,{1!s}".format(site_name, self.configuration_dn)
 
         delete_force(self.ldb, usr1)
         delete_force(self.ldb, usr2)
@@ -390,8 +390,8 @@ class BasicDeleteTests(BaseDeleteTests):
 
 if not "://" in host:
     if os.path.isfile(host):
-        host = "tdb://%s" % host
+        host = "tdb://{0!s}".format(host)
     else:
-        host = "ldap://%s" % host
+        host = "ldap://{0!s}".format(host)
 
 TestProgram(module=__name__, opts=subunitopts)

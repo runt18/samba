@@ -87,7 +87,7 @@ class cmd_ntacl_set(Command):
         s3conf = s3param.get_context()
         s3conf.load(lp.configfile)
         # ensure we are using the right samba_dsdb passdb backend, no matter what
-        s3conf.set("passdb backend", "samba_dsdb:%s" % samdb.url)
+        s3conf.set("passdb backend", "samba_dsdb:{0!s}".format(samdb.url))
 
         setntacl(lp, file, acl, str(domain_sid), xattr_backend, eadb_file, use_ntvfs=use_ntvfs, service=service)
 
@@ -158,7 +158,7 @@ class cmd_ntacl_get(Command):
         s3conf = s3param.get_context()
         s3conf.load(lp.configfile)
         # ensure we are using the right samba_dsdb passdb backend, no matter what
-        s3conf.set("passdb backend", "samba_dsdb:%s" % samdb.url)
+        s3conf.set("passdb backend", "samba_dsdb:{0!s}".format(samdb.url))
 
         acl = getntacl(lp, file, xattr_backend, eadb_file, direct_db_access=use_ntvfs, service=service)
         if as_sddl:
@@ -212,7 +212,7 @@ class cmd_ntacl_sysvolreset(Command):
         s3conf = s3param.get_context()
         s3conf.load(lp.configfile)
         # ensure we are using the right samba_dsdb passdb backend, no matter what
-        s3conf.set("passdb backend", "samba_dsdb:%s" % samdb.url)
+        s3conf.set("passdb backend", "samba_dsdb:{0!s}".format(samdb.url))
 
         LA_sid = security.dom_sid(str(domain_sid)
                                   +"-"+str(security.DOMAIN_RID_ADMINISTRATOR))
@@ -225,10 +225,10 @@ class cmd_ntacl_sysvolreset(Command):
         # groups mapped via passdb, we can relax some of these checks
         (LA_uid,LA_type) = s4_passdb.sid_to_id(LA_sid)
         if (LA_type != idmap.ID_TYPE_UID and LA_type != idmap.ID_TYPE_BOTH):
-            raise CommandError("SID %s is not mapped to a UID" % LA_sid)
+            raise CommandError("SID {0!s} is not mapped to a UID".format(LA_sid))
         (BA_gid,BA_type) = s4_passdb.sid_to_id(BA_sid)
         if (BA_type != idmap.ID_TYPE_GID and BA_type != idmap.ID_TYPE_BOTH):
-            raise CommandError("SID %s is not mapped to a GID" % BA_sid)
+            raise CommandError("SID {0!s} is not mapped to a GID".format(BA_sid))
 
         if use_ntvfs:
             logger.warning("Please note that POSIX permissions have NOT been changed, only the stored NT ACL")

@@ -31,7 +31,7 @@ class GUIDTests(samba.tests.TestCase):
 
     def test_repr(self):
         guid = misc.GUID(text1)
-        self.assertEquals("GUID('%s')" % text1, repr(guid))
+        self.assertEquals("GUID('{0!s}')".format(text1), repr(guid))
 
     def test_compare_different(self):
         guid1 = misc.GUID(text1)
@@ -54,9 +54,9 @@ class PolicyHandleTests(samba.tests.TestCase):
 
     def test_repr(self):
         x = misc.policy_handle(text1, 42)
-        self.assertEquals("policy_handle(%d, '%s')" % (42, text1), repr(x))
+        self.assertEquals("policy_handle({0:d}, '{1!s}')".format(42, text1), repr(x))
 
     def test_str(self):
         x = misc.policy_handle(text1, 42)
-        self.assertEquals("%d, %s" % (42, text1), str(x))
+        self.assertEquals("{0:d}, {1!s}".format(42, text1), str(x))
 

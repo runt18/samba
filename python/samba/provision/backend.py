@@ -183,8 +183,8 @@ class LDAPBackend(ProvisionBackend):
         if ldap_backend_forced_uri is not None:
             self.ldap_uri = ldap_backend_forced_uri
         else:
-            self.ldap_uri = "ldapi://%s" % urllib.quote(
-                os.path.join(self.ldapdir, "ldapi"), safe="")
+            self.ldap_uri = "ldapi://{0!s}".format(urllib.quote(
+                os.path.join(self.ldapdir, "ldapi"), safe=""))
 
         if not os.path.exists(self.ldapdir):
             os.mkdir(self.ldapdir)
@@ -208,7 +208,7 @@ class LDAPBackend(ProvisionBackend):
                     p = f.read()
                 finally:
                     f.close()
-                self.logger.info("Check for slapd process with PID: %s and terminate it manually." % p)
+                self.logger.info("Check for slapd process with PID: {0!s} and terminate it manually.".format(p))
             raise SlapdAlreadyRunning(self.ldap_uri)
         except LdbError:
             # XXX: We should never be catching all Ldb errors
@@ -282,10 +282,10 @@ class LDAPBackend(ProvisionBackend):
                 count = count + 1
 
                 if count > 15:
-                    self.logger.error("Could not connect to slapd started with: %s" %  "\'" + "\' \'".join(self.slapd_provision_command) + "\'")
+                    self.logger.error("Could not connect to slapd started with: {0!s}".format("\'") + "\' \'".join(self.slapd_provision_command) + "\'")
                     raise ProvisioningError("slapd never accepted a connection within 15 seconds of starting")
 
-        self.logger.error("Could not start slapd with: %s" % "\'" + "\' \'".join(self.slapd_provision_command) + "\'")
+        self.logger.error("Could not start slapd with: {0!s}".format("\'") + "\' \'".join(self.slapd_provision_command) + "\'")
         raise ProvisioningError("slapd died before we could make a connection to it")
 
     def shutdown(self):
@@ -553,7 +553,7 @@ class OpenLDAPBackend(LDAPBackend):
             # specified there as part of it's clue as to it's own name,
             # and not to replicate to itself
             if self.ol_mmr_urls is None:
-                server_port_string = "ldap://0.0.0.0:%d" % self.ldap_backend_extra_port
+                server_port_string = "ldap://0.0.0.0:{0:d}".format(self.ldap_backend_extra_port)
             else:
                 server_port_string = "ldap://%s.%s:%d" (self.names.hostname,
                     self.names.dnsdomain, self.ldap_backend_extra_port)
@@ -591,7 +591,7 @@ class OpenLDAPBackend(LDAPBackend):
         retcode = subprocess.call(slapd_cmd, close_fds=True, shell=False)
 
         if retcode != 0:
-            self.logger.error("conversion from slapd.conf to cn=config failed slapd started with: %s" %  "\'" + "\' \'".join(slapd_cmd) + "\'")
+            self.logger.error("conversion from slapd.conf to cn=config failed slapd started with: {0!s}".format("\'") + "\' \'".join(slapd_cmd) + "\'")
             raise ProvisioningError("conversion from slapd.conf to cn=config failed")
 
         if not os.path.exists(os.path.join(self.olcdir, "cn=config.ldif")):
@@ -666,7 +666,7 @@ class FDSBackend(LDAPBackend):
     def provision(self):
         from samba.provision import ProvisioningError, setup_path
         if self.ldap_backend_extra_port is not None:
-            serverport = "ServerPort=%d" % self.ldap_backend_extra_port
+            serverport = "ServerPort={0:d}".format(self.ldap_backend_extra_port)
         else:
             serverport = ""
 
@@ -827,7 +827,7 @@ class FDSBackend(LDAPBackend):
 
         # configure in-directory access control on Fedora DS via the aci
         # attribute (over a direct ldapi:// socket)
-        aci = """(targetattr = "*") (version 3.0;acl "full access to all by samba-admin";allow (all)(userdn = "ldap:///CN=samba-admin,%s");)""" % self.sambadn
+        aci = """(targetattr = "*") (version 3.0;acl "full access to all by samba-admin";allow (all)(userdn = "ldap:///CN=samba-admin,{0!s}");)""".format(self.sambadn)
 
         m = ldb.Message()
         m["aci"] = ldb.MessageElement([aci], ldb.FLAG_MOD_REPLACE, "aci")

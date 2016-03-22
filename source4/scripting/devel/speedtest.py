@@ -83,14 +83,14 @@ class SpeedTest(samba.tests.TestCase):
         self.base_dn = ldb.domain_dn()
         self.domain_sid = security.dom_sid(ldb.get_domain_sid())
         self.user_pass = "samba123@"
-        print "baseDN: %s" % self.base_dn
+        print "baseDN: {0!s}".format(self.base_dn)
 
     def create_user(self, user_dn):
         ldif = """
 dn: """ + user_dn + """
 sAMAccountName: """ + user_dn.split(",")[0][3:] + """
 objectClass: user
-unicodePwd:: """ + base64.b64encode(("\"%s\"" % self.user_pass).encode('utf-16-le')) + """
+unicodePwd:: """ + base64.b64encode(("\"{0!s}\"".format(self.user_pass)).encode('utf-16-le')) + """
 url: www.example.com
 """
         self.ldb_admin.add_ldif(ldif)
@@ -107,14 +107,14 @@ url: www.example.com
 
     def create_bundle(self, count):
         for i in range(count):
-            self.create_user("cn=speedtestuser%d,cn=Users,%s" % (i+1, self.base_dn))
+            self.create_user("cn=speedtestuser{0:d},cn=Users,{1!s}".format(i+1, self.base_dn))
 
     def remove_bundle(self, count):
         for i in range(count):
-            delete_force(self.ldb_admin, "cn=speedtestuser%d,cn=Users,%s" % (i+1, self.base_dn))
+            delete_force(self.ldb_admin, "cn=speedtestuser{0:d},cn=Users,{1!s}".format(i+1, self.base_dn))
 
     def remove_test_users(self):
-        res = ldb.search(base="cn=Users,%s" % self.base_dn, expression="(objectClass=user)", scope=SCOPE_SUBTREE)
+        res = ldb.search(base="cn=Users,{0!s}".format(self.base_dn), expression="(objectClass=user)", scope=SCOPE_SUBTREE)
         dn_list = [item.dn for item in res if "speedtestuser" in str(item.dn)]
         for dn in dn_list:
             delete_force(self.ldb_admin, dn)
@@ -125,7 +125,7 @@ class SpeedTestAddDel(SpeedTest):
         super(SpeedTestAddDel, self).setUp()
 
     def run_bundle(self, num):
-        print "\n=== Test ADD/DEL %s user objects ===\n" % num
+        print "\n=== Test ADD/DEL {0!s} user objects ===\n".format(num)
         avg_add = Decimal("0.0")
         avg_del = Decimal("0.0")
         for x in [1, 2, 3]:
@@ -133,15 +133,15 @@ class SpeedTestAddDel(SpeedTest):
             self.create_bundle(num)
             res_add = Decimal( str(time.time() - start) )
             avg_add += res_add
-            print "   Attempt %s ADD: %.3fs" % ( x, float(res_add) )
+            print "   Attempt {0!s} ADD: {1:.3f}s".format(x, float(res_add) )
             #
             start = time.time()
             self.remove_bundle(num)
             res_del = Decimal( str(time.time() - start) )
             avg_del += res_del
-            print "   Attempt %s DEL: %.3fs" % ( x, float(res_del) )
-        print "Average ADD: %.3fs" % float( Decimal(avg_add) / Decimal("3.0") )
-        print "Average DEL: %.3fs" % float( Decimal(avg_del) / Decimal("3.0") )
+            print "   Attempt {0!s} DEL: {1:.3f}s".format(x, float(res_del) )
+        print "Average ADD: {0:.3f}s".format(float( Decimal(avg_add) / Decimal("3.0") ))
+        print "Average DEL: {0:.3f}s".format(float( Decimal(avg_del) / Decimal("3.0") ))
         print ""
 
     def test_00000(self):
@@ -178,26 +178,25 @@ class AclSearchSpeedTest(SpeedTest):
         delete_force(self.ldb_admin, self.get_user_dn("acltestuser"))
 
     def run_search_bundle(self, num, _ldb):
-        print "\n=== Creating %s user objects ===\n" % num
+        print "\n=== Creating {0!s} user objects ===\n".format(num)
         self.create_bundle(num)
-        mod = "(A;;LC;;;%s)(D;;RP;;;%s)" % (str(self.user_sid), str(self.user_sid))
+        mod = "(A;;LC;;;{0!s})(D;;RP;;;{1!s})".format(str(self.user_sid), str(self.user_sid))
         for i in range(num):
-            self.sd_utils.dacl_add_ace("cn=speedtestuser%d,cn=Users,%s" %
-                                       (i+1, self.base_dn), mod)
-        print "\n=== %s user objects created ===\n" % num
-        print "\n=== Test search on %s user objects ===\n" % num
+            self.sd_utils.dacl_add_ace("cn=speedtestuser{0:d},cn=Users,{1!s}".format(i+1, self.base_dn), mod)
+        print "\n=== {0!s} user objects created ===\n".format(num)
+        print "\n=== Test search on {0!s} user objects ===\n".format(num)
         avg_search = Decimal("0.0")
         for x in [1, 2, 3]:
             start = time.time()
             res = _ldb.search(base=self.base_dn, expression="(objectClass=*)", scope=SCOPE_SUBTREE)
             res_search = Decimal( str(time.time() - start) )
             avg_search += res_search
-            print "   Attempt %s SEARCH: %.3fs" % ( x, float(res_search) )
-        print "Average Search: %.3fs" % float( Decimal(avg_search) / Decimal("3.0") )
+            print "   Attempt {0!s} SEARCH: {1:.3f}s".format(x, float(res_search) )
+        print "Average Search: {0:.3f}s".format(float( Decimal(avg_search) / Decimal("3.0") ))
         self.remove_bundle(num)
 
     def get_user_dn(self, name):
-        return "CN=%s,CN=Users,%s" % (name, self.base_dn)
+        return "CN={0!s},CN=Users,{1!s}".format(name, self.base_dn)
 
     def get_ldb_connection(self, target_username, target_password):
         creds_tmp = Credentials()
@@ -216,14 +215,14 @@ class AclSearchSpeedTest(SpeedTest):
 
     def test_search2_01000(self):
         # allow the user to see objects but not attributes, all attributes will be filtered out
-        mod = "(A;;LC;;;%s)(D;;RP;;;%s)" % (str(self.user_sid), str(self.user_sid))
-        self.sd_utils.dacl_add_ace("CN=Users,%s" % self.base_dn, mod)
+        mod = "(A;;LC;;;{0!s})(D;;RP;;;{1!s})".format(str(self.user_sid), str(self.user_sid))
+        self.sd_utils.dacl_add_ace("CN=Users,{0!s}".format(self.base_dn), mod)
         self.run_search_bundle(1000, self.ldb_user)
 
 # Important unit running information
 
 if not "://" in host:
-    host = "ldap://%s" % host
+    host = "ldap://{0!s}".format(host)
 
 ldb_options = ["modules:paged_searches"]
 ldb = SamDB(host, credentials=creds, session_info=system_session(), lp=lp, options=ldb_options)

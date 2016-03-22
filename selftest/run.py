@@ -31,7 +31,7 @@ def expand_environment_strings(s, vars):
     # we use a reverse sort so we do the longer ones first
     for k in sorted(vars.keys(), reverse=True):
         v = vars[k]
-        s = s.replace("$%s" % k, v)
+        s = s.replace("${0!s}".format(k), v)
     return s
 
 
@@ -65,7 +65,7 @@ def expand_command_run(cmd, supports_loadfile, supports_idlist, subtests=None):
         finally:
             f.close()
         return (
-            cmd.replace("$LOADLIST", "--load-list=%s" % listid_file),
+            cmd.replace("$LOADLIST", "--load-list={0!s}".format(listid_file)),
             listid_file)
     elif supports_idlist:
         cmd += " " + " ".join(subtests)
@@ -82,7 +82,7 @@ def exported_envvars_str(vars, names):
     for n in names:
         if not n in vars:
             continue
-        out += "%s=%s\n" % (n, vars[n])
+        out += "{0!s}={1!s}\n".format(n, vars[n])
     return out
 
 
@@ -112,7 +112,7 @@ def run_testsuite_command(name, cmd, subunit_ops, env=None, outf=None):
     except Exception, e:
         subunit_ops.time(now())
         subunit_ops.progress(None, subunit.PROGRESS_POP)
-        subunit_ops.end_testsuite(name, "error", "Unable to run %r: %s" % (cmd, e))
+        subunit_ops.end_testsuite(name, "error", "Unable to run {0!r}: {1!s}".format(cmd, e))
         return None
 
     subunit_ops.time(now())
@@ -121,14 +121,14 @@ def run_testsuite_command(name, cmd, subunit_ops, env=None, outf=None):
     if env is not None:
         envlog = env.get_log()
         if envlog != "":
-            outf.write("envlog: %s\n" % envlog)
+            outf.write("envlog: {0!s}\n".format(envlog))
 
-    outf.write("command: %s\n" % cmd)
-    outf.write("expanded command: %s\n" % expand_environment_strings(cmd, os.environ))
+    outf.write("command: {0!s}\n".format(cmd))
+    outf.write("expanded command: {0!s}\n".format(expand_environment_strings(cmd, os.environ)))
 
     if exitcode == 0:
         subunit_ops.end_testsuite(name, "success")
     else:
-        subunit_ops.end_testsuite(name, "failure", "Exit code was %d" % exitcode)
+        subunit_ops.end_testsuite(name, "failure", "Exit code was {0:d}".format(exitcode))
 
     return exitcode

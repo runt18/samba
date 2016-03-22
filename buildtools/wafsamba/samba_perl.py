@@ -18,10 +18,10 @@ def SAMBA_CHECK_PERL(conf, mandatory=True, version=(5,0,0)):
         return Utils.to_list(Utils.cmd_output([conf.env.PERL, '-MConfig', '-e', cmd]))
 
     def check_perl_config_var(var):
-        conf.start_msg("Checking for perl $Config{%s}:" % var)
+        conf.start_msg("Checking for perl $Config{{{0!s}}}:".format(var))
         try:
-            v = read_perl_config_var('print $Config{%s}' % var)[0]
-            conf.end_msg("'%s'" % (v), 'GREEN')
+            v = read_perl_config_var('print $Config{{{0!s}}}'.format(var))[0]
+            conf.end_msg("'{0!s}'".format((v)), 'GREEN')
             return v
         except IndexError:
             conf.end_msg(False, 'YELLOW')
@@ -36,7 +36,7 @@ def SAMBA_CHECK_PERL(conf, mandatory=True, version=(5,0,0)):
     if perl_arch_install_dir is None:
         perl_arch_install_dir = "${LIBDIR}/perl5";
     conf.start_msg("PERL_ARCH_INSTALL_DIR: ")
-    conf.end_msg("'%s'" % (perl_arch_install_dir), 'GREEN')
+    conf.end_msg("'{0!s}'".format((perl_arch_install_dir)), 'GREEN')
     conf.env.PERL_ARCH_INSTALL_DIR = perl_arch_install_dir
 
     perl_lib_install_dir = None
@@ -45,11 +45,11 @@ def SAMBA_CHECK_PERL(conf, mandatory=True, version=(5,0,0)):
     if perl_lib_install_dir is None:
         perl_lib_install_dir = "${DATADIR}/perl5";
     conf.start_msg("PERL_LIB_INSTALL_DIR: ")
-    conf.end_msg("'%s'" % (perl_lib_install_dir), 'GREEN')
+    conf.end_msg("'{0!s}'".format((perl_lib_install_dir)), 'GREEN')
     conf.env.PERL_LIB_INSTALL_DIR = perl_lib_install_dir
 
     perl_inc = read_perl_config_var('print "@INC"')
     perl_inc.remove('.')
     conf.start_msg("PERL_INC: ")
-    conf.end_msg("%s" % (perl_inc), 'GREEN')
+    conf.end_msg("{0!s}".format((perl_inc)), 'GREEN')
     conf.env.PERL_INC = perl_inc

@@ -52,7 +52,7 @@ class HIP(dns.rdata.Rdata):
             servers.append(str(server.choose_relativity(origin, relativize)))
         if len(servers) > 0:
             text += (' ' + ' '.join(servers))
-        return '%u %s %s%s' % (self.algorithm, hit, key, text)
+        return '{0:d} {1!s} {2!s}{3!s}'.format(self.algorithm, hit, key, text)
 
     def from_text(cls, rdclass, rdtype, tok, origin = None, relativize = True):
         algorithm = tok.get_uint8()

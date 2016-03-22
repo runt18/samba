@@ -94,7 +94,7 @@ class Node(object):
 		# for setting: new type = type + x - type & 3
 
 		if parent and name in parent.childs:
-			raise Utils.WafError('node %s exists in the parent files %r already' % (name, parent))
+			raise Utils.WafError('node {0!s} exists in the parent files {1!r} already'.format(name, parent))
 
 		if parent: parent.childs[name] = self
 
@@ -112,7 +112,7 @@ class Node(object):
 
 	def __str__(self):
 		if not self.parent: return ''
-		return "%s://%s" % (type_to_string[self.id & 3], self.abspath())
+		return "{0!s}://{1!s}".format(type_to_string[self.id & 3], self.abspath())
 
 	def __repr__(self):
 		return self.__str__()
@@ -205,7 +205,7 @@ class Node(object):
 		if node:
 			tp = node.id & 3
 			if tp != BUILD:
-				raise Utils.WafError('find_or_declare found a source file where a build file was expected %r' % '/'.join(lst))
+				raise Utils.WafError('find_or_declare found a source file where a build file was expected {0!r}'.format('/'.join(lst)))
 			return node
 		node = self.__class__(name, parent, BUILD)
 		return node
@@ -594,7 +594,7 @@ class Node(object):
 						accu.append(k)
 					else:
 						k = k.replace('.', '[.]').replace('*', '.*').replace('?', '.')
-						k = '^%s$' % k
+						k = '^{0!s}$'.format(k)
 						#print "pattern", k
 						accu.append(re.compile(k))
 				ret.append(accu)

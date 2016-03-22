@@ -73,7 +73,7 @@ def write_clientconf(conffile, clientdir, vars):
     try:
         f.write("[global]\n")
         for item in settings.iteritems():
-            f.write("\t%s = %s\n" % item)
+            f.write("\t{0!s} = {1!s}\n".format(*item))
     finally:
         f.close()
 

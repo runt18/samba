@@ -130,13 +130,12 @@ class task_gen(object):
 		self.bld.all_task_gen.append(self)
 
 	def __str__(self):
-		return ("<task_gen '%s' of type %s defined in %s>"
-			% (self.name or self.target, self.__class__.__name__, str(self.path)))
+		return ("<task_gen '{0!s}' of type {1!s} defined in {2!s}>".format(self.name or self.target, self.__class__.__name__, str(self.path)))
 
 	def __setattr__(self, name, attr):
 		real = typos.get(name, name)
 		if real != name:
-			warn('typo %s -> %s' % (name, real))
+			warn('typo {0!s} -> {1!s}'.format(name, real))
 			if Logs.verbose > 0:
 				traceback.print_stack()
 		object.__setattr__(self, real, attr)
@@ -155,7 +154,7 @@ class task_gen(object):
 		for x in self.features + ['*']:
 			st = task_gen.traits[x]
 			if not st:
-				warn('feature %r does not exist - bind at least one method to it' % x)
+				warn('feature {0!r} does not exist - bind at least one method to it'.format(x))
 			keys.update(st)
 
 		# copy the precedence table
@@ -191,7 +190,7 @@ class task_gen(object):
 					else:
 						tmp.append(x)
 
-		if prec: raise Utils.WafError("graph has a cycle %s" % str(prec))
+		if prec: raise Utils.WafError("graph has a cycle {0!s}".format(str(prec)))
 		out.reverse()
 		self.meths = out
 
@@ -201,7 +200,7 @@ class task_gen(object):
 			try:
 				v = getattr(self, x)
 			except AttributeError:
-				raise Utils.WafError("tried to retrieve %s which is not a valid method" % x)
+				raise Utils.WafError("tried to retrieve {0!s} which is not a valid method".format(x))
 			debug('task_gen: -> %s (%d)', x, id(self))
 			v()
 
@@ -340,7 +339,7 @@ def declare_extension(var, func):
 		for x in Utils.to_list(var):
 			task_gen.mappings[x] = func
 	except:
-		raise Utils.WscriptError('declare_extension takes either a list or a string %r' % var)
+		raise Utils.WscriptError('declare_extension takes either a list or a string {0!r}'.format(var))
 	task_gen.mapped[func.__name__] = func
 
 def declare_order(*k):
@@ -391,7 +390,7 @@ def declare_chain(name='', action='', ext_in='', ext_out='', reentrant=True, col
 					self.allnodes.append(out_source[i])
 		else:
 			# XXX: useless: it will fail on Utils.to_list above...
-			raise Utils.WafError("do not know how to process %s" % str(ext))
+			raise Utils.WafError("do not know how to process {0!s}".format(str(ext)))
 
 		tsk = self.create_task(name, node, out_source)
 
@@ -474,7 +473,7 @@ def extension(var):
 			for x in Utils.to_list(var):
 				task_gen.mappings[x] = func
 		except:
-			raise Utils.WafError('extension takes either a list or a string %r' % var)
+			raise Utils.WafError('extension takes either a list or a string {0!r}'.format(var))
 		task_gen.mapped[func.__name__] = func
 		return func
 	return deco
@@ -496,7 +495,7 @@ def apply_core(self):
 			x(self, filename)
 		else:
 			node = find_resource(filename)
-			if not node: raise Utils.WafError("source not found: '%s' in '%s'" % (filename, str(self.path)))
+			if not node: raise Utils.WafError("source not found: '{0!s}' in '{1!s}'".format(filename, str(self.path)))
 			self.allnodes.append(node)
 
 	for node in self.allnodes:
@@ -504,8 +503,7 @@ def apply_core(self):
 		x = self.get_hook(node.suffix())
 
 		if not x:
-			raise Utils.WafError("Cannot guess how to process %s (got mappings %r in %r) -> try conf.check_tool(..)?" % \
-				(str(node), self.__class__.mappings.keys(), self.__class__))
+			raise Utils.WafError("Cannot guess how to process {0!s} (got mappings {1!r} in {2!r}) -> try conf.check_tool(..)?".format(str(node), self.__class__.mappings.keys(), self.__class__))
 		x(self, node)
 feature('*')(apply_core)
 
@@ -563,7 +561,7 @@ def exec_rule(self):
 		for x in self.to_list(self.source):
 			y = self.path.find_resource(x)
 			if not y:
-				raise Utils.WafError('input file %r could not be found (%r)' % (x, self.path.abspath()))
+				raise Utils.WafError('input file {0!r} could not be found ({1!r})'.format(x, self.path.abspath()))
 			tsk.inputs.append(y)
 
 	if self.allnodes:

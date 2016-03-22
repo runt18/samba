@@ -44,7 +44,7 @@ import rfc4518
 import stringprep
 
 if len(sys.argv) != 3:
-    print "usage: %s rfc3454.txt out-dir" % sys.argv[0]
+    print "usage: {0!s} rfc3454.txt out-dir".format(sys.argv[0])
     sys.exit(1)
 
 tables = rfc3454.read(sys.argv[1])
@@ -55,9 +55,9 @@ for x in t2.iterkeys():
 
 error_list = stringprep.get_errorlist()
 
-errorlist_h = generate.Header('%s/errorlist_table.h' % sys.argv[2])
+errorlist_h = generate.Header('{0!s}/errorlist_table.h'.format(sys.argv[2]))
 
-errorlist_c = generate.Implementation('%s/errorlist_table.c' % sys.argv[2])
+errorlist_c = generate.Implementation('{0!s}/errorlist_table.c'.format(sys.argv[2]))
 
 errorlist_h.file.write(
 '''
@@ -104,10 +104,9 @@ for x in trans:
     (start, length, description, tables) = x
     symbols = stringprep.symbols(error_list, tables)
     if len(symbols) == 0:
-        print "no symbol for %s" % description
+        print "no symbol for {0!s}".format(description)
         sys.exit(1)
-    errorlist_c.file.write("  {0x%x, 0x%x, %s}, /* %s: %s */\n"
-                % (start, length, symbols, ",".join(tables), description))
+    errorlist_c.file.write("  {{0x{0:x}, 0x{1:x}, {2!s}}}, /* {3!s}: {4!s} */\n".format(start, length, symbols, ",".join(tables), description))
 
 errorlist_c.file.write(
 '''};
@@ -115,7 +114,7 @@ errorlist_c.file.write(
 ''')
 
 errorlist_c.file.write(
-    "const size_t _wind_errorlist_table_size = %u;\n" % len(trans))
+    "const size_t _wind_errorlist_table_size = {0:d};\n".format(len(trans)))
 
 errorlist_h.close()
 errorlist_c.close()

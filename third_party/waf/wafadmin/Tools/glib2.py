@@ -24,7 +24,7 @@ def process_marshal(self):
 		node = self.path.find_resource(f)
 
 		if not node:
-			raise Utils.WafError('file not found %r' % f)
+			raise Utils.WafError('file not found {0!r}'.format(f))
 
 		h_node = node.change_ext('.h')
 		c_node = node.change_ext('.c')
@@ -38,7 +38,7 @@ def genmarshal_func(self):
 	bld = self.inputs[0].__class__.bld
 
 	get = self.env.get_flat
-	cmd1 = "%s %s --prefix=%s --header > %s" % (
+	cmd1 = "{0!s} {1!s} --prefix={2!s} --header > {3!s}".format(
 		get('GLIB_GENMARSHAL'),
 		self.inputs[0].srcpath(self.env),
 		get('GLIB_GENMARSHAL_PREFIX'),
@@ -50,11 +50,11 @@ def genmarshal_func(self):
 
 	#print self.outputs[1].abspath(self.env)
 	f = open(self.outputs[1].abspath(self.env), 'wb')
-	c = '''#include "%s"\n''' % self.outputs[0].name
+	c = '''#include "{0!s}"\n'''.format(self.outputs[0].name)
 	f.write(c)
 	f.close()
 
-	cmd2 = "%s %s --prefix=%s --body >> %s" % (
+	cmd2 = "{0!s} {1!s} --prefix={2!s} --body >> {3!s}".format(
 		get('GLIB_GENMARSHAL'),
 		self.inputs[0].srcpath(self.env),
 		get('GLIB_GENMARSHAL_PREFIX'),
@@ -132,7 +132,7 @@ def process_enums(self):
 
 		if enum['template']: # template, if provided
 			template_node = self.path.find_resource(enum['template'])
-			options.append('--template %s' % (template_node.abspath(env)))
+			options.append('--template {0!s}'.format((template_node.abspath(env))))
 			inputs.append(template_node)
 		params = {'file-head' : '--fhead',
 		           'file-prod' : '--fprod',
@@ -144,7 +144,7 @@ def process_enums(self):
 		           'comments': '--comments'}
 		for param, option in params.iteritems():
 			if enum[param]:
-				options.append('%s %r' % (option, enum[param]))
+				options.append('{0!s} {1!r}'.format(option, enum[param]))
 
 		env['GLIB_MKENUMS_OPTIONS'] = ' '.join(options)
 

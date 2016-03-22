@@ -93,11 +93,11 @@ def post_run(self):
 			continue
 
 		if not node:
-			raise ValueError('could not find %r for %r' % (x, self))
+			raise ValueError('could not find {0!r} for {1!r}'.format(x, self))
 		else:
 			nodes.append(node)
 
-	Logs.debug('deps: real scanner for %s returned %s' % (str(self), str(nodes)))
+	Logs.debug('deps: real scanner for {0!s} returned {1!s}'.format(str(self), str(nodes)))
 
 	bld.node_deps[self.unique_id()] = nodes
 	bld.raw_deps[self.unique_id()] = []

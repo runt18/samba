@@ -68,7 +68,7 @@ class req(SocketServer.StreamRequestHandler):
 			query = query.decode('iso8859-1')
 		#print "%r" % query
 		if not re_valid_query.match(query):
-			raise ValueError('Invalid query %r' % query)
+			raise ValueError('Invalid query {0!r}'.format(query))
 
 		query = query.strip().split(',')
 
@@ -77,7 +77,7 @@ class req(SocketServer.StreamRequestHandler):
 		elif query[0] == BYE:
 			raise ValueError('Exit')
 		else:
-			raise ValueError('Invalid query %r' % query)
+			raise ValueError('Invalid query {0!r}'.format(query))
 
 	def run_command(self, query):
 
@@ -236,7 +236,7 @@ else:
 			data = read_data(conn, dlen)
 			(out, err, exc) = cPickle.loads(data)
 			if exc:
-				raise Utils.WafError('Execution failure: %s' % exc)
+				raise Utils.WafError('Execution failure: {0!s}'.format(exc))
 
 		if out:
 			log.write(out)

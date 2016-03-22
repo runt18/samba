@@ -35,7 +35,7 @@ if __name__ == "__main__":
     if not creds.authentication_requested():
         parser.error("You must supply credentials")
 
-    binding_str = "ncacn_ip_tcp:%s[print,sign]" % server
+    binding_str = "ncacn_ip_tcp:{0!s}[print,sign]".format(server)
 
     dns_conn = dnsserver.dnsserver(binding_str, lp, creds)
 

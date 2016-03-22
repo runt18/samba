@@ -28,7 +28,7 @@ def confirm(msg, forced=False, allow_all=False):
     :param forced: Are the answer forced
     """
     if forced:
-        print("%s [YES]" % msg)
+        print("{0!s} [YES]".format(msg))
         return True
 
     mapping = {
@@ -47,11 +47,11 @@ def confirm(msg, forced=False, allow_all=False):
         prompt = '[y/N/all/none]'
 
     while True:
-        v = raw_input(msg + ' %s ' % prompt)
+        v = raw_input(msg + ' {0!s} '.format(prompt))
         v = v.upper()
         if v in mapping:
             return mapping[v]
-        print("Unknown response '%s'" % v)
+        print("Unknown response '{0!s}'".format(v))
 
 
 def normalise_int32(ivalue):
@@ -78,7 +78,7 @@ class dsdb_Dn(object):
             # it is a binary DN
             colons = dnstring.split(':')
             if len(colons) < 4:
-                raise RuntimeError("Invalid DN %s" % dnstring)
+                raise RuntimeError("Invalid DN {0!s}".format(dnstring))
             prefix_len = 4 + len(colons[1]) + int(colons[1])
             self.prefix = dnstring[0:prefix_len]
             self.binary = self.prefix[3+len(colons[1]):-1]

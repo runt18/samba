@@ -34,7 +34,7 @@ if len(sys.argv) == 3:
 elif len(sys.argv) == 5:
 	print "Adding/Updating share..."
 else:
-	print "Usage: %s configfile share [path] [comments]" % sys.argv[0]
+	print "Usage: {0!s} configfile share [path] [comments]".format(sys.argv[0])
 	sys.exit(1)
 	
 	
@@ -50,7 +50,7 @@ if not confFile.valid:
 	
 if delete_mode:
 	if not confFile.isService( sys.argv[2] ):
-		sys.stderr.write( "Asked to delete non-existent service! [%s]\n" % sys.argv[2] )
+		sys.stderr.write( "Asked to delete non-existent service! [{0!s}]\n".format(sys.argv[2]) )
 		sys.exit( 1 )
 		
 	confFile.DelService( sys.argv[2] )

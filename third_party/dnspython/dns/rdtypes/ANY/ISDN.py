@@ -35,10 +35,10 @@ class ISDN(dns.rdata.Rdata):
 
     def to_text(self, origin=None, relativize=True, **kw):
         if self.subaddress:
-            return '"%s" "%s"' % (dns.rdata._escapify(self.address),
+            return '"{0!s}" "{1!s}"'.format(dns.rdata._escapify(self.address),
                                   dns.rdata._escapify(self.subaddress))
         else:
-            return '"%s"' % dns.rdata._escapify(self.address)
+            return '"{0!s}"'.format(dns.rdata._escapify(self.address))
 
     def from_text(cls, rdclass, rdtype, tok, origin = None, relativize = True):
         address = tok.get_string()

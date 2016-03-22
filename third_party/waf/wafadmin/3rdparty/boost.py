@@ -68,14 +68,14 @@ def version_string(version):
 	minor = version / 100 % 1000
 	minor_minor = version % 100
 	if minor_minor == 0:
-		return "%d_%d" % (major, minor)
+		return "{0:d}_{1:d}".format(major, minor)
 	else:
-		return "%d_%d_%d" % (major, minor, minor_minor)
+		return "{0:d}_{1:d}_{2:d}".format(major, minor, minor_minor)
 
 def libfiles(lib, pattern, lib_paths):
 	result = []
 	for lib_path in lib_paths:
-		libname = pattern % ('boost_%s[!_]*' % lib)
+		libname = pattern % ('boost_{0!s}[!_]*'.format(lib))
 		result += glob.glob(os.path.join(lib_path, libname))
 	return result
 
@@ -193,7 +193,7 @@ def find_boost_includes(self, kw):
 	version = 0
 	for include_path in boostPath:
 		boost_paths = [p for p in glob.glob(os.path.join(include_path, 'boost*')) if os.path.isdir(p)]
-		debug('BOOST Paths: %r' % boost_paths)
+		debug('BOOST Paths: {0!r}'.format(boost_paths))
 		for path in boost_paths:
 			pathname = os.path.split(path)[-1]
 			ret = -1
@@ -208,8 +208,7 @@ def find_boost_includes(self, kw):
 				boost_path = path
 				version = ret
 	if not version:
-		self.fatal('boost headers not found! (required version min: %s max: %s)'
-			  % (kw['min_version'], kw['max_version']))
+		self.fatal('boost headers not found! (required version min: {0!s} max: {1!s})'.format(kw['min_version'], kw['max_version']))
 		return False
 
 	found_version = version_string(version)
@@ -217,12 +216,12 @@ def find_boost_includes(self, kw):
 	if kw['tag_version'] is None:
 		kw['tag_version'] = versiontag
 	elif kw['tag_version'] != versiontag:
-		warn('boost header version %r and tag_version %r do not match!' % (versiontag, kw['tag_version']))
+		warn('boost header version {0!r} and tag_version {1!r} do not match!'.format(versiontag, kw['tag_version']))
 	env = self.env
 	env['CPPPATH_BOOST'] = boost_path
 	env['BOOST_VERSION'] = found_version
 	self.found_includes = 1
-	ret = 'Version %s (%s)' % (found_version, boost_path)
+	ret = 'Version {0!s} ({1!s})'.format(found_version, boost_path)
 	return ret
 
 @conf
@@ -317,7 +316,7 @@ def check_boost(self, *k, **kw):
 			if Logs.verbose > 1:
 				raise
 			else:
-				self.fatal('the configuration failed (see %r)' % self.log.name)
+				self.fatal('the configuration failed (see {0!r})'.format(self.log.name))
 	else:
 		if 'okmsg' in kw:
 			self.check_message_2(kw.get('okmsg_includes', ret))
@@ -334,7 +333,7 @@ def check_boost(self, *k, **kw):
 				if Logs.verbose > 1:
 					raise
 				else:
-					self.fatal('the configuration failed (see %r)' % self.log.name)
+					self.fatal('the configuration failed (see {0!r})'.format(self.log.name))
 		else:
 			if 'okmsg' in kw:
 				self.check_message_2(kw['okmsg'])

@@ -18,7 +18,7 @@ def add_answer(ca_file, msg, answer):
     try:
         f = open(ca_file, 'a')
     except:
-        Logs.error("Unable to open cross-answers file %s" % ca_file)
+        Logs.error("Unable to open cross-answers file {0!s}".format(ca_file))
         sys.exit(1)
     (retcode, retstring) = answer
     # if retstring is more than one line then we probably
@@ -31,16 +31,16 @@ def add_answer(ca_file, msg, answer):
     answer = (retcode, retstring)
 
     if answer == ANSWER_OK:
-        f.write('%s: OK\n' % msg)
+        f.write('{0!s}: OK\n'.format(msg))
     elif answer == ANSWER_UNKNOWN:
-        f.write('%s: UNKNOWN\n' % msg)
+        f.write('{0!s}: UNKNOWN\n'.format(msg))
     elif answer == ANSWER_NO:
-        f.write('%s: NO\n' % msg)
+        f.write('{0!s}: NO\n'.format(msg))
     else:
         if retcode == 0:
-            f.write('%s: "%s"\n' % (msg, retstring))
+            f.write('{0!s}: "{1!s}"\n'.format(msg, retstring))
         else:
-            f.write('%s: (%d, "%s")\n' % (msg, retcode, retstring))
+            f.write('{0!s}: ({1:d}, "{2!s}")\n'.format(msg, retcode, retstring))
     f.close()
 
 
@@ -81,7 +81,7 @@ def cross_answer(ca_file, msg):
                     f.close()
                     return (int(m.group(1)), m.group(2))
                 else:
-                    raise Utils.WafError("Bad answer format '%s' in %s" % (line, ca_file))
+                    raise Utils.WafError("Bad answer format '{0!s}' in {1!s}".format(line, ca_file))
     f.close()
     return ANSWER_UNKNOWN
 
@@ -132,7 +132,7 @@ class cross_Popen(Utils.pproc.Popen):
                 cross_answers_incomplete = True
                 add_answer(ca_file, msg, ans)
             (retcode, retstring) = ans
-            args = ['/bin/sh', '-c', "echo -n '%s'; exit %d" % (retstring, retcode)]
+            args = ['/bin/sh', '-c', "echo -n '{0!s}'; exit {1:d}".format(retstring, retcode)]
         real_Popen.__init__(*(obj, args), **kw)
 
 
@@ -167,5 +167,5 @@ def SAMBA_CROSS_CHECK_COMPLETE(conf):
     '''check if we have some unanswered questions'''
     global cross_answers_incomplete
     if conf.env.CROSS_COMPILE and cross_answers_incomplete:
-        raise Utils.WafError("Cross answers file %s is incomplete" % conf.env.CROSS_ANSWERS)
+        raise Utils.WafError("Cross answers file {0!s} is incomplete".format(conf.env.CROSS_ANSWERS))
     return True

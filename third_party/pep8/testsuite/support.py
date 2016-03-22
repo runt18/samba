@@ -32,7 +32,7 @@ class TestReport(StandardReport):
             self.counters[code] += 1
         else:
             self.counters[code] = 1
-        detailed_code = '%s:%s:%s' % (code, line_number, offset + 1)
+        detailed_code = '{0!s}:{1!s}:{2!s}'.format(code, line_number, offset + 1)
         # Don't care about expected errors or warnings
         if code in self.expected or detailed_code in self.expected:
             return
@@ -44,13 +44,13 @@ class TestReport(StandardReport):
 
     def get_file_results(self):
         # Check if the expected errors were found
-        label = '%s:%s:1' % (self.filename, self.line_offset)
+        label = '{0!s}:{1!s}:1'.format(self.filename, self.line_offset)
         for extended_code in self.expected:
             code = extended_code.split(':')[0]
             if not self.counters.get(code):
                 self.file_errors += 1
                 self.total_errors += 1
-                print('%s: error %s not found' % (label, extended_code))
+                print('{0!s}: error {1!s} not found'.format(label, extended_code))
             else:
                 self.counters[code] -= 1
         for code, extra in sorted(self.counters.items()):
@@ -58,13 +58,11 @@ class TestReport(StandardReport):
                 if extra and code in self.expected:
                     self.file_errors += 1
                     self.total_errors += 1
-                    print('%s: error %s found too many times (+%d)' %
-                          (label, code, extra))
+                    print('{0!s}: error {1!s} found too many times (+{2:d})'.format(label, code, extra))
                 # Reset counters
                 del self.counters[code]
         if self._verbose and not self.file_errors:
-            print('%s: passed (%s)' %
-                  (label, ' '.join(self.expected) or 'Okay'))
+            print('{0!s}: passed ({1!s})'.format(label, ' '.join(self.expected) or 'Okay'))
         self.counters['test cases'] += 1
         if self.file_errors:
             self.counters['failed tests'] += 1
@@ -104,19 +102,19 @@ def selftest(options):
                 if len(counters) > len(options.benchmark_keys):
                     codes = [key for key in counters
                              if key not in options.benchmark_keys]
-                    error = "incorrectly found %s" % ', '.join(codes)
+                    error = "incorrectly found {0!s}".format(', '.join(codes))
             elif not counters.get(code):
-                error = "failed to find %s" % code
+                error = "failed to find {0!s}".format(code)
             # Keep showing errors for multiple tests
             for key in set(counters) - set(options.benchmark_keys):
                 del counters[key]
             count_all += 1
             if not error:
                 if options.verbose:
-                    print("%s: %s" % (code, source))
+                    print("{0!s}: {1!s}".format(code, source))
             else:
                 count_failed += 1
-                print("pep8.py: %s:" % error)
+                print("pep8.py: {0!s}:".format(error))
                 for line in checker.lines:
                     print(line.rstrip())
     return count_failed, count_all
@@ -185,7 +183,7 @@ def run_tests(style):
         count_failed = fail_s + fail_d
         if not options.quiet:
             count_passed = done_d + done_s - count_failed
-            print("%d passed and %d failed." % (count_passed, count_failed))
+            print("{0:d} passed and {1:d} failed.".format(count_passed, count_failed))
             print("Test failed." if count_failed else "Test passed.")
         if count_failed:
             sys.exit(1)

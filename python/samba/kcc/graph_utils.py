@@ -33,19 +33,19 @@ def write_dot_file(basename, edge_list, vertices=None, label=None,
         # sanitise DN and guid labels
         basename += '_' + label.translate(None, ', ')
 
-    f = open(os.path.join(dot_file_dir, "%s.dot" % basename), 'w')
+    f = open(os.path.join(dot_file_dir, "{0!s}.dot".format(basename)), 'w')
 
     if debug is not None:
         debug(f.name)
     graphname = ''.join(x for x in basename if x.isalnum())
-    print >>f, '%s %s {' % ('digraph' if directed else 'graph', graphname)
-    print >>f, 'label="%s";\nfontsize=20;' % (label or graphname)
+    print >>f, '{0!s} {1!s} {{'.format('digraph' if directed else 'graph', graphname)
+    print >>f, 'label="{0!s}";\nfontsize=20;'.format((label or graphname))
     if vertices:
         for i, v in enumerate(vertices):
             if reformat_labels:
                 v = v.replace(',', '\\n')
-            vc = ('color="%s"' % vertex_colors[i]) if vertex_colors else ''
-            print >>f, '"%s" [%s];' % (v, vc)
+            vc = ('color="{0!s}"'.format(vertex_colors[i])) if vertex_colors else ''
+            print >>f, '"{0!s}" [{1!s}];'.format(v, vc)
 
     for i, edge in enumerate(edge_list):
         a, b = edge
@@ -53,9 +53,9 @@ def write_dot_file(basename, edge_list, vertices=None, label=None,
             a = a.replace(',', '\\n')
             b = b.replace(',', '\\n')
         line = '->' if directed else '--'
-        el = ('label="%s"' % edge_labels[i]) if edge_labels else ''
-        ec = ('color="%s"' % edge_colors[i]) if edge_colors else ''
-        print >>f, '"%s" %s "%s" [%s %s];' % (a, line, b, el, ec)
+        el = ('label="{0!s}"'.format(edge_labels[i])) if edge_labels else ''
+        ec = ('color="{0!s}"'.format(edge_colors[i])) if edge_colors else ''
+        print >>f, '"{0!s}" {1!s} "{2!s}" [{3!s} {4!s}];'.format(a, line, b, el, ec)
     print >>f, '}'
     f.close()
 
@@ -183,16 +183,16 @@ def verify_graph_no_lonely_vertices(edges, vertices, edge_vertices):
     """There are no vertices without edges."""
     lonely = set(vertices) - set(edge_vertices)
     if lonely:
-        raise GraphError("some vertices are not connected:\n%s" %
-                         '\n'.join(sorted(lonely)))
+        raise GraphError("some vertices are not connected:\n{0!s}".format(
+                         '\n'.join(sorted(lonely))))
 
 
 def verify_graph_no_unknown_vertices(edges, vertices, edge_vertices):
     """The edge endpoints contain no vertices that are otherwise unknown."""
     unknown = set(edge_vertices) - set(vertices)
     if unknown:
-        raise GraphError("some edge vertices are seemingly unknown:\n%s" %
-                         '\n'.join(sorted(unknown)))
+        raise GraphError("some edge vertices are seemingly unknown:\n{0!s}".format(
+                         '\n'.join(sorted(unknown))))
 
 
 def verify_graph_directed_double_ring(edges, vertices, edge_vertices):
@@ -295,7 +295,7 @@ def verify_graph_directed_double_ring_or_small(edges, vertices, edge_vertices):
 def verify_graph(title, edges, vertices=None, directed=False, properties=(),
                  fatal=True, debug=null_debug):
     errors = []
-    debug("%sStarting verify_graph for %s%s%s" % (PURPLE, MAGENTA, title,
+    debug("{0!s}Starting verify_graph for {1!s}{2!s}{3!s}".format(PURPLE, MAGENTA, title,
                                                   C_NORMAL))
 
     properties = [x.replace(' ', '_') for x in properties]
@@ -310,18 +310,17 @@ def verify_graph(title, edges, vertices=None, directed=False, properties=(),
     else:
         vertices = set(vertices)
         if vertices != edge_vertices:
-            debug("vertices in edges don't match given vertices:\n %s != %s" %
-                  (sorted(edge_vertices), sorted(vertices)))
+            debug("vertices in edges don't match given vertices:\n {0!s} != {1!s}".format(sorted(edge_vertices), sorted(vertices)))
 
     for p in properties:
-        fn = 'verify_graph_%s' % p
+        fn = 'verify_graph_{0!s}'.format(p)
         try:
             f = globals()[fn]
         except KeyError:
-            errors.append((p, "There is no verification check for '%s'" % p))
+            errors.append((p, "There is no verification check for '{0!s}'".format(p)))
         try:
             f(edges, vertices, edge_vertices)
-            debug(" %s%18s:%s verified!" % (DARK_GREEN, p, C_NORMAL))
+            debug(" {0!s}{1:18!s}:{2!s} verified!".format(DARK_GREEN, p, C_NORMAL))
         except GraphError, e:
             errors.append((p, e))
 
@@ -329,10 +328,10 @@ def verify_graph(title, edges, vertices=None, directed=False, properties=(),
         if fatal:
             raise GraphError("The '%s' graph lacks the following properties:"
                              "\n%s" %
-                             (title, '\n'.join('%s: %s' % x for x in errors)))
-        debug(("%s%s%s FAILED:" % (MAGENTA, title, RED)))
+                             (title, '\n'.join('{0!s}: {1!s}'.format(*x) for x in errors)))
+        debug(("{0!s}{1!s}{2!s} FAILED:".format(MAGENTA, title, RED)))
         for p, e in errors:
-            debug(" %18s: %s%s%s" % (p, DARK_YELLOW, e, RED))
+            debug(" {0:18!s}: {1!s}{2!s}{3!s}".format(p, DARK_YELLOW, e, RED))
         debug(C_NORMAL)
 
 
@@ -343,7 +342,7 @@ def verify_and_dot(basename, edges, vertices=None, label=None,
                    edge_colors=None, edge_labels=None,
                    vertex_colors=None):
 
-    title = '%s %s' % (basename, label or '')
+    title = '{0!s} {1!s}'.format(basename, label or '')
     if verify:
         verify_graph(title, edges, vertices, properties=properties,
                      fatal=fatal, debug=debug)
@@ -360,6 +359,6 @@ def list_verify_tests():
         if k.startswith('verify_graph_'):
             print k.replace('verify_graph_', '')
             if v.__doc__:
-                print '    %s%s%s' % (GREY, v.__doc__.rstrip(), C_NORMAL)
+                print '    {0!s}{1!s}{2!s}'.format(GREY, v.__doc__.rstrip(), C_NORMAL)
             else:
                 print

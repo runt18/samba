@@ -121,10 +121,10 @@ class GensecTests(samba.tests.TestCase):
         while not client_finished or not server_finished:
             i += 1
             if not client_finished:
-                print "running client gensec_update: %d: %r" % (len(server_to_client), server_to_client)
+                print "running client gensec_update: {0:d}: {1!r}".format(len(server_to_client), server_to_client)
                 (client_finished, client_to_server) = self.gensec_client.update(server_to_client)
             if not server_finished:
-                print "running server gensec_update: %d: %r" % (len(client_to_server), client_to_server)
+                print "running server gensec_update: {0:d}: {1!r}".format(len(client_to_server), client_to_server)
                 (server_finished, server_to_client) = self.gensec_server.update(client_to_server)
 
         """Here we expect a lot more than the typical 1 or 2 roundtrips"""

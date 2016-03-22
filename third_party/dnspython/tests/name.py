@@ -80,7 +80,7 @@ class NameTestCase(unittest.TestCase):
             try:
                 n = dns.name.from_text(t)
             except:
-                self.fail("good test '%s' raised an exception" % t)
+                self.fail("good test '{0!s}' raised an exception".format(t))
         for t in bad:
             caught = False
             try:
@@ -88,7 +88,7 @@ class NameTestCase(unittest.TestCase):
             except:
                 caught = True
             if not caught:
-                self.fail("bad test '%s' did not raise an exception" % t)
+                self.fail("bad test '{0!s}' did not raise an exception".format(t))
 
     def testImmutable1(self):
         def bad():

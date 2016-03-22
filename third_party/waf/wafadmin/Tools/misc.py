@@ -61,7 +61,7 @@ def apply_copy(self):
 
 	for filename in lst:
 		node = self.path.find_resource(filename)
-		if not node: raise Utils.WafError('cannot find input file %s for processing' % filename)
+		if not node: raise Utils.WafError('cannot find input file {0!s} for processing'.format(filename))
 
 		target = self.target
 		if not target or len(lst)>1: target = node.name
@@ -121,7 +121,7 @@ def apply_subst(self):
 
 	for filename in lst:
 		node = self.path.find_resource(filename)
-		if not node: raise Utils.WafError('cannot find input file %s for processing' % filename)
+		if not node: raise Utils.WafError('cannot find input file {0!s} for processing'.format(filename))
 
 		if self.target:
 			newnode = self.path.find_or_declare(self.target)
@@ -167,7 +167,7 @@ class input_file(cmd_arg):
 		assert isinstance(base_path, Node.Node)
 		self.node = base_path.find_resource(self.name)
 		if self.node is None:
-			raise Utils.WafError("Input file %s not found in " % (self.name, base_path))
+			raise Utils.WafError("Input file {0!s} not found in ".format(self.name, base_path))
 
 	def get_path(self, env, absolute):
 		if absolute:
@@ -180,7 +180,7 @@ class output_file(cmd_arg):
 		assert isinstance(base_path, Node.Node)
 		self.node = base_path.find_or_declare(self.name)
 		if self.node is None:
-			raise Utils.WafError("Output file %s not found in " % (self.name, base_path))
+			raise Utils.WafError("Output file {0!s} not found in ".format(self.name, base_path))
 
 	def get_path(self, env, absolute):
 		if absolute:
@@ -193,7 +193,7 @@ class cmd_dir_arg(cmd_arg):
 		assert isinstance(base_path, Node.Node)
 		self.node = base_path.find_dir(self.name)
 		if self.node is None:
-			raise Utils.WafError("Directory %s not found in " % (self.name, base_path))
+			raise Utils.WafError("Directory {0!s} not found in ".format(self.name, base_path))
 
 class input_dir(cmd_dir_arg):
 	def get_path(self, dummy_env, dummy_absolute):
@@ -262,11 +262,10 @@ class command_output(Task.Task):
 			stderr = None
 
 		if task.cwd is None:
-			cwd = ('None (actually %r)' % os.getcwd())
+			cwd = ('None (actually {0!r})'.format(os.getcwd()))
 		else:
 			cwd = repr(task.cwd)
-		debug("command-output: cwd=%s, stdin=%r, stdout=%r, argv=%r" %
-			     (cwd, stdin, stdout, argv))
+		debug("command-output: cwd={0!s}, stdin={1!r}, stdout={2!r}, argv={3!r}".format(cwd, stdin, stdout, argv))
 
 		if task.os_env is None:
 			os_env = os.environ
@@ -358,7 +357,7 @@ use command_is_external=True''') % (self.command,)
 		assert isinstance(self.stdout, str)
 		stdout = self.path.find_or_declare(self.stdout)
 		if stdout is None:
-			raise Utils.WafError("File %s not found" % (self.stdout,))
+			raise Utils.WafError("File {0!s} not found".format(self.stdout))
 		outputs.append(stdout)
 
 	if self.stderr is None:
@@ -367,7 +366,7 @@ use command_is_external=True''') % (self.command,)
 		assert isinstance(self.stderr, str)
 		stderr = self.path.find_or_declare(self.stderr)
 		if stderr is None:
-			raise Utils.WafError("File %s not found" % (self.stderr,))
+			raise Utils.WafError("File {0!s} not found".format(self.stderr))
 		outputs.append(stderr)
 
 	if self.stdin is None:
@@ -376,19 +375,19 @@ use command_is_external=True''') % (self.command,)
 		assert isinstance(self.stdin, str)
 		stdin = self.path.find_resource(self.stdin)
 		if stdin is None:
-			raise Utils.WafError("File %s not found" % (self.stdin,))
+			raise Utils.WafError("File {0!s} not found".format(self.stdin))
 		inputs.append(stdin)
 
 	for hidden_input in self.to_list(self.hidden_inputs):
 		node = self.path.find_resource(hidden_input)
 		if node is None:
-			raise Utils.WafError("File %s not found in dir %s" % (hidden_input, self.path))
+			raise Utils.WafError("File {0!s} not found in dir {1!s}".format(hidden_input, self.path))
 		inputs.append(node)
 
 	for hidden_output in self.to_list(self.hidden_outputs):
 		node = self.path.find_or_declare(hidden_output)
 		if node is None:
-			raise Utils.WafError("File %s not found in dir %s" % (hidden_output, self.path))
+			raise Utils.WafError("File {0!s} not found in dir {1!s}".format(hidden_output, self.path))
 		outputs.append(node)
 
 	if not (inputs or getattr(self, 'no_inputs', None)):

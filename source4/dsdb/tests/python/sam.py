@@ -70,7 +70,7 @@ class SamTests(samba.tests.TestCase):
         self.ldb = ldb
         self.base_dn = ldb.domain_dn()
 
-        print "baseDN: %s\n" % self.base_dn
+        print "baseDN: {0!s}\n".format(self.base_dn)
 
         delete_force(self.ldb, "cn=ldaptestuser,cn=users," + self.base_dn)
         delete_force(self.ldb, "cn=ldaptestuser2,cn=users," + self.base_dn)
@@ -2866,7 +2866,7 @@ class SamTests(samba.tests.TestCase):
         print "Test default attributes for new User objects\n"
 
         user_name = "ldaptestuser"
-        user_dn = "CN=%s,CN=Users,%s" % (user_name, self.base_dn)
+        user_dn = "CN={0!s},CN=Users,{1!s}".format(user_name, self.base_dn)
         ldb.add({
             "dn": user_dn,
             "objectclass": "user",
@@ -2891,7 +2891,7 @@ class SamTests(samba.tests.TestCase):
                           "dn": Dn(ldb, user_dn),
                           "pwdLastSet": MessageElement(["0"]),
                           "sAMAccountName": MessageElement([user_name]),
-                          "objectCategory": MessageElement(["CN=Person,%s" % ldb.get_schema_basedn().get_linearized()]),
+                          "objectCategory": MessageElement(["CN=Person,{0!s}".format(ldb.get_schema_basedn().get_linearized())]),
                           "objectGUID": "**SKIP**",
                           "whenChanged": "**SKIP**",
                           "badPwdCount": MessageElement(["0"]),
@@ -2910,22 +2910,22 @@ class SamTests(samba.tests.TestCase):
         # check attribute values
         for name in expected_attrs.keys():
             actual_val = user_obj.get(name)
-            self.assertFalse(actual_val is None, "No value for attribute '%s'" % name)
+            self.assertFalse(actual_val is None, "No value for attribute '{0!s}'".format(name))
             expected_val = expected_attrs[name]
             if expected_val == "**SKIP**":
                 # "**ANY**" values means "any"
                 continue
             self.assertEqual(expected_val, actual_val,
-                             "Unexpected value for '%s'" % name)
+                             "Unexpected value for '{0!s}'".format(name))
         # clean up
         delete_force(self.ldb, "cn=ldaptestuser,cn=users," + self.base_dn)
 
 
 if not "://" in host:
     if os.path.isfile(host):
-        host = "tdb://%s" % host
+        host = "tdb://{0!s}".format(host)
     else:
-        host = "ldap://%s" % host
+        host = "ldap://{0!s}".format(host)
 
 ldb = SamDB(host, credentials=creds, session_info=system_session(lp), lp=lp)
 

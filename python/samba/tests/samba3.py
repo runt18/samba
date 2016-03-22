@@ -64,7 +64,7 @@ class PassdbTestCase(TestCaseInTempDir):
 
     def setUp(self):
         super(PassdbTestCase, self).setUp()
-        os.system("cp -r %s %s" % (DATADIR, self.tempdir))
+        os.system("cp -r {0!s} {1!s}".format(DATADIR, self.tempdir))
         datadir = os.path.join(self.tempdir, "samba3")
 
         self.lp = s3param.get_context()
@@ -79,7 +79,7 @@ class PassdbTestCase(TestCaseInTempDir):
     def tearDown(self):
         self.lp = []
         self.pdb = []
-        os.system("rm -rf %s" % os.path.join(self.tempdir, "samba3"))
+        os.system("rm -rf {0!s}".format(os.path.join(self.tempdir, "samba3")))
         super(PassdbTestCase, self).tearDown()
 
     def test_param(self):

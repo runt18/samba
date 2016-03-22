@@ -34,7 +34,7 @@ class LdifError(Exception):
 def write_search_result(samdb, f, res):
     for msg in res:
         lstr = samdb.write_ldif(msg, ldb.CHANGETYPE_NONE)
-        f.write("%s" % lstr)
+        f.write("{0!s}".format(lstr))
 
 
 def ldif_to_samdb(dburl, lp, ldif_file, forced_local_dsa=None):
@@ -53,8 +53,8 @@ def ldif_to_samdb(dburl, lp, ldif_file, forced_local_dsa=None):
     :param ldif_file: path to the ldif file to import
     """
     if os.path.exists(dburl):
-        raise LdifError("Specify a database (%s) that doesn't already exist." %
-                        dburl)
+        raise LdifError("Specify a database ({0!s}) that doesn't already exist.".format(
+                        dburl))
 
     # Use ["modules:"] as we are attempting to build a sam
     # database as opposed to start it here.
@@ -69,8 +69,8 @@ def ldif_to_samdb(dburl, lp, ldif_file, forced_local_dsa=None):
             tmpdb.modify_ldif("""dn: @ROOTDSE
 changetype: modify
 replace: dsServiceName
-dsServiceName: CN=NTDS Settings,%s
-            """ % forced_local_dsa)
+dsServiceName: CN=NTDS Settings,{0!s}
+            """.format(forced_local_dsa))
 
         tmpdb.add_ldif("""dn: @MODULES
 @LIST: rootdse,extended_dn_in,extended_dn_out_ldb,objectguid
@@ -79,7 +79,7 @@ dsServiceName: CN=NTDS Settings,%s
 
     except Exception, estr:
         tmpdb.transaction_cancel()
-        raise LdifError("Failed to import %s: %s" % (ldif_file, estr))
+        raise LdifError("Failed to import {0!s}: {1!s}".format(ldif_file, estr))
 
     tmpdb.transaction_commit()
 
@@ -110,17 +110,16 @@ def samdb_to_ldif_file(samdb, dburl, lp, creds, ldif_file):
                       session_info=system_session(),
                       credentials=creds, lp=lp)
     except ldb.LdbError, (enum, estr):
-        raise LdifError("Unable to open sam database (%s) : %s" %
-                        (dburl, estr))
+        raise LdifError("Unable to open sam database ({0!s}) : {1!s}".format(dburl, estr))
 
     if os.path.exists(ldif_file):
-        raise LdifError("Specify a file (%s) that doesn't already exist." %
-                        ldif_file)
+        raise LdifError("Specify a file ({0!s}) that doesn't already exist.".format(
+                        ldif_file))
 
     try:
         f = open(ldif_file, "w")
     except IOError as ioerr:
-        raise LdifError("Unable to open (%s) : %s" % (ldif_file, str(ioerr)))
+        raise LdifError("Unable to open ({0!s}) : {1!s}".format(ldif_file, str(ioerr)))
 
     try:
         # Query Partitions
@@ -136,7 +135,7 @@ def samdb_to_ldif_file(samdb, dburl, lp, creds, ldif_file):
                  "msDS-NC-Replica-Locations",
                  "msDS-NC-RO-Replica-Locations"]
 
-        sstr = "CN=Partitions,%s" % samdb.get_config_basedn()
+        sstr = "CN=Partitions,{0!s}".format(samdb.get_config_basedn())
         res = samdb.search(base=sstr, scope=ldb.SCOPE_SUBTREE,
                            attrs=attrs,
                            expression="(objectClass=crossRef)")
@@ -154,7 +153,7 @@ def samdb_to_ldif_file(samdb, dburl, lp, creds, ldif_file):
                  "msDS-Behavior-Version",
                  "msDS-EnabledFeature"]
 
-        sstr = "CN=Partitions,%s" % samdb.get_config_basedn()
+        sstr = "CN=Partitions,{0!s}".format(samdb.get_config_basedn())
         res = samdb.search(base=sstr, scope=ldb.SCOPE_SUBTREE,
                            attrs=attrs,
                            expression="(objectClass=crossRefContainer)")
@@ -169,7 +168,7 @@ def samdb_to_ldif_file(samdb, dburl, lp, creds, ldif_file):
                  "whenChanged",
                  "systemFlags"]
 
-        sstr = "CN=Sites,%s" % samdb.get_config_basedn()
+        sstr = "CN=Sites,{0!s}".format(samdb.get_config_basedn())
         sites = samdb.search(base=sstr, scope=ldb.SCOPE_SUBTREE,
                              attrs=attrs,
                              expression="(objectClass=site)")
@@ -190,7 +189,7 @@ def samdb_to_ldif_file(samdb, dburl, lp, creds, ldif_file):
                      "schedule",
                      "options"]
 
-            sstr = "CN=NTDS Site Settings,%s" % sitestr
+            sstr = "CN=NTDS Site Settings,{0!s}".format(sitestr)
             res = samdb.search(base=sstr, scope=ldb.SCOPE_BASE,
                                attrs=attrs)
 
@@ -272,8 +271,8 @@ def samdb_to_ldif_file(samdb, dburl, lp, creds, ldif_file):
                  "bridgeheadServerListBL",
                  "transportAddressAttribute"]
 
-        sstr = "CN=Inter-Site Transports,CN=Sites,%s" % \
-               samdb.get_config_basedn()
+        sstr = "CN=Inter-Site Transports,CN=Sites,{0!s}".format( \
+               samdb.get_config_basedn())
         res = samdb.search(sstr, scope=ldb.SCOPE_SUBTREE,
                            attrs=attrs,
                            expression="(objectClass=interSiteTransport)")
@@ -293,8 +292,8 @@ def samdb_to_ldif_file(samdb, dburl, lp, creds, ldif_file):
                  "siteList",
                  "cost"]
 
-        sstr = "CN=Sites,%s" % \
-               samdb.get_config_basedn()
+        sstr = "CN=Sites,{0!s}".format( \
+               samdb.get_config_basedn())
         res = samdb.search(sstr, scope=ldb.SCOPE_SUBTREE,
                            attrs=attrs,
                            expression="(objectClass=siteLink)",
@@ -310,7 +309,7 @@ def samdb_to_ldif_file(samdb, dburl, lp, creds, ldif_file):
                  "whenChanged",
                  "siteLinkList"]
 
-        sstr = "CN=Sites,%s" % samdb.get_config_basedn()
+        sstr = "CN=Sites,{0!s}".format(samdb.get_config_basedn())
         res = samdb.search(sstr, scope=ldb.SCOPE_SUBTREE,
                            attrs=attrs,
                            expression="(objectClass=siteLinkBridge)")
@@ -326,7 +325,7 @@ def samdb_to_ldif_file(samdb, dburl, lp, creds, ldif_file):
                  "whenChanged",
                  "systemFlags"]
 
-        sstr = "CN=Sites,%s" % samdb.get_config_basedn()
+        sstr = "CN=Sites,{0!s}".format(samdb.get_config_basedn())
         res = samdb.search(sstr, scope=ldb.SCOPE_SUBTREE,
                            attrs=attrs,
                            expression="(objectClass=serversContainer)")
@@ -346,7 +345,7 @@ def samdb_to_ldif_file(samdb, dburl, lp, creds, ldif_file):
                  "dNSHostName",
                  "mailAddress"]
 
-        sstr = "CN=Sites,%s" % samdb.get_config_basedn()
+        sstr = "CN=Sites,{0!s}".format(samdb.get_config_basedn())
         res = samdb.search(sstr, scope=ldb.SCOPE_SUBTREE,
                            attrs=attrs,
                            expression="(objectClass=server)")
@@ -397,6 +396,6 @@ def samdb_to_ldif_file(samdb, dburl, lp, creds, ldif_file):
         write_search_result(samdb, f, res)
 
     except ldb.LdbError, (enum, estr):
-        raise LdifError("Error processing (%s) : %s" % (sstr, estr))
+        raise LdifError("Error processing ({0!s}) : {1!s}".format(sstr, estr))
 
     f.close()

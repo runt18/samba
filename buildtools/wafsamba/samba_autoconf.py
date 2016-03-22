@@ -28,7 +28,7 @@ def hlist_to_string(conf, headers=None):
         hlist = hlist[:]
         hlist.extend(TO_LIST(headers))
     for h in hlist:
-        hdrs += '#include <%s>\n' % h
+        hdrs += '#include <{0!s}>\n'.format(h)
     return hdrs
 
 
@@ -84,7 +84,7 @@ def CHECK_HEADER(conf, h, add_headers=False, lib=None):
     d = h.upper().replace('/', '_')
     d = d.replace('.', '_')
     d = d.replace('-', '_')
-    d = 'HAVE_%s' % d
+    d = 'HAVE_{0!s}'.format(d)
     if CONFIG_SET(conf, d):
         if add_headers:
             if not h in conf.env.hlist:
@@ -96,14 +96,14 @@ def CHECK_HEADER(conf, h, add_headers=False, lib=None):
     hdrs = hlist_to_string(conf, headers=h)
     if lib is None:
         lib = ""
-    ret = conf.check(fragment='%s\nint main(void) { return 0; }' % hdrs,
+    ret = conf.check(fragment='{0!s}\nint main(void) {{ return 0; }}'.format(hdrs),
                      type='nolink',
                      execute=0,
                      ccflags=ccflags,
                      mandatory=False,
                      includes=cpppath,
                      uselib=lib.upper(),
-                     msg="Checking for header %s" % h)
+                     msg="Checking for header {0!s}".format(h))
     if not ret:
         missing_headers.add(h)
         return False
@@ -151,8 +151,8 @@ def CHECK_TYPE(conf, t, alternate=None, headers=None, define=None, lib=None, msg
     if define is None:
         define = 'HAVE_' + t.upper().replace(' ', '_')
     if msg is None:
-        msg='Checking for %s' % t
-    ret = CHECK_CODE(conf, '%s _x' % t,
+        msg='Checking for {0!s}'.format(t)
+    ret = CHECK_CODE(conf, '{0!s} _x'.format(t),
                      define,
                      execute=False,
                      headers=headers,
@@ -187,20 +187,20 @@ def CHECK_VARIABLE(conf, v, define=None, always=False,
                    headers=None, msg=None, lib=None):
     '''check for a variable declaration (or define)'''
     if define is None:
-        define = 'HAVE_%s' % v.upper()
+        define = 'HAVE_{0!s}'.format(v.upper())
 
     if msg is None:
-        msg="Checking for variable %s" % v
+        msg="Checking for variable {0!s}".format(v)
 
     return CHECK_CODE(conf,
                       # we need to make sure the compiler doesn't
                       # optimize it out...
                       '''
-                      #ifndef %s
-                      void *_x; _x=(void *)&%s; return (int)_x;
+                      #ifndef {0!s}
+                      void *_x; _x=(void *)&{1!s}; return (int)_x;
                       #endif
                       return 0
-                      ''' % (v, v),
+                      '''.format(v, v),
                       execute=False,
                       link=False,
                       msg=msg,
@@ -221,21 +221,21 @@ def CHECK_DECLS(conf, vars, reverse=False, headers=None, always=False):
     ret = True
     for v in TO_LIST(vars):
         if not reverse:
-            define='HAVE_DECL_%s' % v.upper()
+            define='HAVE_DECL_{0!s}'.format(v.upper())
         else:
-            define='HAVE_%s_DECL' % v.upper()
+            define='HAVE_{0!s}_DECL'.format(v.upper())
         if not CHECK_VARIABLE(conf, v,
                               define=define,
                               headers=headers,
-                              msg='Checking for declaration of %s' % v,
+                              msg='Checking for declaration of {0!s}'.format(v),
                               always=always):
             if not CHECK_CODE(conf,
                       '''
-                      return (int)%s;
-                      ''' % (v),
+                      return (int){0!s};
+                      '''.format((v)),
                       execute=False,
                       link=False,
-                      msg='Checking for declaration of %s (as enum)' % v,
+                      msg='Checking for declaration of {0!s} (as enum)'.format(v),
                       local_include=False,
                       headers=headers,
                       define=define,
@@ -246,29 +246,29 @@ def CHECK_DECLS(conf, vars, reverse=False, headers=None, always=False):
 
 def CHECK_FUNC(conf, f, link=True, lib=None, headers=None):
     '''check for a function'''
-    define='HAVE_%s' % f.upper()
+    define='HAVE_{0!s}'.format(f.upper())
 
     ret = False
 
-    conf.COMPOUND_START('Checking for %s' % f)
+    conf.COMPOUND_START('Checking for {0!s}'.format(f))
 
     if link is None or link:
         ret = CHECK_CODE(conf,
                          # this is based on the autoconf strategy
                          '''
-                         #define %s __fake__%s
+                         #define {0!s} __fake__{1!s}
                          #ifdef HAVE_LIMITS_H
                          # include <limits.h>
                          #else
                          # include <assert.h>
                          #endif
-                         #undef %s
-                         #if defined __stub_%s || defined __stub___%s
+                         #undef {2!s}
+                         #if defined __stub_{3!s} || defined __stub___{4!s}
                          #error "bad glibc stub"
                          #endif
-                         extern char %s();
-                         int main() { return %s(); }
-                         ''' % (f, f, f, f, f, f, f),
+                         extern char {5!s}();
+                         int main() {{ return {6!s}(); }}
+                         '''.format(f, f, f, f, f, f, f),
                          execute=False,
                          link=True,
                          addmain=False,
@@ -277,14 +277,14 @@ def CHECK_FUNC(conf, f, link=True, lib=None, headers=None):
                          local_include=False,
                          lib=lib,
                          headers=headers,
-                         msg='Checking for %s' % f)
+                         msg='Checking for {0!s}'.format(f))
 
         if not ret:
             ret = CHECK_CODE(conf,
                              # it might be a macro
                              # we need to make sure the compiler doesn't
                              # optimize it out...
-                             'void *__x = (void *)%s; return (int)__x' % f,
+                             'void *__x = (void *){0!s}; return (int)__x'.format(f),
                              execute=False,
                              link=True,
                              addmain=True,
@@ -293,13 +293,13 @@ def CHECK_FUNC(conf, f, link=True, lib=None, headers=None):
                              local_include=False,
                              lib=lib,
                              headers=headers,
-                             msg='Checking for macro %s' % f)
+                             msg='Checking for macro {0!s}'.format(f))
 
     if not ret and (link is None or not link):
         ret = CHECK_VARIABLE(conf, f,
                              define=define,
                              headers=headers,
-                             msg='Checking for declaration of %s' % f)
+                             msg='Checking for declaration of {0!s}'.format(f))
     conf.COMPOUND_END(ret)
     return ret
 
@@ -321,20 +321,20 @@ def CHECK_SIZEOF(conf, vars, headers=None, define=None, critical=True):
         v_define = define
         ret = False
         if v_define is None:
-            v_define = 'SIZEOF_%s' % v.upper().replace(' ', '_')
+            v_define = 'SIZEOF_{0!s}'.format(v.upper().replace(' ', '_'))
         for size in list((1, 2, 4, 8, 16, 32)):
             if CHECK_CODE(conf,
-                      'static int test_array[1 - 2 * !(((long int)(sizeof(%s))) <= %d)];' % (v, size),
+                      'static int test_array[1 - 2 * !(((long int)(sizeof({0!s}))) <= {1:d})];'.format(v, size),
                       define=v_define,
                       quote=False,
                       headers=headers,
                       local_include=False,
-                      msg="Checking if size of %s == %d" % (v, size)):
+                      msg="Checking if size of {0!s} == {1:d}".format(v, size)):
                 conf.DEFINE(v_define, size)
                 ret = True
                 break
         if not ret and critical:
-            Logs.error("Couldn't determine size of '%s'" % v)
+            Logs.error("Couldn't determine size of '{0!s}'".format(v))
             sys.exit(1)
     return ret
 
@@ -344,16 +344,16 @@ def CHECK_VALUEOF(conf, v, headers=None, define=None):
     ret = True
     v_define = define
     if v_define is None:
-        v_define = 'VALUEOF_%s' % v.upper().replace(' ', '_')
+        v_define = 'VALUEOF_{0!s}'.format(v.upper().replace(' ', '_'))
     if CHECK_CODE(conf,
-                  'printf("%%u", (unsigned)(%s))' % v,
+                  'printf("%u", (unsigned)({0!s}))'.format(v),
                   define=v_define,
                   execute=True,
                   define_ret=True,
                   quote=False,
                   headers=headers,
                   local_include=False,
-                  msg="Checking value of %s" % v):
+                  msg="Checking value of {0!s}".format(v)):
         return int(conf.env[v_define])
 
     return None
@@ -386,17 +386,17 @@ def CHECK_CODE(conf, code, define,
     defs = conf.get_config_header()
 
     if addmain:
-        fragment='%s\n%s\n int main(void) { %s; return 0; }\n' % (defs, hdrs, code)
+        fragment='{0!s}\n{1!s}\n int main(void) {{ {2!s}; return 0; }}\n'.format(defs, hdrs, code)
     else:
-        fragment='%s\n%s\n%s\n' % (defs, hdrs, code)
+        fragment='{0!s}\n{1!s}\n{2!s}\n'.format(defs, hdrs, code)
 
     if msg is None:
-        msg="Checking for %s" % define
+        msg="Checking for {0!s}".format(define)
 
     cflags = TO_LIST(cflags)
 
     if local_include:
-        cflags.append('-I%s' % conf.curdir)
+        cflags.append('-I{0!s}'.format(conf.curdir))
 
     if not link:
         type='nolink'
@@ -457,16 +457,16 @@ def CHECK_STRUCTURE_MEMBER(conf, structname, member,
                            always=False, define=None, headers=None):
     '''check for a structure member'''
     if define is None:
-        define = 'HAVE_%s' % member.upper()
+        define = 'HAVE_{0!s}'.format(member.upper())
     return CHECK_CODE(conf,
-                      '%s s; void *_x; _x=(void *)&s.%s' % (structname, member),
+                      '{0!s} s; void *_x; _x=(void *)&s.{1!s}'.format(structname, member),
                       define,
                       execute=False,
                       link=False,
                       always=always,
                       headers=headers,
                       local_include=False,
-                      msg="Checking for member %s in %s" % (member, structname))
+                      msg="Checking for member {0!s} in {1!s}".format(member, structname))
 
 
 @conf
@@ -477,7 +477,7 @@ def CHECK_CFLAGS(conf, cflags, fragment='int main(void) { return 0; }\n'):
                       execute=0,
                       type='nolink',
                       ccflags=cflags,
-                      msg="Checking compiler accepts %s" % cflags)
+                      msg="Checking compiler accepts {0!s}".format(cflags))
 
 @conf
 def CHECK_LDFLAGS(conf, ldflags):
@@ -487,7 +487,7 @@ def CHECK_LDFLAGS(conf, ldflags):
                       execute=0,
                       ldflags=ldflags,
                       mandatory=False,
-                      msg="Checking linker accepts %s" % ldflags)
+                      msg="Checking linker accepts {0!s}".format(ldflags))
 
 
 @conf
@@ -532,9 +532,9 @@ def library_flags(self, libs):
         # note that we do not add the -I and -L in here, as that is added by the waf
         # core. Adding it here would just change the order that it is put on the link line
         # which can cause system paths to be added before internal libraries
-        extra_ccflags = TO_LIST(getattr(self.env, 'CCFLAGS_%s' % lib.upper(), []))
-        extra_ldflags = TO_LIST(getattr(self.env, 'LDFLAGS_%s' % lib.upper(), []))
-        extra_cpppath = TO_LIST(getattr(self.env, 'CPPPATH_%s' % lib.upper(), []))
+        extra_ccflags = TO_LIST(getattr(self.env, 'CCFLAGS_{0!s}'.format(lib.upper()), []))
+        extra_ldflags = TO_LIST(getattr(self.env, 'LDFLAGS_{0!s}'.format(lib.upper()), []))
+        extra_cpppath = TO_LIST(getattr(self.env, 'CPPPATH_{0!s}'.format(lib.upper()), []))
         ccflags.extend(extra_ccflags)
         ldflags.extend(extra_ldflags)
         cpppath.extend(extra_cpppath)
@@ -576,14 +576,14 @@ int foo()
 
         if not res:
             if mandatory:
-                Logs.error("Mandatory library '%s' not found for functions '%s'" % (lib, list))
+                Logs.error("Mandatory library '{0!s}' not found for functions '{1!s}'".format(lib, list))
                 sys.exit(1)
             if empty_decl:
                 # if it isn't a mandatory library, then remove it from dependency lists
                 if set_target:
                     SET_TARGET_TYPE(conf, lib, 'EMPTY')
         else:
-            conf.define('HAVE_LIB%s' % lib.upper().replace('-','_').replace('.','_'), 1)
+            conf.define('HAVE_LIB{0!s}'.format(lib.upper().replace('-','_').replace('.','_')), 1)
             conf.env['LIB_' + lib.upper()] = lib
             if set_target:
                 conf.SET_TARGET_TYPE(lib, 'SYSLIB')
@@ -614,7 +614,7 @@ def CHECK_FUNCS_IN(conf, list, library, mandatory=False, checklibc=False,
 
     # check if some already found
     for f in remaining[:]:
-        if CONFIG_SET(conf, 'HAVE_%s' % f.upper()):
+        if CONFIG_SET(conf, 'HAVE_{0!s}'.format(f.upper())):
             remaining.remove(f)
 
     # see if the functions are in libc
@@ -632,7 +632,7 @@ def CHECK_FUNCS_IN(conf, list, library, mandatory=False, checklibc=False,
     checklist = conf.CHECK_LIB(liblist, empty_decl=empty_decl, set_target=set_target)
     for lib in liblist[:]:
         if not lib in checklist and mandatory:
-            Logs.error("Mandatory library '%s' not found for functions '%s'" % (lib, list))
+            Logs.error("Mandatory library '{0!s}' not found for functions '{1!s}'".format(lib, list))
             sys.exit(1)
 
     ret = True

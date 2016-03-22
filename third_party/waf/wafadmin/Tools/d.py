@@ -196,7 +196,7 @@ def scan(self):
 	gruik.start(self.inputs[0])
 
 	if Logs.verbose:
-		debug('deps: nodes found for %s: %s %s' % (str(self.inputs[0]), str(gruik.nodes), str(gruik.names)))
+		debug('deps: nodes found for {0!s}: {1!s} {2!s}'.format(str(self.inputs[0]), str(gruik.nodes), str(gruik.names)))
 		#debug("deps found for %s: %s" % (str(node), str(gruik.deps)), 'deps')
 	return (gruik.nodes, gruik.names)
 
@@ -207,7 +207,7 @@ def get_target_name(self):
 	for x in self.features:
 		if x in ['dshlib', 'dstaticlib']:
 			tp = x.lstrip('d')
-	return v['D_%s_PATTERN' % tp] % self.target
+	return v['D_{0!s}_PATTERN'.format(tp)] % self.target
 
 d_params = {
 'dflags': '',
@@ -272,7 +272,7 @@ def apply_d_libs(self):
 
 		y = self.name_to_obj(lib_name)
 		if not y:
-			raise Utils.WafError('object %r was not found in uselib_local (required by %r)' % (lib_name, self.name))
+			raise Utils.WafError('object {0!r} was not found in uselib_local (required by {1!r})'.format(lib_name, self.name))
 		y.post()
 		seen.add(lib_name)
 
@@ -309,7 +309,7 @@ def apply_d_libs(self):
 			for x in self.to_list(y.export_incdirs):
 				node = y.path.find_dir(x)
 				if not node:
-					raise Utils.WafError('object %r: invalid folder %r in export_incdirs' % (y.target, x))
+					raise Utils.WafError('object {0!r}: invalid folder {1!r} in export_incdirs'.format(y.target, x))
 				self.env.append_unique('INC_PATHS', node)
 
 @feature('dprogram', 'dshlib', 'dstaticlib')
@@ -379,7 +379,7 @@ def apply_d_vars(self):
 		if not os.path.isabs(path):
 			node = self.path.find_resource(path)
 			if not node:
-				raise Utils.WafError('could not find libpath %r from %r' % (path, self))
+				raise Utils.WafError('could not find libpath {0!r} from {1!r}'.format(path, self))
 			path = node.abspath(self.env)
 
 		env.append_unique('DLINKFLAGS', libpath_st % path)
@@ -418,7 +418,7 @@ def d_hook(self, node):
 	# create the compilation task: cpp or cc
 	task = self.create_task(self.generate_headers and 'd_with_header' or 'd')
 	try: obj_ext = self.obj_ext
-	except AttributeError: obj_ext = '_%d.o' % self.idx
+	except AttributeError: obj_ext = '_{0:d}.o'.format(self.idx)
 
 	task.inputs = [node]
 	task.outputs = [node.change_ext(obj_ext)]

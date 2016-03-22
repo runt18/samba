@@ -61,15 +61,15 @@ if __name__ == "__main__":
 
 		for media_dir in media_dirs:
 
-			print '\nChecking %s...' % media_dir
+			print '\nChecking {0!s}...'.format(media_dir)
 
-			fakepath = '%s_%s_%s' % (media_dir, my_ip, my_name)
-			print '...fakepath: %s' % fakepath
+			fakepath = '{0!s}_{1!s}_{2!s}'.format(media_dir, my_ip, my_name)
+			print '...fakepath: {0!s}'.format(fakepath)
 
 			db = os.path.join(media_dir, 'msmMMOB.mdb')
-			print '...Checking for %s' % db
+			print '...Checking for {0!s}'.format(db)
 			if os.path.exists(db):
-				print '......found %s.' % db
+				print '......found {0!s}.'.format(db)
 				db_mtime = os.stat(db)[stat.ST_MTIME]
 				newer_file = False
 				for child in os.listdir(media_dir):
@@ -77,11 +77,11 @@ if __name__ == "__main__":
 						continue
 					child_mtime = os.stat(os.path.join(media_dir, child))[stat.ST_MTIME]
 					if child_mtime > db_mtime:
-						print '......found newer file %s' % child
+						print '......found newer file {0!s}'.format(child)
 						newer_file = True
 						break
 			else:
-				print '......no %s.' % db
+				print '......no {0!s}.'.format(db)
 				newer_file = True
 
 			if newer_file:
@@ -93,7 +93,7 @@ if __name__ == "__main__":
 				print '...Setting fake mtime to media_dir mtime.  No re-index.'
 
 			if not os.path.exists(fakepath):
-				tmp_fakepath = '%s.tmp' % fakepath
+				tmp_fakepath = '{0!s}.tmp'.format(fakepath)
 				open(tmp_fakepath, 'a').close()
 				os.utime(tmp_fakepath, utime)
 				os.rename(tmp_fakepath, fakepath)

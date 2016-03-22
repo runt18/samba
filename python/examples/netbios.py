@@ -23,6 +23,6 @@ n = Node()
 (reply_from, names, addresses) = n.query_name("GANIEDA", "192.168.4.0",
                                               timeout=4)
 
-print "Received reply from %s:" % (reply_from, )
-print "Names: %r" % (names, )
-print "Addresses: %r" % (addresses, )
+print "Received reply from {0!s}:".format(reply_from )
+print "Names: {0!r}".format(names )
+print "Addresses: {0!r}".format(addresses )

@@ -53,7 +53,7 @@ def check_perl_version(conf, minver=None):
 		try:
 			ver = tuple(map(int, version.split('.')))
 		except:
-			conf.fatal('unsupported perl version %r' % version)
+			conf.fatal('unsupported perl version {0!r}'.format(version))
 		if ver < minver:
 			conf.fatal('perl is too old')
 
@@ -70,9 +70,9 @@ def check_perl_module(conf, module):
 
 	conf.check_perl_module("Some::Module 2.92")
 	"""
-	cmd = [conf.env['PERL'], '-e', 'use %s' % module]
+	cmd = [conf.env['PERL'], '-e', 'use {0!s}'.format(module)]
 	r = Utils.pproc.call(cmd, stdout=Utils.pproc.PIPE, stderr=Utils.pproc.PIPE) == 0
-	conf.check_message("perl module %s" % module, "", r)
+	conf.check_message("perl module {0!s}".format(module), "", r)
 	return r
 
 @conf

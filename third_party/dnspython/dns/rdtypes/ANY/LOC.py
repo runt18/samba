@@ -29,7 +29,7 @@ def _exponent_of(what, desc):
             exp = i - 1
             break
     if exp is None or exp < 0:
-        raise dns.exception.SyntaxError("%s value out of bounds" % desc)
+        raise dns.exception.SyntaxError("{0!s} value out of bounds".format(desc))
     return exp
 
 def _float_to_tuple(what):
@@ -69,10 +69,10 @@ def _encode_size(what, desc):
 def _decode_size(what, desc):
     exponent = what & 0x0F
     if exponent > 9:
-        raise dns.exception.SyntaxError("bad %s exponent" % desc)
+        raise dns.exception.SyntaxError("bad {0!s} exponent".format(desc))
     base = (what & 0xF0) >> 4
     if base > 9:
-        raise dns.exception.SyntaxError("bad %s base" % desc)
+        raise dns.exception.SyntaxError("bad {0!s} base".format(desc))
     return long(base) * pow(10, exponent)
 
 class LOC(dns.rdata.Rdata):
@@ -135,7 +135,7 @@ class LOC(dns.rdata.Rdata):
         else:
             long_hemisphere = 'W'
             long_degrees = -1 * self.longitude[0]
-        text = "%d %d %d.%03d %s %d %d %d.%03d %s %0.2fm" % (
+        text = "{0:d} {1:d} {2:d}.{3:03d} {4!s} {5:d} {6:d} {7:d}.{8:03d} {9!s} {10:0.2f}m".format(
             lat_degrees, self.latitude[1], self.latitude[2], self.latitude[3],
             lat_hemisphere, long_degrees, self.longitude[1], self.longitude[2],
             self.longitude[3], long_hemisphere, self.altitude / 100.0
@@ -143,7 +143,7 @@ class LOC(dns.rdata.Rdata):
 
         if self.size != 1.0 or self.horizontal_precision != 10000.0 or \
            self.vertical_precision != 10.0:
-            text += " %0.2fm %0.2fm %0.2fm" % (
+            text += " {0:0.2f}m {1:0.2f}m {2:0.2f}m".format(
                 self.size / 100.0, self.horizontal_precision / 100.0,
                 self.vertical_precision / 100.0
             )

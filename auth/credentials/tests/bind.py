@@ -62,7 +62,7 @@ class BindTests(samba.tests.TestCase):
         self.schema_dn = self.info_dc["schemaNamingContext"][0]
         self.domain_dn = self.info_dc["defaultNamingContext"][0]
         self.config_dn = self.info_dc["configurationNamingContext"][0]
-        self.computer_dn = "CN=centos53,CN=Computers,%s" % self.domain_dn
+        self.computer_dn = "CN=centos53,CN=Computers,{0!s}".format(self.domain_dn)
         self.password = "P@ssw0rd"
         self.username = "BindTestUser_" + time.strftime("%s", time.gmtime())
 
@@ -110,7 +110,7 @@ unicodePwd:: """ + base64.b64encode("\"P@ssw0rd\"".encode('utf-16-le')) + """
         self.ldb.newuser(username=self.username, password=self.password)
         ldb_res = self.ldb.search(base=self.domain_dn,
                                       scope=SCOPE_SUBTREE,
-                                      expression="(samAccountName=%s)" % self.username)
+                                      expression="(samAccountName={0!s})".format(self.username))
         self.assertEquals(len(ldb_res), 1)
         user_dn = ldb_res[0]["dn"]
 

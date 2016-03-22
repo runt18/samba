@@ -332,8 +332,7 @@ class BuildContext(Utils.Context):
 			cls_name = k[0]
 
 			try: cls = TaskGen.task_gen.classes[cls_name]
-			except KeyError: raise Utils.WscriptError('%s is not a valid task generator -> %s' %
-				(cls_name, [x for x in TaskGen.task_gen.classes]))
+			except KeyError: raise Utils.WscriptError('{0!s} is not a valid task generator -> {1!s}'.format(cls_name, [x for x in TaskGen.task_gen.classes]))
 			ret = cls(*k, **kw)
 		return ret
 
@@ -421,7 +420,7 @@ class BuildContext(Utils.Context):
 		self.cachedir = os.path.join(blddir, CACHE_DIR)
 
 		if srcdir == blddir:
-			raise Utils.WafError("build dir must be different from srcdir: %s <-> %s " % (srcdir, blddir))
+			raise Utils.WafError("build dir must be different from srcdir: {0!s} <-> {1!s} ".format(srcdir, blddir))
 
 		self.bdir = blddir
 
@@ -493,7 +492,7 @@ class BuildContext(Utils.Context):
 				try:
 					cache[x.id] = Utils.h_file(x.abspath())
 				except IOError:
-					raise Utils.WafError('The file %s is not readable or has become a dir' % x.abspath())
+					raise Utils.WafError('The file {0!s} is not readable or has become a dir'.format(x.abspath()))
 			else:
 				try: del cache[x.id]
 				except KeyError: pass
@@ -687,7 +686,7 @@ class BuildContext(Utils.Context):
 							to_post.append(tg)
 
 				if not target_name in target_objects and all:
-					raise Utils.WafError("target '%s' does not exist" % target_name)
+					raise Utils.WafError("target '{0!s}' does not exist".format(target_name))
 
 			debug('group: Forcing up to group %s for target %s', mana.group_name(min_grp), Options.options.compile_targets)
 
@@ -731,7 +730,7 @@ class BuildContext(Utils.Context):
 					if not tg.path.is_child_of(ln):
 						continue
 					if Logs.verbose:
-						Logs.debug('group: %s' % tg)
+						Logs.debug('group: {0!s}'.format(tg))
 					tg.post()
 
 	def env_of_name(self, name):
@@ -751,9 +750,9 @@ class BuildContext(Utils.Context):
 
 		pc = (100.*state)/total
 		eta = Utils.get_elapsed_time(ini)
-		fs = "[%%%dd/%%%dd][%%s%%2d%%%%%%s][%s][" % (n, n, ind)
+		fs = "[%{0:d}d/%{1:d}d][%s%2d%%%s][{2!s}][".format(n, n, ind)
 		left = fs % (state, total, col1, pc, col2)
-		right = '][%s%s%s]' % (col1, eta, col2)
+		right = '][{0!s}{1!s}{2!s}]'.format(col1, eta, col2)
 
 		cols = Utils.get_term_cols() - len(left) - len(right) + 2*len(col1) + 2*len(col2)
 		if cols < 7: cols = 7
@@ -783,7 +782,7 @@ class BuildContext(Utils.Context):
 						return False
 
 			srclbl = src.replace(self.srcnode.abspath(None)+os.sep, '')
-			info("* installing %s as %s" % (srclbl, tgt))
+			info("* installing {0!s} as {1!s}".format(srclbl, tgt))
 
 			# following is for shared libs and stale inodes (-_-)
 			try: os.remove(tgt)
@@ -796,12 +795,12 @@ class BuildContext(Utils.Context):
 				try:
 					os.stat(src)
 				except (OSError, IOError):
-					error('File %r does not exist' % src)
-				raise Utils.WafError('Could not install the file %r' % tgt)
+					error('File {0!r} does not exist'.format(src))
+				raise Utils.WafError('Could not install the file {0!r}'.format(tgt))
 			return True
 
 		elif self.is_install < 0:
-			info("* uninstalling %s" % tgt)
+			info("* uninstalling {0!s}".format(tgt))
 
 			self.uninstall.append(tgt)
 
@@ -813,7 +812,7 @@ class BuildContext(Utils.Context):
 						self.uninstall_error = True
 						Logs.warn('build: some files could not be uninstalled (retry with -vv to list them)')
 					if Logs.verbose > 1:
-						Logs.warn('could not remove %s (error code %r)' % (e.filename, e.errno))
+						Logs.warn('could not remove {0!s} (error code {1!r})'.format(e.filename, e.errno))
 			return True
 
 	red = re.compile(r"^([A-Za-z]:)?[/\\\\]*")
@@ -842,10 +841,10 @@ class BuildContext(Utils.Context):
 		destpath = self.get_install_path(path, env)
 
 		if self.is_install > 0:
-			info('* creating %s' % destpath)
+			info('* creating {0!s}'.format(destpath))
 			Utils.check_dir(destpath)
 		elif self.is_install < 0:
-			info('* removing %s' % destpath)
+			info('* removing {0!s}'.format(destpath))
 			self.uninstall.append(destpath + '/xxx') # yes, ugly
 
 	def install_files(self, path, files, env=None, chmod=O644, relative_trick=False, cwd=None):
@@ -890,7 +889,7 @@ class BuildContext(Utils.Context):
 				else:
 					nd = cwd.find_resource(filename)
 				if not nd:
-					raise Utils.WafError("Unable to install the file %r (not found in %s)" % (filename, cwd))
+					raise Utils.WafError("Unable to install the file {0!r} (not found in {1!s})".format(filename, cwd))
 
 				if relative_trick:
 					destfile = os.path.join(destpath, filename)
@@ -916,7 +915,7 @@ class BuildContext(Utils.Context):
 			env = self.env
 
 		if not path:
-			raise Utils.WafError("where do you want to install %r? (%r?)" % (srcfile, path))
+			raise Utils.WafError("where do you want to install {0!r}? ({1!r}?)".format(srcfile, path))
 
 		if not cwd:
 			cwd = self.path
@@ -934,7 +933,7 @@ class BuildContext(Utils.Context):
 			if not os.path.isabs(srcfile):
 				node = cwd.find_resource(srcfile)
 				if not node:
-					raise Utils.WafError("Unable to install the file %r (not found in %s)" % (srcfile, cwd))
+					raise Utils.WafError("Unable to install the file {0!r} (not found in {1!s})".format(srcfile, cwd))
 				src = node.abspath(env)
 
 		return self.do_install(src, destpath, chmod)
@@ -947,7 +946,7 @@ class BuildContext(Utils.Context):
 			return
 
 		if not path:
-			raise Utils.WafError("where do you want to install %r? (%r?)" % (src, path))
+			raise Utils.WafError("where do you want to install {0!r}? ({1!r}?)".format(src, path))
 
 		tgt = self.get_install_path(path, env)
 
@@ -965,13 +964,13 @@ class BuildContext(Utils.Context):
 				try: os.remove(tgt)
 				except OSError: pass
 
-				info('* symlink %s (-> %s)' % (tgt, src))
+				info('* symlink {0!s} (-> {1!s})'.format(tgt, src))
 				os.symlink(src, tgt)
 			return 0
 
 		else: # UNINSTALL
 			try:
-				info('* removing %s' % (tgt))
+				info('* removing {0!s}'.format((tgt)))
 				os.remove(tgt)
 				return 0
 			except OSError:
@@ -981,7 +980,7 @@ class BuildContext(Utils.Context):
 		# 'runner' zone is printed out for waf -v, see wafadmin/Options.py
 		debug('runner: system command -> %s', cmd)
 		if self.log:
-			self.log.write('%s\n' % cmd)
+			self.log.write('{0!s}\n'.format(cmd))
 			kw['log'] = self.log
 		try:
 			if not kw.get('cwd', None):

@@ -98,7 +98,7 @@ def _escapify(label):
         elif ord(c) > 0x20 and ord(c) < 0x7F:
             text += c
         else:
-            text += '\\%03d' % ord(c)
+            text += '\\{0:03d}'.format(ord(c))
     return text
 
 def _validate_labels(labels):
@@ -369,7 +369,7 @@ class Name(object):
             labels.extend(list(origin.labels))
         else:
             labels = self.labels
-        dlabels = ["%s%s" % (chr(len(x)), x.lower()) for x in labels]
+        dlabels = ["{0!s}{1!s}".format(chr(len(x)), x.lower()) for x in labels]
         return ''.join(dlabels)
 
     def to_wire(self, file = None, compress = None, origin = None):

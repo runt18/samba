@@ -48,7 +48,7 @@ def __call__(environ, start_response):
     try:
         import swat
     except ImportError, e:
-        print "NO SWAT: %r" % e
+        print "NO SWAT: {0!r}".format(e)
         have_swat = False
     else:
         have_swat = True
@@ -69,7 +69,7 @@ def __call__(environ, start_response):
         status = '404 Not found'
         response_headers = [('Content-type', 'text/html')]
         start_response(status, response_headers)
-        return ["The path %s (%s) was not found" % (orig_path, name)]
+        return ["The path {0!s} ({1!s}) was not found".format(orig_path, name)]
 
 
 if __name__ == '__main__':

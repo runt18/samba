@@ -174,23 +174,23 @@ class unit_test(object):
 			elif result: n += 7
 			else: n += 3
 
-			line = '%s %s' % (label, '.' * n)
+			line = '{0!s} {1!s}'.format(label, '.' * n)
 
-			if err: p('RED', '%sERROR' % line)
-			elif result: p('GREEN', '%sOK' % line)
-			else: p('YELLOW', '%sFAILED' % line)
+			if err: p('RED', '{0!s}ERROR'.format(line))
+			elif result: p('GREEN', '{0!s}OK'.format(line))
+			else: p('YELLOW', '{0!s}FAILED'.format(line))
 
 		percentage_ok = float(self.num_tests_ok) / float(self.total_num_tests) * 100.0
 		percentage_failed = float(self.num_tests_failed) / float(self.total_num_tests) * 100.0
 		percentage_erroneous = float(self.num_tests_err) / float(self.total_num_tests) * 100.0
 
 		p('NORMAL', '''
-Successful tests:      %i (%.1f%%)
-Failed tests:          %i (%.1f%%)
-Erroneous tests:       %i (%.1f%%)
+Successful tests:      {0:d} ({1:.1f}%)
+Failed tests:          {2:d} ({3:.1f}%)
+Erroneous tests:       {4:d} ({5:.1f}%)
 
-Total number of tests: %i
-''' % (self.num_tests_ok, percentage_ok, self.num_tests_failed, percentage_failed,
+Total number of tests: {6:d}
+'''.format(self.num_tests_ok, percentage_ok, self.num_tests_failed, percentage_failed,
 		self.num_tests_err, percentage_erroneous, self.total_num_tests))
 		p('GREEN', 'Unit tests finished')
 
@@ -218,7 +218,7 @@ def set_options(opt):
 @after('apply_link', 'vars_target_cprogram')
 def make_test(self):
 	if not 'cprogram' in self.features:
-		Logs.error('test cannot be executed %s' % self)
+		Logs.error('test cannot be executed {0!s}'.format(self))
 		return
 
 	self.default_install_path = None
@@ -297,12 +297,12 @@ def summary(bld):
 		total = len(lst)
 		tfail = len([x for x in lst if x[1]])
 
-		Utils.pprint('CYAN', '  tests that pass %d/%d' % (total-tfail, total))
+		Utils.pprint('CYAN', '  tests that pass {0:d}/{1:d}'.format(total-tfail, total))
 		for (f, code, out, err) in lst:
 			if not code:
-				Utils.pprint('CYAN', '    %s' % f)
+				Utils.pprint('CYAN', '    {0!s}'.format(f))
 
-		Utils.pprint('CYAN', '  tests that fail %d/%d' % (tfail, total))
+		Utils.pprint('CYAN', '  tests that fail {0:d}/{1:d}'.format(tfail, total))
 		for (f, code, out, err) in lst:
 			if code:
-				Utils.pprint('CYAN', '    %s' % f)
+				Utils.pprint('CYAN', '    {0!s}'.format(f))

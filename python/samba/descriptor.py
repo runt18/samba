@@ -35,7 +35,7 @@ import re
 # Descriptors of naming contexts and other important objects
 
 def sddl2binary(sddl_in, domain_sid, name_map):
-    sddl = "%s" % sddl_in
+    sddl = "{0!s}".format(sddl_in)
 
     for [name, sid] in name_map.items():
         sddl = sddl.replace(name, sid)
@@ -412,29 +412,29 @@ def get_wellknown_sds(samdb):
 
     # Then subcontainers
     subcontainers = [
-        (ldb.Dn(samdb, "%s" % str(samdb.domain_dn())), get_domain_descriptor),
-        (ldb.Dn(samdb, "CN=LostAndFound,%s" % str(samdb.domain_dn())), get_domain_delete_protected2_descriptor),
-        (ldb.Dn(samdb, "CN=System,%s" % str(samdb.domain_dn())), get_domain_delete_protected1_descriptor),
-        (ldb.Dn(samdb, "CN=Infrastructure,%s" % str(samdb.domain_dn())), get_domain_infrastructure_descriptor),
-        (ldb.Dn(samdb, "CN=Builtin,%s" % str(samdb.domain_dn())), get_domain_builtin_descriptor),
-        (ldb.Dn(samdb, "CN=Computers,%s" % str(samdb.domain_dn())), get_domain_computers_descriptor),
-        (ldb.Dn(samdb, "CN=Users,%s" % str(samdb.domain_dn())), get_domain_users_descriptor),
-        (ldb.Dn(samdb, "OU=Domain Controllers,%s" % str(samdb.domain_dn())), get_domain_controllers_descriptor),
-        (ldb.Dn(samdb, "CN=MicrosoftDNS,CN=System,%s" % str(samdb.domain_dn())), get_dns_domain_microsoft_dns_descriptor),
+        (ldb.Dn(samdb, "{0!s}".format(str(samdb.domain_dn()))), get_domain_descriptor),
+        (ldb.Dn(samdb, "CN=LostAndFound,{0!s}".format(str(samdb.domain_dn()))), get_domain_delete_protected2_descriptor),
+        (ldb.Dn(samdb, "CN=System,{0!s}".format(str(samdb.domain_dn()))), get_domain_delete_protected1_descriptor),
+        (ldb.Dn(samdb, "CN=Infrastructure,{0!s}".format(str(samdb.domain_dn()))), get_domain_infrastructure_descriptor),
+        (ldb.Dn(samdb, "CN=Builtin,{0!s}".format(str(samdb.domain_dn()))), get_domain_builtin_descriptor),
+        (ldb.Dn(samdb, "CN=Computers,{0!s}".format(str(samdb.domain_dn()))), get_domain_computers_descriptor),
+        (ldb.Dn(samdb, "CN=Users,{0!s}".format(str(samdb.domain_dn()))), get_domain_users_descriptor),
+        (ldb.Dn(samdb, "OU=Domain Controllers,{0!s}".format(str(samdb.domain_dn()))), get_domain_controllers_descriptor),
+        (ldb.Dn(samdb, "CN=MicrosoftDNS,CN=System,{0!s}".format(str(samdb.domain_dn()))), get_dns_domain_microsoft_dns_descriptor),
 
-        (ldb.Dn(samdb, "%s" % str(samdb.get_config_basedn())), get_config_descriptor),
-        (ldb.Dn(samdb, "CN=NTDS Quotas,%s" % str(samdb.get_config_basedn())), get_config_ntds_quotas_descriptor),
-        (ldb.Dn(samdb, "CN=LostAndFoundConfig,%s" % str(samdb.get_config_basedn())), get_config_delete_protected1wd_descriptor),
-        (ldb.Dn(samdb, "CN=Services,%s" % str(samdb.get_config_basedn())), get_config_delete_protected1_descriptor),
-        (ldb.Dn(samdb, "CN=Physical Locations,%s" % str(samdb.get_config_basedn())), get_config_delete_protected1wd_descriptor),
-        (ldb.Dn(samdb, "CN=WellKnown Security Principals,%s" % str(samdb.get_config_basedn())), get_config_delete_protected1wd_descriptor),
-        (ldb.Dn(samdb, "CN=ForestUpdates,%s" % str(samdb.get_config_basedn())), get_config_delete_protected1wd_descriptor),
-        (ldb.Dn(samdb, "CN=DisplaySpecifiers,%s" % str(samdb.get_config_basedn())), get_config_delete_protected2_descriptor),
-        (ldb.Dn(samdb, "CN=Extended-Rights,%s" % str(samdb.get_config_basedn())), get_config_delete_protected2_descriptor),
-        (ldb.Dn(samdb, "CN=Partitions,%s" % str(samdb.get_config_basedn())), get_config_partitions_descriptor),
-        (ldb.Dn(samdb, "CN=Sites,%s" % str(samdb.get_config_basedn())), get_config_sites_descriptor),
+        (ldb.Dn(samdb, "{0!s}".format(str(samdb.get_config_basedn()))), get_config_descriptor),
+        (ldb.Dn(samdb, "CN=NTDS Quotas,{0!s}".format(str(samdb.get_config_basedn()))), get_config_ntds_quotas_descriptor),
+        (ldb.Dn(samdb, "CN=LostAndFoundConfig,{0!s}".format(str(samdb.get_config_basedn()))), get_config_delete_protected1wd_descriptor),
+        (ldb.Dn(samdb, "CN=Services,{0!s}".format(str(samdb.get_config_basedn()))), get_config_delete_protected1_descriptor),
+        (ldb.Dn(samdb, "CN=Physical Locations,{0!s}".format(str(samdb.get_config_basedn()))), get_config_delete_protected1wd_descriptor),
+        (ldb.Dn(samdb, "CN=WellKnown Security Principals,{0!s}".format(str(samdb.get_config_basedn()))), get_config_delete_protected1wd_descriptor),
+        (ldb.Dn(samdb, "CN=ForestUpdates,{0!s}".format(str(samdb.get_config_basedn()))), get_config_delete_protected1wd_descriptor),
+        (ldb.Dn(samdb, "CN=DisplaySpecifiers,{0!s}".format(str(samdb.get_config_basedn()))), get_config_delete_protected2_descriptor),
+        (ldb.Dn(samdb, "CN=Extended-Rights,{0!s}".format(str(samdb.get_config_basedn()))), get_config_delete_protected2_descriptor),
+        (ldb.Dn(samdb, "CN=Partitions,{0!s}".format(str(samdb.get_config_basedn()))), get_config_partitions_descriptor),
+        (ldb.Dn(samdb, "CN=Sites,{0!s}".format(str(samdb.get_config_basedn()))), get_config_sites_descriptor),
 
-        (ldb.Dn(samdb, "%s" % str(samdb.get_schema_basedn())), get_schema_descriptor),
+        (ldb.Dn(samdb, "{0!s}".format(str(samdb.get_schema_basedn()))), get_schema_descriptor),
     ]
 
     current = samdb.search(expression="(objectClass=*)",
@@ -443,32 +443,32 @@ def get_wellknown_sds(samdb):
 
     for nc in current[0]["namingContexts"]:
 
-        dnsforestdn = ldb.Dn(samdb, "DC=ForestDnsZones,%s" % (str(samdb.get_root_basedn())))
+        dnsforestdn = ldb.Dn(samdb, "DC=ForestDnsZones,{0!s}".format((str(samdb.get_root_basedn()))))
         if ldb.Dn(samdb, nc) == dnsforestdn:
-            c = (ldb.Dn(samdb, "%s" % str(dnsforestdn)), get_dns_partition_descriptor)
+            c = (ldb.Dn(samdb, "{0!s}".format(str(dnsforestdn))), get_dns_partition_descriptor)
             subcontainers.append(c)
-            c = (ldb.Dn(samdb, "CN=Infrastructure,%s" % str(dnsforestdn)),
+            c = (ldb.Dn(samdb, "CN=Infrastructure,{0!s}".format(str(dnsforestdn))),
                  get_domain_delete_protected1_descriptor)
             subcontainers.append(c)
-            c = (ldb.Dn(samdb, "CN=LostAndFound,%s" % str(dnsforestdn)),
+            c = (ldb.Dn(samdb, "CN=LostAndFound,{0!s}".format(str(dnsforestdn))),
                  get_domain_delete_protected2_descriptor)
             subcontainers.append(c)
-            c = (ldb.Dn(samdb, "CN=MicrosoftDNS,%s" % str(dnsforestdn)),
+            c = (ldb.Dn(samdb, "CN=MicrosoftDNS,{0!s}".format(str(dnsforestdn))),
                  get_dns_forest_microsoft_dns_descriptor)
             subcontainers.append(c)
             continue
 
-        dnsdomaindn = ldb.Dn(samdb, "DC=DomainDnsZones,%s" % (str(samdb.domain_dn())))
+        dnsdomaindn = ldb.Dn(samdb, "DC=DomainDnsZones,{0!s}".format((str(samdb.domain_dn()))))
         if ldb.Dn(samdb, nc) == dnsdomaindn:
-            c = (ldb.Dn(samdb, "%s" % str(dnsdomaindn)), get_dns_partition_descriptor)
+            c = (ldb.Dn(samdb, "{0!s}".format(str(dnsdomaindn))), get_dns_partition_descriptor)
             subcontainers.append(c)
-            c = (ldb.Dn(samdb, "CN=Infrastructure,%s" % str(dnsdomaindn)),
+            c = (ldb.Dn(samdb, "CN=Infrastructure,{0!s}".format(str(dnsdomaindn))),
                  get_domain_delete_protected1_descriptor)
             subcontainers.append(c)
-            c = (ldb.Dn(samdb, "CN=LostAndFound,%s" % str(dnsdomaindn)),
+            c = (ldb.Dn(samdb, "CN=LostAndFound,{0!s}".format(str(dnsdomaindn))),
                  get_domain_delete_protected2_descriptor)
             subcontainers.append(c)
-            c = (ldb.Dn(samdb, "CN=MicrosoftDNS,%s" % str(dnsdomaindn)),
+            c = (ldb.Dn(samdb, "CN=MicrosoftDNS,{0!s}".format(str(dnsdomaindn))),
                  get_dns_domain_microsoft_dns_descriptor)
             subcontainers.append(c)
 
@@ -579,7 +579,7 @@ def get_diff_sds(refsd, cursd, domainsid, checkSacl = True):
               "(in current)\n" % (hash_ref["owner"], hash_cur["owner"])
 
     if not hash_cur.has_key("group"):
-        txt = "%s\tNo group in current SD" % txt
+        txt = "{0!s}\tNo group in current SD".format(txt)
     elif hash_ref.has_key("group") and hash_cur["group"] != hash_ref["group"]:
         txt = "%s\tGroup mismatch: %s (in ref) %s" \
               "(in current)\n" % (txt, hash_ref["group"], hash_cur["group"])
@@ -620,8 +620,8 @@ def get_diff_sds(refsd, cursd, domainsid, checkSacl = True):
                           " current\n" % (txt, item)
 
         elif hash_cur.has_key(part) and not hash_ref.has_key(part):
-            txt = "%s\tReference ACL hasn't a %s part\n" % (txt, part)
+            txt = "{0!s}\tReference ACL hasn't a {1!s} part\n".format(txt, part)
         elif not hash_cur.has_key(part) and hash_ref.has_key(part):
-            txt = "%s\tCurrent ACL hasn't a %s part\n" % (txt, part)
+            txt = "{0!s}\tCurrent ACL hasn't a {1!s} part\n".format(txt, part)
 
     return txt

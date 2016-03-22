@@ -44,9 +44,9 @@ class APLItem(object):
 
     def __str__(self):
         if self.negation:
-            return "!%d:%s/%s" % (self.family, self.address, self.prefix)
+            return "!{0:d}:{1!s}/{2!s}".format(self.family, self.address, self.prefix)
         else:
-            return "%d:%s/%s" % (self.family, self.address, self.prefix)
+            return "{0:d}:{1!s}/{2!s}".format(self.family, self.address, self.prefix)
 
     def to_wire(self, file):
         if self.family == 1:

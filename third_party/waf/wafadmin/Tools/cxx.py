@@ -73,7 +73,7 @@ def apply_defines_cxx(self):
 		val = self.env['CXXDEFINES_'+l]
 		if val: milst += self.to_list(val)
 
-	self.env['DEFLINES'] = ["%s %s" % (x[0], Utils.trimquotes('='.join(x[1:]))) for x in [y.split('=') for y in milst]]
+	self.env['DEFLINES'] = ["{0!s} {1!s}".format(x[0], Utils.trimquotes('='.join(x[1:]))) for x in [y.split('=') for y in milst]]
 	y = self.env['CXXDEFINES_ST']
 	self.env.append_unique('_CXXDEFFLAGS', [y%x for x in milst])
 
@@ -83,13 +83,13 @@ def cxx_hook(self, node):
 	if getattr(self, 'obj_ext', None):
 		obj_ext = self.obj_ext
 	else:
-		obj_ext = '_%d.o' % self.idx
+		obj_ext = '_{0:d}.o'.format(self.idx)
 
 	task = self.create_task('cxx', node, node.change_ext(obj_ext))
 	try:
 		self.compiled_tasks.append(task)
 	except AttributeError:
-		raise Utils.WafError('Have you forgotten to set the feature "cxx" on %s?' % str(self))
+		raise Utils.WafError('Have you forgotten to set the feature "cxx" on {0!s}?'.format(str(self)))
 	return task
 
 cxx_str = '${CXX} ${CXXFLAGS} ${CPPFLAGS} ${_CXXINCFLAGS} ${_CXXDEFFLAGS} ${CXX_SRC_F}${SRC} ${CXX_TGT_F}${TGT}'

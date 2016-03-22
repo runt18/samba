@@ -5,7 +5,7 @@
 import Logs, Utils, Build, Task
 
 def say(txt):
-	Logs.warn("^o^: %s" % txt)
+	Logs.warn("^o^: {0!s}".format(txt))
 
 try:
 	ret = Utils.cmd_output('which cowsay 2> /dev/null').strip()

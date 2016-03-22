@@ -25,7 +25,7 @@ def prepare_impl(t, cwd, ver, wafdir):
 		sys.exit(0)
 
 	# now find the wscript file
-	msg1 = 'Waf: Please run waf from a directory containing a file named "%s" or run distclean' % WSCRIPT_FILE
+	msg1 = 'Waf: Please run waf from a directory containing a file named "{0!s}" or run distclean'.format(WSCRIPT_FILE)
 
 	# in theory projects can be configured in an autotool-like manner:
 	# mkdir build && cd build && ../waf configure && ../waf
@@ -63,7 +63,7 @@ def prepare_impl(t, cwd, ver, wafdir):
 			try:
 				env.load(os.path.join(cwd, Options.lockfile))
 			except:
-				error('could not load %r' % Options.lockfile)
+				error('could not load {0!r}'.format(Options.lockfile))
 			try:
 				os.stat(env['cwd'])
 			except:
@@ -88,7 +88,7 @@ def prepare_impl(t, cwd, ver, wafdir):
 	try:
 		os.chdir(candidate)
 	except OSError:
-		raise Utils.WafError("the folder %r is unreadable" % candidate)
+		raise Utils.WafError("the folder {0!r} is unreadable".format(candidate))
 
 	# define the main module containing the functions init, shutdown, ..
 	Utils.set_main_module(os.path.join(candidate, WSCRIPT_FILE))
@@ -97,7 +97,7 @@ def prepare_impl(t, cwd, ver, wafdir):
 		d = getattr(Utils.g_module, BLDDIR, None)
 		if d:
 			# test if user has set the blddir in wscript.
-			msg = ' Overriding build directory %s with %s' % (d, build_dir_override)
+			msg = ' Overriding build directory {0!s} with {1!s}'.format(d, build_dir_override)
 			warn(msg)
 		Utils.g_module.blddir = build_dir_override
 
@@ -136,8 +136,8 @@ def prepare_impl(t, cwd, ver, wafdir):
 
 def prepare(t, cwd, ver, wafdir):
 	if WAFVERSION != ver:
-		msg = 'Version mismatch: waf %s <> wafadmin %s (wafdir %s)' % (ver, WAFVERSION, wafdir)
-		print('\033[91mError: %s\033[0m' % msg)
+		msg = 'Version mismatch: waf {0!s} <> wafadmin {1!s} (wafdir {2!s})'.format(ver, WAFVERSION, wafdir)
+		print('\033[91mError: {0!s}\033[0m'.format(msg))
 		sys.exit(1)
 
 	#"""
@@ -174,7 +174,7 @@ def main():
 			fun = getattr(Utils.g_module, x, None)
 
 		if not fun:
-			raise Utils.WscriptError('No such command %r' % x)
+			raise Utils.WscriptError('No such command {0!r}'.format(x))
 
 		ctx = getattr(Utils.g_module, x + '_context', Utils.Context)()
 
@@ -189,10 +189,10 @@ def main():
 
 		ela = ''
 		if not Options.options.progress_bar:
-			ela = ' (%s)' % Utils.get_elapsed_time(ini)
+			ela = ' ({0!s})'.format(Utils.get_elapsed_time(ini))
 
 		if x != 'init' and x != 'shutdown':
-			info('%r finished successfully%s' % (x, ela))
+			info('{0!r} finished successfully{1!s}'.format(x, ela))
 
 		if not commands and x != 'shutdown':
 			commands.append('shutdown')
@@ -395,7 +395,7 @@ def build_impl(bld):
 	bld.load_dirs(proj[SRCDIR], proj[BLDDIR])
 	bld.load_envs()
 
-	info("Waf: Entering directory `%s'" % bld.bldnode.abspath())
+	info("Waf: Entering directory `{0!s}'".format(bld.bldnode.abspath()))
 	bld.add_subdirs([os.path.split(Utils.g_module.root_path)[0]])
 
 	# execute something immediately before the build starts
@@ -405,7 +405,7 @@ def build_impl(bld):
 		bld.compile()
 	finally:
 		if Options.options.progress_bar: print('')
-		info("Waf: Leaving directory `%s'" % bld.bldnode.abspath())
+		info("Waf: Leaving directory `{0!s}'".format(bld.bldnode.abspath()))
 
 	# execute something immediately after a successful build
 	bld.post_build()
@@ -459,7 +459,7 @@ def distclean(ctx=None):
 			try:
 				proj = Environment.Environment(f)
 			except:
-				Logs.warn('could not read %r' % f)
+				Logs.warn('could not read {0!r}'.format(f))
 				continue
 
 			try:
@@ -468,13 +468,13 @@ def distclean(ctx=None):
 				pass
 			except OSError, e:
 				if e.errno != errno.ENOENT:
-					Logs.warn('project %r cannot be removed' % proj[BLDDIR])
+					Logs.warn('project {0!r} cannot be removed'.format(proj[BLDDIR]))
 
 			try:
 				os.remove(f)
 			except OSError, e:
 				if e.errno != errno.ENOENT:
-					Logs.warn('file %r cannot be removed' % f)
+					Logs.warn('file {0!r} cannot be removed'.format(f))
 
 		# remove the local waf cache
 		if not commands and f.startswith('.waf'):
@@ -534,11 +534,11 @@ def dist(appname='', version=''):
 	try: from hashlib import sha1 as sha
 	except ImportError: from sha import sha
 	try:
-		digest = " (sha=%r)" % sha(Utils.readf(arch_name)).hexdigest()
+		digest = " (sha={0!r})".format(sha(Utils.readf(arch_name)).hexdigest())
 	except:
 		digest = ''
 
-	info('New archive created: %s%s' % (arch_name, digest))
+	info('New archive created: {0!s}{1!s}'.format(arch_name, digest))
 
 	if os.path.exists(tmp_folder): shutil.rmtree(tmp_folder)
 	return arch_name
@@ -570,13 +570,13 @@ def distcheck(appname='', version='', subdir=''):
 	else:
 		build_path = path
 
-	instdir = tempfile.mkdtemp('.inst', '%s-%s' % (appname, version))
+	instdir = tempfile.mkdtemp('.inst', '{0!s}-{1!s}'.format(appname, version))
 	ret = Utils.pproc.Popen([waf, 'configure', 'build', 'install', 'uninstall', '--destdir=' + instdir], cwd=build_path).wait()
 	if ret:
-		raise Utils.WafError('distcheck failed with code %i' % ret)
+		raise Utils.WafError('distcheck failed with code {0:d}'.format(ret))
 
 	if os.path.exists(instdir):
-		raise Utils.WafError('distcheck succeeded, but files were left in %s' % instdir)
+		raise Utils.WafError('distcheck succeeded, but files were left in {0!s}'.format(instdir))
 
 	shutil.rmtree(path)
 

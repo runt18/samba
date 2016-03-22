@@ -940,8 +940,8 @@ userPassword: thatsAcomplPASS4
 
 if not "://" in host:
     if os.path.isfile(host):
-        host = "tdb://%s" % host
+        host = "tdb://{0!s}".format(host)
     else:
-        host = "ldap://%s" % host
+        host = "ldap://{0!s}".format(host)
 
 TestProgram(module=__name__, opts=subunitopts)

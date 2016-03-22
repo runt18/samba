@@ -37,13 +37,13 @@ class NdrDumpTests(BlackboxTestCase):
         return os.path.join(data_path_dir, name)
 
     def test_ndrdump_with_in(self):
-        self.check_run("ndrdump samr samr_CreateUser in %s" % (self.data_path("samr-CreateUser-in.dat")))
+        self.check_run("ndrdump samr samr_CreateUser in {0!s}".format((self.data_path("samr-CreateUser-in.dat"))))
 
     def test_ndrdump_with_out(self):
-        self.check_run("ndrdump samr samr_CreateUser out %s" % (self.data_path("samr-CreateUser-out.dat")))
+        self.check_run("ndrdump samr samr_CreateUser out {0!s}".format((self.data_path("samr-CreateUser-out.dat"))))
 
     def test_ndrdump_context_file(self):
-        self.check_run("ndrdump --context-file %s samr samr_CreateUser out %s" % (self.data_path("samr-CreateUser-in.dat"), self.data_path("samr-CreateUser-out.dat")))
+        self.check_run("ndrdump --context-file {0!s} samr samr_CreateUser out {1!s}".format(self.data_path("samr-CreateUser-in.dat"), self.data_path("samr-CreateUser-out.dat")))
 
     def test_ndrdump_with_validate(self):
-        self.check_run("ndrdump --validate samr samr_CreateUser in %s" % (self.data_path("samr-CreateUser-in.dat")))
+        self.check_run("ndrdump --validate samr samr_CreateUser in {0!s}".format((self.data_path("samr-CreateUser-in.dat"))))

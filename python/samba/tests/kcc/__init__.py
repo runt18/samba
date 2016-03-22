@@ -60,7 +60,7 @@ class KCCTests(samba.tests.TestCase):
 
     def test_list_dsas(self):
         my_kcc = kcc.KCC(unix_now, False, False, False, False)
-        my_kcc.load_samdb("ldap://%s" % os.environ["SERVER"],
+        my_kcc.load_samdb("ldap://{0!s}".format(os.environ["SERVER"]),
                           self.lp, self.creds)
         dsas = my_kcc.list_dsas()
         env = os.environ['TEST_ENV']
@@ -75,6 +75,6 @@ class KCCTests(samba.tests.TestCase):
         my_kcc = kcc.KCC(unix_now, readonly=True, verify=True,
                          debug=False, dot_file_dir=None)
 
-        my_kcc.run("ldap://%s" % os.environ["SERVER"],
+        my_kcc.run("ldap://{0!s}".format(os.environ["SERVER"]),
                    self.lp, self.creds,
                    attempt_live_connections=False)

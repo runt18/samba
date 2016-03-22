@@ -29,7 +29,7 @@ def ndr_pack(object):
     """
     ndr_pack = getattr(object, "__ndr_pack__", None)
     if ndr_pack is None:
-        raise TypeError("%r is not a NDR object" % object)
+        raise TypeError("{0!r} is not a NDR object".format(object))
     return ndr_pack()
 
 

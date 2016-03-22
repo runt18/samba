@@ -59,10 +59,9 @@ class cmd_sites_create(Command):
             samdb.transaction_commit()
         except sites.SiteAlreadyExistsException, e:
             samdb.transaction_cancel()
-            raise CommandError("Error while creating site %s, error: %s" %
-                               (sitename, str(e)))
+            raise CommandError("Error while creating site {0!s}, error: {1!s}".format(sitename, str(e)))
 
-        self.outf.write("Site %s created !\n" % sitename)
+        self.outf.write("Site {0!s} created !\n".format(sitename))
 
 
 class cmd_sites_delete(Command):
@@ -97,9 +96,9 @@ class cmd_sites_delete(Command):
         except sites.SiteException, e:
             samdb.transaction_cancel()
             raise CommandError(
-                "Error while removing site %s, error: %s" % (sitename, str(e)))
+                "Error while removing site {0!s}, error: {1!s}".format(sitename, str(e)))
 
-        self.outf.write("Site %s removed!\n" % sitename)
+        self.outf.write("Site {0!s} removed!\n".format(sitename))
 
 
 class cmd_sites_subnet_create(Command):
@@ -132,10 +131,9 @@ class cmd_sites_subnet_create(Command):
             samdb.transaction_commit()
         except subnets.SubnetException, e:
             samdb.transaction_cancel()
-            raise CommandError("Error while creating subnet %s: %s" %
-                               (subnetname, e))
+            raise CommandError("Error while creating subnet {0!s}: {1!s}".format(subnetname, e))
 
-        self.outf.write("Subnet %s created !\n" % subnetname)
+        self.outf.write("Subnet {0!s} created !\n".format(subnetname))
 
 
 class cmd_sites_subnet_delete(Command):
@@ -169,10 +167,9 @@ class cmd_sites_subnet_delete(Command):
             samdb.transaction_commit()
         except subnets.SubnetException, e:
             samdb.transaction_cancel()
-            raise CommandError("Error while removing subnet %s, error: %s" %
-                               (subnetname, e))
+            raise CommandError("Error while removing subnet {0!s}, error: {1!s}".format(subnetname, e))
 
-        self.outf.write("Subnet %s removed!\n" % subnetname)
+        self.outf.write("Subnet {0!s} removed!\n".format(subnetname))
 
 
 class cmd_sites_subnet_set_site(Command):
@@ -205,11 +202,9 @@ class cmd_sites_subnet_set_site(Command):
             samdb.transaction_commit()
         except subnets.SubnetException, e:
             samdb.transaction_cancel()
-            raise CommandError("Error assigning subnet %s to site %s: %s" %
-                               (subnetname, site_of_subnet, e))
+            raise CommandError("Error assigning subnet {0!s} to site {1!s}: {2!s}".format(subnetname, site_of_subnet, e))
 
-        print >> self.outf, ("Subnet %s shifted to site %s" %
-                             (subnet_name, site_of_subnet))
+        print >> self.outf, ("Subnet {0!s} shifted to site {1!s}".format(subnet_name, site_of_subnet))
 
 
 class cmd_sites_subnet(SuperCommand):

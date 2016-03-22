@@ -39,7 +39,7 @@ direct manipulation of DNS zones, messages, names, and records.""",
     'url' : 'http://www.dnspython.org',
     'packages' : ['dns', 'dns.rdtypes', 'dns.rdtypes.IN', 'dns.rdtypes.ANY'],
     'download_url' : \
-    'http://www.dnspython.org/kits/%s/dnspython-%s.tar.gz' % (version, version),
+    'http://www.dnspython.org/kits/{0!s}/dnspython-{1!s}.tar.gz'.format(version, version),
     'classifiers' : [
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",

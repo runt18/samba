@@ -71,7 +71,7 @@ def plantestsuite(name, env, cmdline):
     if isinstance(cmdline, list):
         cmdline = " ".join(cmdline)
     if "$LISTOPT" in cmdline:
-        raise AssertionError("test %s supports --list, but not --load-list" % name)
+        raise AssertionError("test {0!s} supports --list, but not --load-list".format(name))
     print cmdline + " 2>&1 " + " | " + add_prefix(name, env)
 
 
@@ -80,7 +80,7 @@ def add_prefix(prefix, env, support_list=False):
         listopt = "$LISTOPT "
     else:
         listopt = ""
-    return "%s/selftest/filter-subunit %s--fail-on-empty --prefix=\"%s.\" --suffix=\"(%s)\"" % (srcdir(), listopt, prefix, env)
+    return "{0!s}/selftest/filter-subunit {1!s}--fail-on-empty --prefix=\"{2!s}.\" --suffix=\"({3!s})\"".format(srcdir(), listopt, prefix, env)
 
 
 def plantestsuite_loadlist(name, env, cmdline):
@@ -88,17 +88,17 @@ def plantestsuite_loadlist(name, env, cmdline):
     if env == "none":
         fullname = name
     else:
-        fullname = "%s(%s)" % (name, env)
+        fullname = "{0!s}({1!s})".format(name, env)
     print fullname
     print env
     if isinstance(cmdline, list):
         cmdline = " ".join(cmdline)
     support_list = ("$LISTOPT" in cmdline)
     if not "$LISTOPT" in cmdline:
-        raise AssertionError("loadlist test %s does not support not --list" % name)
+        raise AssertionError("loadlist test {0!s} does not support not --list".format(name))
     if not "$LOADLIST" in cmdline:
-        raise AssertionError("loadlist test %s does not support --load-list" % name)
-    print ("%s | %s" % (cmdline.replace("$LOADLIST", ""), add_prefix(name, env, support_list))).replace("$LISTOPT", "--list")
+        raise AssertionError("loadlist test {0!s} does not support --load-list".format(name))
+    print ("{0!s} | {1!s}".format(cmdline.replace("$LOADLIST", ""), add_prefix(name, env, support_list))).replace("$LISTOPT", "--list")
     print cmdline.replace("$LISTOPT", "") + " 2>&1 " + " | " + add_prefix(name, env, False)
 
 
@@ -109,7 +109,7 @@ def skiptestsuite(name, reason):
     :param reason: Reason the test suite was skipped
     """
     # FIXME: Report this using subunit, but re-adjust the testsuite count somehow
-    print >>sys.stderr, "skipping %s (%s)" % (name, reason)
+    print >>sys.stderr, "skipping {0!s} ({1!s})".format(name, reason)
 
 
 def planperltestsuite(name, path):
@@ -119,7 +119,7 @@ def planperltestsuite(name, path):
     :param path: Path to the test runner
     """
     if has_perl_test_more:
-        plantestsuite(name, "none", "%s %s | %s" % (" ".join(perl), path, tap2subunit))
+        plantestsuite(name, "none", "{0!s} {1!s} | {2!s}".format(" ".join(perl), path, tap2subunit))
     else:
         skiptestsuite(name, "Test::More not available")
 
@@ -132,7 +132,7 @@ def planpythontestsuite(env, module, name=None, extra_path=None):
     pypath = list(extra_path)
     args = [python, "-m", "samba.subunit.run", "$LISTOPT", "$LOADLIST", module]
     if pypath:
-        args.insert(0, "PYTHONPATH=%s" % ":".join(["$PYTHONPATH"] + pypath))
+        args.insert(0, "PYTHONPATH={0!s}".format(":".join(["$PYTHONPATH"] + pypath)))
     plantestsuite_loadlist(name, env, args)
 
 
@@ -164,11 +164,11 @@ smbtorture4_options = [
 
 def plansmbtorture4testsuite(name, env, options, target, modname=None):
     if modname is None:
-        modname = "samba4.%s" % name
+        modname = "samba4.{0!s}".format(name)
     if isinstance(options, list):
         options = " ".join(options)
-    options = " ".join(smbtorture4_options + ["--target=%s" % target]) + " " + options
-    cmdline = "%s $LISTOPT $LOADLIST %s %s" % (valgrindify(smbtorture4), options, name)
+    options = " ".join(smbtorture4_options + ["--target={0!s}".format(target)]) + " " + options
+    cmdline = "{0!s} $LISTOPT $LOADLIST {1!s} {2!s}".format(valgrindify(smbtorture4), options, name)
     plantestsuite_loadlist(modname, env, cmdline)
 
 

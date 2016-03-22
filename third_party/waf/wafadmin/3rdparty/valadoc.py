@@ -37,18 +37,18 @@ class valadoc_task(Task.Task):
       if not self.env['VALADOCFLAGS']:
         self.env['VALADOCFLAGS'] = ''
       cmd = [Utils.subst_vars(VALADOC_STR, self.env)]
-      cmd.append ('-o %s' % self.output_dir)
+      cmd.append ('-o {0!s}'.format(self.output_dir))
       if getattr(self, 'doclet', None):
-        cmd.append ('--doclet %s' % self.doclet)
-      cmd.append ('--package-name %s' % self.package_name)
+        cmd.append ('--doclet {0!s}'.format(self.doclet))
+      cmd.append ('--package-name {0!s}'.format(self.package_name))
       if getattr(self, 'version', None):
-        cmd.append ('--package-version %s' % self.package_version)
+        cmd.append ('--package-version {0!s}'.format(self.package_version))
       if getattr(self, 'packages', None):
         for package in self.packages:
-          cmd.append ('--pkg %s' % package)
+          cmd.append ('--pkg {0!s}'.format(package))
       if getattr(self, 'vapi_dirs', None):
         for vapi_dir in self.vapi_dirs:
-          cmd.append ('--vapidir %s' % vapi_dir)
+          cmd.append ('--vapidir {0!s}'.format(vapi_dir))
       if not getattr(self, 'protected', None):
         cmd.append ('--no-protected')
       if getattr(self, 'private', None):

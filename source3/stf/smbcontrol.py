@@ -59,8 +59,8 @@ class NoArgCmdTest(comfychair.TestCase):
     """A test class that tests a command with no argument."""
     def runtest(self):
         self.require_root()
-        out = self.runcmd("smbcontrol self %s" % self.cmd)
-        out = self.runcmd("smbcontrol self %s spottyfoot" % self.cmd,
+        out = self.runcmd("smbcontrol self {0!s}".format(self.cmd))
+        out = self.runcmd("smbcontrol self {0!s} spottyfoot".format(self.cmd),
                           expectedResult = 1)
 
 class ForceElection(NoArgCmdTest):
@@ -107,8 +107,8 @@ class OneArgCmdTest(comfychair.TestCase):
     """A test class that tests a command with one argument."""
     def runtest(self):
         self.require_root()
-        out = self.runcmd("smbcontrol self %s spottyfoot" % self.cmd)
-        out = self.runcmd("smbcontrol self %s" % self.cmd, expectedResult = 1)
+        out = self.runcmd("smbcontrol self {0!s} spottyfoot".format(self.cmd))
+        out = self.runcmd("smbcontrol self {0!s}".format(self.cmd), expectedResult = 1)
 
 class DrvUpgrade(OneArgCmdTest):
     """Test driver upgrade message."""
@@ -144,27 +144,24 @@ class PrintNotify(comfychair.TestCase):
 
         for cmd in ["queuepause", "queueresume"]:
 
-            out = self.runcmd("smbcontrol self printnotify %s" % cmd,
+            out = self.runcmd("smbcontrol self printnotify {0!s}".format(cmd),
                               expectedResult = 1)
             self.assert_re_match("Usage:", out[1])
         
-            out = self.runcmd("smbcontrol self printnotify %s spottyfoot"
-                              % cmd)
+            out = self.runcmd("smbcontrol self printnotify {0!s} spottyfoot".format(cmd))
 
         # Job commands
 
         for cmd in ["jobpause", "jobresume", "jobdelete"]:
 
-            out = self.runcmd("smbcontrol self printnotify %s" % cmd,
+            out = self.runcmd("smbcontrol self printnotify {0!s}".format(cmd),
                               expectedResult = 1)
             self.assert_re_match("Usage:", out[1])
 
-            out = self.runcmd("smbcontrol self printnotify %s spottyfoot"
-                              % cmd, expectedResult = 1)
+            out = self.runcmd("smbcontrol self printnotify {0!s} spottyfoot".format(cmd), expectedResult = 1)
             self.assert_re_match("Usage:", out[1])
 
-            out = self.runcmd("smbcontrol self printnotify %s spottyfoot 123"
-                              % cmd)
+            out = self.runcmd("smbcontrol self printnotify {0!s} spottyfoot 123".format(cmd))
 
         # Printer properties
 
@@ -197,7 +194,7 @@ class Profile(comfychair.TestCase):
         self.assert_re_match("Unknown", out[1])
         
         for cmd in ["off", "count", "on", "flush"]:
-            out = self.runcmd("smbcontrol self profile %s" % cmd)
+            out = self.runcmd("smbcontrol self profile {0!s}".format(cmd))
 
 class ProfileLevel(comfychair.TestCase):
     """Test requesting the current profiling level."""

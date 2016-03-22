@@ -31,8 +31,8 @@ class GroupCmdTestCase(SambaToolCmdTest):
 
     def setUp(self):
         super(GroupCmdTestCase, self).setUp()
-        self.samdb = self.getSamDB("-H", "ldap://%s" % os.environ["DC_SERVER"],
-            "-U%s%%%s" % (os.environ["DC_USERNAME"], os.environ["DC_PASSWORD"]))
+        self.samdb = self.getSamDB("-H", "ldap://{0!s}".format(os.environ["DC_SERVER"]),
+            "-U{0!s}%{1!s}".format(os.environ["DC_USERNAME"], os.environ["DC_PASSWORD"]))
         self.groups = []
         self.groups.append(self._randomGroup({"name": "testgroup1"}))
         self.groups.append(self._randomGroup({"name": "testgroup2"}))
@@ -45,14 +45,14 @@ class GroupCmdTestCase(SambaToolCmdTest):
 
             self.assertCmdSuccess(result)
             self.assertEquals(err, "", "There shouldn't be any error message")
-            self.assertIn("Added group %s" % group["name"], out)
+            self.assertIn("Added group {0!s}".format(group["name"]), out)
 
             found = self._find_group(group["name"])
 
             self.assertIsNotNone(found)
 
-            self.assertEquals("%s" % found.get("name"), group["name"])
-            self.assertEquals("%s" % found.get("description"), group["description"])
+            self.assertEquals("{0!s}".format(found.get("name")), group["name"])
+            self.assertEquals("{0!s}".format(found.get("description")), group["description"])
 
     def tearDown(self):
         super(GroupCmdTestCase, self).tearDown()
@@ -74,33 +74,33 @@ class GroupCmdTestCase(SambaToolCmdTest):
         for group in self.groups:
             (result, out, err) = self.runsubcmd("group", "delete", group["name"])
             self.assertCmdSuccess(result,
-                                  "Failed to delete group '%s'" % group["name"])
+                                  "Failed to delete group '{0!s}'".format(group["name"]))
             found = self._find_group(group["name"])
             self.assertIsNone(found,
-                              "Deleted group '%s' still exists" % group["name"])
+                              "Deleted group '{0!s}' still exists".format(group["name"]))
 
         # test adding groups
         for group in self.groups:
             (result, out, err) =  self.runsubcmd("group", "add", group["name"],
-                                                 "--description=%s" % group["description"],
-                                                 "-H", "ldap://%s" % os.environ["DC_SERVER"],
-                                                 "-U%s%%%s" % (os.environ["DC_USERNAME"],
+                                                 "--description={0!s}".format(group["description"]),
+                                                 "-H", "ldap://{0!s}".format(os.environ["DC_SERVER"]),
+                                                 "-U{0!s}%{1!s}".format(os.environ["DC_USERNAME"],
                                                  os.environ["DC_PASSWORD"]))
 
             self.assertCmdSuccess(result)
             self.assertEquals(err,"","There shouldn't be any error message")
-            self.assertIn("Added group %s" % group["name"], out)
+            self.assertIn("Added group {0!s}".format(group["name"]), out)
 
             found = self._find_group(group["name"])
 
-            self.assertEquals("%s" % found.get("samaccountname"),
-                              "%s" % group["name"])
+            self.assertEquals("{0!s}".format(found.get("samaccountname")),
+                              "{0!s}".format(group["name"]))
 
 
     def test_list(self):
         (result, out, err) = self.runsubcmd("group", "list",
-                                            "-H", "ldap://%s" % os.environ["DC_SERVER"],
-                                            "-U%s%%%s" % (os.environ["DC_USERNAME"],
+                                            "-H", "ldap://{0!s}".format(os.environ["DC_SERVER"]),
+                                            "-U{0!s}%{1!s}".format(os.environ["DC_USERNAME"],
                                                           os.environ["DC_PASSWORD"]))
         self.assertCmdSuccess(result, "Error running list")
 
@@ -116,16 +116,16 @@ class GroupCmdTestCase(SambaToolCmdTest):
         for groupobj in grouplist:
             name = groupobj.get("samaccountname", idx=0)
             found = self.assertMatch(out, name,
-                                     "group '%s' not found" % name)
+                                     "group '{0!s}' not found".format(name))
 
     def test_listmembers(self):
         (result, out, err) = self.runsubcmd("group", "listmembers", "Domain Users",
-                                            "-H", "ldap://%s" % os.environ["DC_SERVER"],
-                                            "-U%s%%%s" % (os.environ["DC_USERNAME"],
+                                            "-H", "ldap://{0!s}".format(os.environ["DC_SERVER"]),
+                                            "-U{0!s}%{1!s}".format(os.environ["DC_USERNAME"],
                                                           os.environ["DC_PASSWORD"]))
         self.assertCmdSuccess(result, "Error running listmembers")
 
-        search_filter = "(|(primaryGroupID=513)(memberOf=CN=Domain Users,CN=Users,%s))" % self.samdb.domain_dn()
+        search_filter = "(|(primaryGroupID=513)(memberOf=CN=Domain Users,CN=Users,{0!s}))".format(self.samdb.domain_dn())
 
         grouplist = self.samdb.search(base=self.samdb.domain_dn(),
                                       scope=ldb.SCOPE_SUBTREE,
@@ -136,7 +136,7 @@ class GroupCmdTestCase(SambaToolCmdTest):
 
         for groupobj in grouplist:
             name = groupobj.get("samAccountName", idx=0)
-            found = self.assertMatch(out, name, "group '%s' not found" % name)
+            found = self.assertMatch(out, name, "group '{0!s}' not found".format(name))
 
     def _randomGroup(self, base=None):
         """create a group with random attribute values, you can specify base attributes"""
@@ -151,14 +151,13 @@ class GroupCmdTestCase(SambaToolCmdTest):
 
     def _create_group(self, group):
         return self.runsubcmd("group", "add", group["name"],
-                              "--description=%s" % group["description"],
-                              "-H", "ldap://%s" % os.environ["DC_SERVER"],
-                              "-U%s%%%s" % (os.environ["DC_USERNAME"],
+                              "--description={0!s}".format(group["description"]),
+                              "-H", "ldap://{0!s}".format(os.environ["DC_SERVER"]),
+                              "-U{0!s}%{1!s}".format(os.environ["DC_USERNAME"],
                                             os.environ["DC_PASSWORD"]))
 
     def _find_group(self, name):
-        search_filter = ("(&(sAMAccountName=%s)(objectCategory=%s,%s))" %
-                         (ldb.binary_encode(name),
+        search_filter = ("(&(sAMAccountName={0!s})(objectCategory={1!s},{2!s}))".format(ldb.binary_encode(name),
                          "CN=Group,CN=Schema,CN=Configuration",
                          self.samdb.domain_dn()))
         grouplist = self.samdb.search(base=self.samdb.domain_dn(),

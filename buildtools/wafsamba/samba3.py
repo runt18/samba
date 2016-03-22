@@ -19,12 +19,12 @@ def SAMBA3_ADD_OPTION(opt, option, help=(), dest=None, default=True,
         default_str = str(default)
 
     if help == ():
-        help = ("Build with %s support (default=%s)" % (option, default_str))
+        help = ("Build with {0!s} support (default={1!s})".format(option, default_str))
     if dest is None:
-        dest = "with_%s" % option.replace('-', '_')
+        dest = "with_{0!s}".format(option.replace('-', '_'))
 
-    with_val = "--%s-%s" % (with_name, option)
-    without_val = "--%s-%s" % (without_name, option)
+    with_val = "--{0!s}-{1!s}".format(with_name, option)
+    without_val = "--{0!s}-{1!s}".format(without_name, option)
 
     #FIXME: This is broken and will always default to "default" no matter if
     # --with or --without is chosen.

@@ -81,7 +81,7 @@ def __read_raw_entries(f):
 
                 entry.append(l)
             else:
-                print >>sys.stderr, "Invalid line: %s" % l,
+                print >>sys.stderr, "Invalid line: {0!s}".format(l),
                 sys.exit(1)
 
         if len(entry):
@@ -105,10 +105,10 @@ def __write_ldif_one(entry):
 
     for l in entry:
         if l[2] == 0:
-            out.append("%s: %s" % (l[0], l[1]))
+            out.append("{0!s}: {1!s}".format(l[0], l[1]))
         else:
             # This is a base64-encoded value
-            out.append("%s:: %s" % (l[0], l[1]))
+            out.append("{0!s}:: {1!s}".format(l[0], l[1]))
 
     return "\n".join(out)
 
@@ -180,7 +180,7 @@ if __name__ == '__main__':
     try:
         display_specifiers_file = sys.argv[1]
     except IndexError:
-        print >>sys.stderr, "Usage: %s display-specifiers-ldif-file.txt" % (sys.argv[0])
+        print >>sys.stderr, "Usage: {0!s} display-specifiers-ldif-file.txt".format((sys.argv[0]))
         sys.exit(1)
 
     print read_ms_ldif(display_specifiers_file)

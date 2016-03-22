@@ -15,7 +15,7 @@ from samba.dcerpc import winreg
 import optparse
 import samba.getopt as options
 
-parser = optparse.OptionParser("%s <BINDING> [path]" % sys.argv[0])
+parser = optparse.OptionParser("{0!s} <BINDING> [path]".format(sys.argv[0]))
 sambaopts = options.SambaOptions(parser)
 parser.add_option_group(sambaopts)
 parser.add_option("--createkey", type="string", metavar="KEYNAME", 
@@ -38,9 +38,9 @@ def list_values(key):
         name = winreg.StringBuf()
         name.size = max_valnamelen
         (name, type, data, _, data_len) = conn.EnumValue(key, i, name, 0, "", max_valbufsize, 0)
-        print "\ttype=%-30s size=%4d  '%s'" % type, len, name
+        print "\ttype={0:<30!s} size={1:4d}  '{2!s}'".format(*type), len, name
         if type in (winreg.REG_SZ, winreg.REG_EXPAND_SZ):
-            print "\t\t'%s'" % data
+            print "\t\t'{0!s}'".format(data)
 #        if (v.type == reg.REG_MULTI_SZ) {
 #            for (j in v.value) {
 #                printf("\t\t'%s'\n", v.value[j])
@@ -63,7 +63,7 @@ def list_path(key, path):
         keyclass.size = max_subkeysize
         (name, _, _) = conn.EnumKey(key, i, name, keyclass=keyclass, last_changed_time=None)[0]
         subkey = conn.OpenKey(key, name, 0, winreg.KEY_QUERY_VALUE | winreg.KEY_ENUMERATE_SUB_KEYS)
-        count += list_path(subkey, "%s\\%s" % (path, name))
+        count += list_path(subkey, "{0!s}\\{1!s}".format(path, name))
         list_values(subkey)
     return count
 
@@ -75,11 +75,11 @@ else:
 if opts.createkey:
     reg.create_key("HKLM\\SOFTWARE", opt.createkey)
 else:
-    print "Listing registry tree '%s'" % root
+    print "Listing registry tree '{0!s}'".format(root)
     try:
-        root_key = getattr(conn, "Open%s" % root)(None, winreg.KEY_QUERY_VALUE | winreg.KEY_ENUMERATE_SUB_KEYS)
+        root_key = getattr(conn, "Open{0!s}".format(root))(None, winreg.KEY_QUERY_VALUE | winreg.KEY_ENUMERATE_SUB_KEYS)
     except AttributeError:
-        print "Unknown root key name %s" % root
+        print "Unknown root key name {0!s}".format(root)
         sys.exit(1)
     count = list_path(root_key, root)
     if count == 0:

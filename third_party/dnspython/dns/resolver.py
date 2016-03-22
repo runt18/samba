@@ -645,7 +645,7 @@ class Resolver(object):
                      raise ValueError
 
                  device_key = _winreg.OpenKey(
-                     lm, r'SYSTEM\CurrentControlSet\Enum\%s' % pnp_id)
+                     lm, r'SYSTEM\CurrentControlSet\Enum\{0!s}'.format(pnp_id))
 
                  try:
                      # Get ConfigFlags for this device

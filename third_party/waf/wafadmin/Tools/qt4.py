@@ -113,7 +113,7 @@ class qxx_task(Task.Task):
 					continue
 				break
 			else:
-				raise Utils.WafError("no header found for %s which is a moc file" % str(d))
+				raise Utils.WafError("no header found for {0!s} which is a moc file".format(str(d)))
 
 			m_node = h_node.change_ext('.moc')
 			tree.node_deps[(self.inputs[0].parent.id, self.env.variant(), m_node.name)] = h_node
@@ -160,7 +160,7 @@ def translation_update(task):
 
 	for x in task.inputs:
 		file = x.abspath(task.env)
-		cmd = "%s %s -ts %s" % (lupdate, file, outs)
+		cmd = "{0!s} {1!s} -ts {2!s}".format(lupdate, file, outs)
 		Utils.pprint('BLUE', cmd)
 		task.generator.bld.exec_command(cmd)
 
@@ -264,7 +264,7 @@ def apply_qt4(self):
 def cxx_hook(self, node):
 	# create the compilation task: cpp or cc
 	try: obj_ext = self.obj_ext
-	except AttributeError: obj_ext = '_%d.o' % self.idx
+	except AttributeError: obj_ext = '_{0:d}.o'.format(self.idx)
 
 	task = self.create_task('qxx', node, node.change_ext(obj_ext))
 	self.compiled_tasks.append(task)
@@ -326,7 +326,7 @@ def detect_qt4(conf):
 				lst.reverse()
 
 				# keep the highest version
-				qtdir = '/usr/local/Trolltech/%s/' % lst[0]
+				qtdir = '/usr/local/Trolltech/{0!s}/'.format(lst[0])
 				qtbin = os.path.join(qtdir, 'bin')
 				paths.append(qtbin)
 
@@ -385,9 +385,9 @@ def detect_qt4(conf):
 	version = version.replace('Qt User Interface Compiler ','')
 	version = version.replace('User Interface Compiler for Qt', '')
 	if version.find(" 3.") != -1:
-		conf.check_message('uic version', '(too old)', 0, option='(%s)'%version)
+		conf.check_message('uic version', '(too old)', 0, option='({0!s})'.format(version))
 		sys.exit(1)
-	conf.check_message('uic version', '', 1, option='(%s)'%version)
+	conf.check_message('uic version', '', 1, option='({0!s})'.format(version))
 
 	find_bin(['moc-qt4', 'moc'], 'QT_MOC')
 	find_bin(['rcc'], 'QT_RCC')
@@ -415,7 +415,7 @@ def detect_qt4(conf):
 			# original author seems to prefer static to shared libraries
 			for (pat, kind) in ((conf.env.staticlib_PATTERN, 'STATIC'), (conf.env.shlib_PATTERN, '')):
 
-				conf.check_message_1('Checking for %s %s' % (lib, kind))
+				conf.check_message_1('Checking for {0!s} {1!s}'.format(lib, kind))
 
 				for ext in ['', '4']:
 					path = os.path.join(qtlibs, pat % (lib + d + ext))

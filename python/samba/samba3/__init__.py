@@ -88,7 +88,7 @@ class Registry(DbDatabase):
         :param key: Key path.
         :return: list with key names
         """
-        data = self.db.get("%s\x00" % key)
+        data = self.db.get("{0!s}\x00".format(key))
         if data is None:
             return []
         (num, ) = struct.unpack("<L", data[0:4])
@@ -104,7 +104,7 @@ class Registry(DbDatabase):
         :param key: Key to retrieve values for.
         :return: Dictionary with value names as key, tuple with type and
             data as value."""
-        data = self.db.get("%s/%s\x00" % (REGISTRY_VALUE_PREFIX, key))
+        data = self.db.get("{0!s}/{1!s}\x00".format(REGISTRY_VALUE_PREFIX, key))
         if data is None:
             return {}
         ret = {}
@@ -167,7 +167,7 @@ class IdmapDatabase(DbDatabase):
         :param xid: UID or GID to retrive SID for.
         :param id_type: Type of id specified - 'UID' or 'GID'
         """
-        data = self.db.get("%s %s\0" % (id_type, str(xid)))
+        data = self.db.get("{0!s} {1!s}\0".format(id_type, str(xid)))
         if data is None:
             return data
         return data.rstrip("\0")
@@ -178,13 +178,13 @@ class IdmapDatabase(DbDatabase):
         :param uid: UID to retrieve SID for.
         :return: A SID or None if no mapping was found.
         """
-        data = self.db.get("%s%d\0" % (IDMAP_USER_PREFIX, uid))
+        data = self.db.get("{0!s}{1:d}\0".format(IDMAP_USER_PREFIX, uid))
         if data is None:
             return data
         return data.rstrip("\0")
 
     def get_group_sid(self, gid):
-        data = self.db.get("%s%d\0" % (IDMAP_GROUP_PREFIX, gid))
+        data = self.db.get("{0!s}{1:d}\0".format(IDMAP_GROUP_PREFIX, gid))
         if data is None:
             return data
         return data.rstrip("\0")
@@ -211,7 +211,7 @@ class SecretsDatabase(DbDatabase):
         return self.db.get("SECRETS/AUTH_USER")
 
     def get_domain_guid(self, host):
-        return self.db.get("SECRETS/DOMGUID/%s" % host)
+        return self.db.get("SECRETS/DOMGUID/{0!s}".format(host))
 
     def ldap_dns(self):
         for k in self.db.iterkeys():
@@ -228,25 +228,25 @@ class SecretsDatabase(DbDatabase):
                 yield k[len("SECRETS/SID/"):].rstrip("\0")
 
     def get_ldap_bind_pw(self, host):
-        return self.db.get("SECRETS/LDAP_BIND_PW/%s" % host)
+        return self.db.get("SECRETS/LDAP_BIND_PW/{0!s}".format(host))
 
     def get_afs_keyfile(self, host):
-        return self.db.get("SECRETS/AFS_KEYFILE/%s" % host)
+        return self.db.get("SECRETS/AFS_KEYFILE/{0!s}".format(host))
 
     def get_machine_sec_channel_type(self, host):
-        return fetch_uint32(self.db, "SECRETS/MACHINE_SEC_CHANNEL_TYPE/%s" % host)
+        return fetch_uint32(self.db, "SECRETS/MACHINE_SEC_CHANNEL_TYPE/{0!s}".format(host))
 
     def get_machine_last_change_time(self, host):
-        return fetch_uint32(self.db, "SECRETS/MACHINE_LAST_CHANGE_TIME/%s" % host)
+        return fetch_uint32(self.db, "SECRETS/MACHINE_LAST_CHANGE_TIME/{0!s}".format(host))
 
     def get_machine_password(self, host):
-        return self.db.get("SECRETS/MACHINE_PASSWORD/%s" % host)
+        return self.db.get("SECRETS/MACHINE_PASSWORD/{0!s}".format(host))
 
     def get_machine_acc(self, host):
-        return self.db.get("SECRETS/$MACHINE.ACC/%s" % host)
+        return self.db.get("SECRETS/$MACHINE.ACC/{0!s}".format(host))
 
     def get_domtrust_acc(self, host):
-        return self.db.get("SECRETS/$DOMTRUST.ACC/%s" % host)
+        return self.db.get("SECRETS/$DOMTRUST.ACC/{0!s}".format(host))
 
     def trusted_domains(self):
         for k in self.db.iterkeys():
@@ -257,7 +257,7 @@ class SecretsDatabase(DbDatabase):
         return self.db.get("INFO/random_seed")
 
     def get_sid(self, host):
-        return self.db.get("SECRETS/SID/%s" % host.upper())
+        return self.db.get("SECRETS/SID/{0!s}".format(host.upper()))
 
 
 SHARE_DATABASE_VERSION_V1 = 1
@@ -275,7 +275,7 @@ class ShareInfoDatabase(DbDatabase):
 
         :param name: Name of the share
         """
-        secdesc = self.db.get("SECDESC/%s" % name)
+        secdesc = self.db.get("SECDESC/{0!s}".format(name))
         # FIXME: Run ndr_pull_security_descriptor
         return secdesc
 
@@ -336,7 +336,7 @@ class WinsDatabase(object):
                 ips.append(entries[i])
                 i+=1
             nb_flags = int(entries[i][:-1], 16)
-            assert not name in self.entries, "Name %s exists twice" % name
+            assert not name in self.entries, "Name {0!s} exists twice".format(name)
             self.entries[name] = (ttl, ips, nb_flags)
         f.close()
 

@@ -196,9 +196,9 @@ Example5 shows how to create an RFC2307/NIS domain enabled user account. If
                           uidnumber=uid_number, gidnumber=gid_number,
                           gecos=gecos, loginshell=login_shell)
         except Exception, e:
-            raise CommandError("Failed to add user '%s': " % username, e)
+            raise CommandError("Failed to add user '{0!s}': ".format(username), e)
 
-        self.outf.write("User '%s' created successfully\n" % username)
+        self.outf.write("User '{0!s}' created successfully\n".format(username))
 
 
 class cmd_user_add(cmd_user_create):
@@ -258,8 +258,8 @@ Example2 shows how to delete a user in the domain against the local server.   su
                           credentials=creds, lp=lp)
             samdb.deleteuser(username)
         except Exception, e:
-            raise CommandError('Failed to remove user "%s"' % username, e)
-        self.outf.write("Deleted user %s\n" % username)
+            raise CommandError('Failed to remove user "{0!s}"'.format(username), e)
+        self.outf.write("Deleted user {0!s}\n".format(username))
 
 
 class cmd_user_list(Command):
@@ -287,14 +287,13 @@ class cmd_user_list(Command):
 
         domain_dn = samdb.domain_dn()
         res = samdb.search(domain_dn, scope=ldb.SCOPE_SUBTREE,
-                    expression=("(&(objectClass=user)(userAccountControl:%s:=%u))"
-                    % (ldb.OID_COMPARATOR_AND, dsdb.UF_NORMAL_ACCOUNT)),
+                    expression=("(&(objectClass=user)(userAccountControl:{0!s}:={1:d}))".format(ldb.OID_COMPARATOR_AND, dsdb.UF_NORMAL_ACCOUNT)),
                     attrs=["samaccountname"])
         if (len(res) == 0):
             return
 
         for msg in res:
-            self.outf.write("%s\n" % msg.get("samaccountname", idx=0))
+            self.outf.write("{0!s}\n".format(msg.get("samaccountname", idx=0)))
 
 
 class cmd_user_enable(Command):
@@ -352,7 +351,7 @@ Example3 shows how to enable a user in the domain against a local LDAP server.  
             raise CommandError("Either the username or '--filter' must be specified!")
 
         if filter is None:
-            filter = "(&(objectClass=user)(sAMAccountName=%s))" % (ldb.binary_encode(username))
+            filter = "(&(objectClass=user)(sAMAccountName={0!s}))".format((ldb.binary_encode(username)))
 
         lp = sambaopts.get_loadparm()
         creds = credopts.get_credentials(lp, fallback_machine=True)
@@ -362,8 +361,8 @@ Example3 shows how to enable a user in the domain against a local LDAP server.  
         try:
             samdb.enable_account(filter)
         except Exception, msg:
-            raise CommandError("Failed to enable user '%s': %s" % (username or filter, msg))
-        self.outf.write("Enabled user '%s'\n" % (username or filter))
+            raise CommandError("Failed to enable user '{0!s}': {1!s}".format(username or filter, msg))
+        self.outf.write("Enabled user '{0!s}'\n".format((username or filter)))
 
 
 class cmd_user_disable(Command):
@@ -391,7 +390,7 @@ class cmd_user_disable(Command):
             raise CommandError("Either the username or '--filter' must be specified!")
 
         if filter is None:
-            filter = "(&(objectClass=user)(sAMAccountName=%s))" % (ldb.binary_encode(username))
+            filter = "(&(objectClass=user)(sAMAccountName={0!s}))".format((ldb.binary_encode(username)))
 
         lp = sambaopts.get_loadparm()
         creds = credopts.get_credentials(lp, fallback_machine=True)
@@ -401,7 +400,7 @@ class cmd_user_disable(Command):
         try:
             samdb.disable_account(filter)
         except Exception, msg:
-            raise CommandError("Failed to disable user '%s': %s" % (username or filter, msg))
+            raise CommandError("Failed to disable user '{0!s}': {1!s}".format(username or filter, msg))
 
 
 class cmd_user_setexpiry(Command):
@@ -457,7 +456,7 @@ Example4 shows how to set the account expiration so that it will never expire.  
             raise CommandError("Either the username or '--filter' must be specified!")
 
         if filter is None:
-            filter = "(&(objectClass=user)(sAMAccountName=%s))" % (ldb.binary_encode(username))
+            filter = "(&(objectClass=user)(sAMAccountName={0!s}))".format((ldb.binary_encode(username)))
 
         lp = sambaopts.get_loadparm()
         creds = credopts.get_credentials(lp)
@@ -469,13 +468,13 @@ Example4 shows how to set the account expiration so that it will never expire.  
             samdb.setexpiry(filter, days*24*3600, no_expiry_req=noexpiry)
         except Exception, msg:
             # FIXME: Catch more specific exception
-            raise CommandError("Failed to set expiry for user '%s': %s" % (
+            raise CommandError("Failed to set expiry for user '{0!s}': {1!s}".format(
                 username or filter, msg))
         if noexpiry:
-            self.outf.write("Expiry for user '%s' disabled.\n" % (
-                username or filter))
+            self.outf.write("Expiry for user '{0!s}' disabled.\n".format((
+                username or filter)))
         else:
-            self.outf.write("Expiry for user '%s' set to %u days.\n" % (
+            self.outf.write("Expiry for user '{0!s}' set to {1:d} days.\n".format(
                 username or filter, days))
 
 
@@ -520,7 +519,7 @@ class cmd_user_password(Command):
             net.change_password(password)
         except Exception, msg:
             # FIXME: catch more specific exception
-            raise CommandError("Failed to change password : %s" % msg)
+            raise CommandError("Failed to change password : {0!s}".format(msg))
         self.outf.write("Changed password OK\n")
 
 
@@ -591,7 +590,7 @@ Example3 shows how an administrator would reset TestUser3 user's password to pas
             password = getpass("New Password: ")
 
         if filter is None:
-            filter = "(&(objectClass=user)(sAMAccountName=%s))" % (ldb.binary_encode(username))
+            filter = "(&(objectClass=user)(sAMAccountName={0!s}))".format((ldb.binary_encode(username)))
 
         lp = sambaopts.get_loadparm()
         creds = credopts.get_credentials(lp)
@@ -607,7 +606,7 @@ Example3 shows how an administrator would reset TestUser3 user's password to pas
                               username=username)
         except Exception, msg:
             # FIXME: catch more specific exception
-            raise CommandError("Failed to set password for user '%s': %s" % (username or filter, msg))
+            raise CommandError("Failed to set password for user '{0!s}': {1!s}".format(username or filter, msg))
         self.outf.write("Changed password OK\n")
 
 

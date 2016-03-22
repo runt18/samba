@@ -29,8 +29,8 @@ class BaseSitesCmdTestCase(SambaToolCmdTest):
     """Tests for samba-tool sites subnets"""
     def setUp(self):
         super(BaseSitesCmdTestCase, self).setUp()
-        self.dburl = "ldap://%s" % os.environ["DC_SERVER"]
-        self.creds_string = "-U%s%%%s" % (os.environ["DC_USERNAME"],
+        self.dburl = "ldap://{0!s}".format(os.environ["DC_SERVER"])
+        self.creds_string = "-U{0!s}%{1!s}".format(os.environ["DC_USERNAME"],
                                           os.environ["DC_PASSWORD"])
 
         self.samdb = self.getSamDB("-H", self.dburl, self.creds_string)
@@ -46,11 +46,11 @@ class SitesCmdTestCase(BaseSitesCmdTestCase):
                                           "-H", self.dburl, self.creds_string)
         self.assertCmdSuccess(result)
 
-        dnsites = ldb.Dn(self.samdb, "CN=Sites,%s" % self.config_dn)
-        dnsite = ldb.Dn(self.samdb, "CN=%s,%s" % (sitename, dnsites))
+        dnsites = ldb.Dn(self.samdb, "CN=Sites,{0!s}".format(self.config_dn))
+        dnsite = ldb.Dn(self.samdb, "CN={0!s},{1!s}".format(sitename, dnsites))
 
         ret = self.samdb.search(base=dnsites, scope=ldb.SCOPE_ONELEVEL,
-                                expression='(dn=%s)' % str(dnsite))
+                                expression='(dn={0!s})'.format(str(dnsite)))
         self.assertEquals(len(ret), 1)
 
         # now delete it
@@ -93,20 +93,18 @@ class SitesSubnetCmdTestCase(BaseSitesCmdTestCase):
 
             ret = self.samdb.search(base=self.config_dn,
                                     scope=ldb.SCOPE_SUBTREE,
-                                    expression=('(&(objectclass=subnet)(cn=%s))'
-                                                % cidr))
+                                    expression=('(&(objectclass=subnet)(cn={0!s}))'.format(cidr)))
             self.assertIsNotNone(ret)
             self.assertEqual(len(ret), 1)
 
         dnsubnets = ldb.Dn(self.samdb,
-                           "CN=Subnets,CN=Sites,%s" % self.config_dn)
+                           "CN=Subnets,CN=Sites,{0!s}".format(self.config_dn))
 
         for cidr, sitename in cidrs:
-            dnsubnet = ldb.Dn(self.samdb, ("Cn=%s,CN=Subnets,CN=Sites,%s" %
-                                           (cidr, self.config_dn)))
+            dnsubnet = ldb.Dn(self.samdb, ("Cn={0!s},CN=Subnets,CN=Sites,{1!s}".format(cidr, self.config_dn)))
 
             ret = self.samdb.search(base=dnsubnets, scope=ldb.SCOPE_ONELEVEL,
-                                    expression='(dn=%s)' % dnsubnet)
+                                    expression='(dn={0!s})'.format(dnsubnet))
             self.assertIsNotNone(ret)
             self.assertEqual(len(ret), 1)
             self.samdb.delete(dnsubnet, ["tree_delete:0"])
@@ -129,8 +127,7 @@ class SitesSubnetCmdTestCase(BaseSitesCmdTestCase):
 
             ret = self.samdb.search(base=self.config_dn,
                                     scope=ldb.SCOPE_SUBTREE,
-                                    expression=('(&(objectclass=subnet)(cn=%s))'
-                                                % cidr))
+                                    expression=('(&(objectclass=subnet)(cn={0!s}))'.format(cidr)))
 
             self.assertIsNotNone(ret)
             self.assertEqual(len(ret), 0)

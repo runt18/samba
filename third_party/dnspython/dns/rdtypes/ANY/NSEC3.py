@@ -77,7 +77,7 @@ class NSEC3(dns.rdata.Rdata):
                         bits.append(dns.rdatatype.to_text(window * 256 + \
                                                           i * 8 + j))
             text += (' ' + ' '.join(bits))
-        return '%u %u %u %s %s%s' % (self.algorithm, self.flags, self.iterations,
+        return '{0:d} {1:d} {2:d} {3!s} {4!s}{5!s}'.format(self.algorithm, self.flags, self.iterations,
                                      salt, next, text)
 
     def from_text(cls, rdclass, rdtype, tok, origin = None, relativize = True):

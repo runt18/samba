@@ -111,7 +111,7 @@ def validate_cfg(self, kw):
 	# pkg-config version
 	if 'atleast_pkgconfig_version' in kw:
 		if not 'msg' in kw:
-			kw['msg'] = 'Checking for pkg-config version >= %s' % kw['atleast_pkgconfig_version']
+			kw['msg'] = 'Checking for pkg-config version >= {0!s}'.format(kw['atleast_pkgconfig_version'])
 		return
 
 	# pkg-config --modversion
@@ -120,7 +120,7 @@ def validate_cfg(self, kw):
 
 	if 'variables' in kw:
 		if not 'msg' in kw:
-			kw['msg'] = 'Checking for %s variables' % kw['package']
+			kw['msg'] = 'Checking for {0!s} variables'.format(kw['package'])
 		return
 
 	# checking for the version of a module, for the moment, one thing at a time
@@ -128,14 +128,14 @@ def validate_cfg(self, kw):
 		y = x.replace('-', '_')
 		if y in kw:
 			if not 'package' in kw:
-				raise ValueError('%s requires a package' % x)
+				raise ValueError('{0!s} requires a package'.format(x))
 
 			if not 'msg' in kw:
-				kw['msg'] = 'Checking for %s %s %s' % (kw['package'], cfg_ver[x], kw[y])
+				kw['msg'] = 'Checking for {0!s} {1!s} {2!s}'.format(kw['package'], cfg_ver[x], kw[y])
 			return
 
 	if not 'msg' in kw:
-		kw['msg'] = 'Checking for %s' % (kw['package'] or kw['path'])
+		kw['msg'] = 'Checking for {0!s}'.format((kw['package'] or kw['path']))
 	if not 'okmsg' in kw:
 		kw['okmsg'] = 'yes'
 	if not 'errmsg' in kw:
@@ -143,15 +143,15 @@ def validate_cfg(self, kw):
 
 @conf
 def cmd_and_log(self, cmd, kw):
-	Logs.debug('runner: %s\n' % cmd)
+	Logs.debug('runner: {0!s}\n'.format(cmd))
 	if self.log:
-		self.log.write('%s\n' % cmd)
+		self.log.write('{0!s}\n'.format(cmd))
 
 	try:
 		p = Utils.pproc.Popen(cmd, stdout=Utils.pproc.PIPE, stderr=Utils.pproc.PIPE, shell=True)
 		(out, err) = p.communicate()
 	except OSError, e:
-		self.log.write('error %r' % e)
+		self.log.write('error {0!r}'.format(e))
 		self.fatal(str(e))
 
 	# placeholder, don't touch
@@ -176,7 +176,7 @@ def exec_cfg(self, kw):
 
 	# pkg-config version
 	if 'atleast_pkgconfig_version' in kw:
-		cmd = '%s --atleast-pkgconfig-version=%s' % (kw['path'], kw['atleast_pkgconfig_version'])
+		cmd = '{0!s} --atleast-pkgconfig-version={1!s}'.format(kw['path'], kw['atleast_pkgconfig_version'])
 		self.cmd_and_log(cmd, kw)
 		if not 'okmsg' in kw:
 			kw['okmsg'] = 'yes'
@@ -186,7 +186,7 @@ def exec_cfg(self, kw):
 	for x in cfg_ver:
 		y = x.replace('-', '_')
 		if y in kw:
-			self.cmd_and_log('%s --%s=%s %s' % (kw['path'], x, kw[y], kw['package']), kw)
+			self.cmd_and_log('{0!s} --{1!s}={2!s} {3!s}'.format(kw['path'], x, kw[y], kw['package']), kw)
 			if not 'okmsg' in kw:
 				kw['okmsg'] = 'yes'
 			self.define(self.have_define(kw.get('uselib_store', kw['package'])), 1, 0)
@@ -194,8 +194,8 @@ def exec_cfg(self, kw):
 
 	# retrieving the version of a module
 	if 'modversion' in kw:
-		version = self.cmd_and_log('%s --modversion %s' % (kw['path'], kw['modversion']), kw).strip()
-		self.define('%s_VERSION' % Utils.quote_define_name(kw.get('uselib_store', kw['modversion'])), version)
+		version = self.cmd_and_log('{0!s} --modversion {1!s}'.format(kw['path'], kw['modversion']), kw).strip()
+		self.define('{0!s}_VERSION'.format(Utils.quote_define_name(kw.get('uselib_store', kw['modversion']))), version)
 		return version
 
 	# retrieving variables of a module
@@ -204,8 +204,8 @@ def exec_cfg(self, kw):
 		uselib = kw.get('uselib_store', kw['package'].upper())
 		vars = Utils.to_list(kw['variables'])
 		for v in vars:
-			val = self.cmd_and_log('%s --variable=%s %s' % (kw['path'], v, kw['package']), kw).strip()
-			var = '%s_%s' % (uselib, v)
+			val = self.cmd_and_log('{0!s} --variable={1!s} {2!s}'.format(kw['path'], v, kw['package']), kw).strip()
+			var = '{0!s}_{1!s}'.format(uselib, v)
 			env[var] = val
 		if not 'okmsg' in kw:
 			kw['okmsg'] = 'yes'
@@ -218,7 +218,7 @@ def exec_cfg(self, kw):
 	if not defi:
 		defi = self.env.PKG_CONFIG_DEFINES or {}
 	for key, val in defi.iteritems():
-		lst.append('--define-variable=%s=%s' % (key, val))
+		lst.append('--define-variable={0!s}={1!s}'.format(key, val))
 
 	lst.append(kw.get('args', ''))
 	lst.append(kw['package'])
@@ -254,7 +254,7 @@ def check_cfg(self, *k, **kw):
 			if Logs.verbose > 1:
 				raise
 			else:
-				self.fatal('the configuration failed (see %r)' % self.log.name)
+				self.fatal('the configuration failed (see {0!r})'.format(self.log.name))
 	else:
 		kw['success'] = ret
 		if 'okmsg' in kw:
@@ -307,7 +307,7 @@ def validate_c(self, kw):
 	def to_header(dct):
 		if 'header_name' in dct:
 			dct = Utils.to_list(dct['header_name'])
-			return ''.join(['#include <%s>\n' % x for x in dct])
+			return ''.join(['#include <{0!s}>\n'.format(x) for x in dct])
 		return ''
 
 	# set the file name
@@ -329,19 +329,19 @@ def validate_c(self, kw):
 		if not kw.get('no_header', False):
 			if not 'header_name' in kw:
 				kw['header_name'] = []
-			fwk = '%s/%s.h' % (fwkname, fwkname)
+			fwk = '{0!s}/{1!s}.h'.format(fwkname, fwkname)
 			if kw.get('remove_dot_h', None):
 				fwk = fwk[:-2]
 			kw['header_name'] = Utils.to_list(kw['header_name']) + [fwk]
 
-		kw['msg'] = 'Checking for framework %s' % fwkname
+		kw['msg'] = 'Checking for framework {0!s}'.format(fwkname)
 		kw['framework'] = fwkname
 		#kw['frameworkpath'] = set it yourself
 
 	if 'function_name' in kw:
 		fu = kw['function_name']
 		if not 'msg' in kw:
-			kw['msg'] = 'Checking for function %s' % fu
+			kw['msg'] = 'Checking for function {0!s}'.format(fu)
 		kw['code'] = to_header(kw) + SNIP1 % fu
 		if not 'uselib_store' in kw:
 			kw['uselib_store'] = fu.upper()
@@ -351,7 +351,7 @@ def validate_c(self, kw):
 	elif 'type_name' in kw:
 		tu = kw['type_name']
 		if not 'msg' in kw:
-			kw['msg'] = 'Checking for type %s' % tu
+			kw['msg'] = 'Checking for type {0!s}'.format(tu)
 		if not 'header_name' in kw:
 			kw['header_name'] = 'stdint.h'
 		kw['code'] = to_header(kw) + SNIP2 % {'type_name' : tu}
@@ -360,7 +360,7 @@ def validate_c(self, kw):
 
 	elif 'header_name' in kw:
 		if not 'msg' in kw:
-			kw['msg'] = 'Checking for header %s' % kw['header_name']
+			kw['msg'] = 'Checking for header {0!s}'.format(kw['header_name'])
 
 		l = Utils.to_list(kw['header_name'])
 		assert len(l)>0, 'list of headers in header_name is empty'
@@ -375,13 +375,13 @@ def validate_c(self, kw):
 
 	if 'lib' in kw:
 		if not 'msg' in kw:
-			kw['msg'] = 'Checking for library %s' % kw['lib']
+			kw['msg'] = 'Checking for library {0!s}'.format(kw['lib'])
 		if not 'uselib_store' in kw:
 			kw['uselib_store'] = kw['lib'].upper()
 
 	if 'staticlib' in kw:
 		if not 'msg' in kw:
-			kw['msg'] = 'Checking for static library %s' % kw['staticlib']
+			kw['msg'] = 'Checking for static library {0!s}'.format(kw['staticlib'])
 		if not 'uselib_store' in kw:
 			kw['uselib_store'] = kw['staticlib'].upper()
 
@@ -397,7 +397,7 @@ def validate_c(self, kw):
 	for (flagsname,flagstype) in [('cxxflags','compiler'), ('cflags','compiler'), ('linkflags','linker')]:
 		if flagsname in kw:
 			if not 'msg' in kw:
-				kw['msg'] = 'Checking for %s flags %s' % (flagstype, kw[flagsname])
+				kw['msg'] = 'Checking for {0!s} flags {1!s}'.format(flagstype, kw[flagsname])
 			if not 'errmsg' in kw:
 				kw['errmsg'] = 'no'
 
@@ -472,7 +472,7 @@ def check(self, *k, **kw):
 			if Logs.verbose > 1:
 				raise
 			else:
-				self.fatal('the configuration failed (see %r)' % self.log.name)
+				self.fatal('the configuration failed (see {0!r})'.format(self.log.name))
 	else:
 		kw['success'] = ret
 		self.check_message_2(self.ret_msg(kw['okmsg'], kw))
@@ -489,7 +489,7 @@ def run_c_code(self, *k, **kw):
 	k = 0
 	while k < 10000:
 		# make certain to use a fresh folder - necessary for win32
-		dir = os.path.join(self.blddir, '.conf_check_%d' % k)
+		dir = os.path.join(self.blddir, '.conf_check_{0:d}'.format(k))
 
 		# if the folder already exists, remove it
 		try:
@@ -507,12 +507,12 @@ def run_c_code(self, *k, **kw):
 	try:
 		os.makedirs(dir)
 	except:
-		self.fatal('cannot create a configuration test folder %r' % dir)
+		self.fatal('cannot create a configuration test folder {0!r}'.format(dir))
 
 	try:
 		os.stat(dir)
 	except:
-		self.fatal('cannot use the configuration test folder %r' % dir)
+		self.fatal('cannot use the configuration test folder {0!r}'.format(dir))
 
 	bdir = os.path.join(dir, 'testbuild')
 
@@ -547,7 +547,7 @@ def run_c_code(self, *k, **kw):
 	for k, v in kw.iteritems():
 		setattr(o, k, v)
 
-	self.log.write("==>\n%s\n<==\n" % kw['code'])
+	self.log.write("==>\n{0!s}\n<==\n".format(kw['code']))
 
 	# compile the program
 	try:
@@ -561,7 +561,7 @@ def run_c_code(self, *k, **kw):
 	os.chdir(back)
 
 	if ret:
-		self.log.write('command returned %r' % ret)
+		self.log.write('command returned {0!r}'.format(ret))
 		self.fatal(str(ret))
 
 	# if we need to run the program, try to get its result
@@ -577,7 +577,7 @@ def run_c_code(self, *k, **kw):
 		w('\n')
 		w(str(err))
 		w('\n')
-		w('returncode %r' % proc.returncode)
+		w('returncode {0!r}'.format(proc.returncode))
 		w('\n')
 		if proc.returncode:
 			self.fatal(Utils.ex_stack())
@@ -610,13 +610,13 @@ def define(self, define, value, quote=1):
 	# the user forgot to tell if the value is quoted or not
 	if isinstance(value, str):
 		if quote:
-			tbl[define] = '"%s"' % repr('"'+value)[2:-1].replace('"', '\\"')
+			tbl[define] = '"{0!s}"'.format(repr('"'+value)[2:-1].replace('"', '\\"'))
 		else:
 			tbl[define] = value
 	elif isinstance(value, int):
 		tbl[define] = value
 	else:
-		raise TypeError('define %r -> %r must be a string or an int' % (define, value))
+		raise TypeError('define {0!r} -> {1!r} must be a string or an int'.format(define, value))
 
 	# add later to make reconfiguring faster
 	self.env[DEFINES] = tbl
@@ -673,7 +673,7 @@ def have_define(self, name):
 def write_config_header(self, configfile='', env='', guard='', top=False):
 	"save the defines into a file"
 	if not configfile: configfile = WAF_CONFIG_H
-	waf_guard = guard or '_%s_WAF' % Utils.quote_define_name(configfile)
+	waf_guard = guard or '_{0!s}_WAF'.format(Utils.quote_define_name(configfile))
 
 	# configfile -> absolute path
 	# there is a good reason to concatenate first and to split afterwards
@@ -691,14 +691,14 @@ def write_config_header(self, configfile='', env='', guard='', top=False):
 
 	dest = open(full, 'w')
 	dest.write('/* Configuration header created by Waf - do not edit */\n')
-	dest.write('#ifndef %s\n#define %s\n\n' % (waf_guard, waf_guard))
+	dest.write('#ifndef {0!s}\n#define {1!s}\n\n'.format(waf_guard, waf_guard))
 
 	dest.write(self.get_config_header())
 
 	# config files are not removed on "waf clean"
 	env.append_unique(CFG_FILES, os.path.join(diff, configfile))
 
-	dest.write('\n#endif /* %s */\n' % waf_guard)
+	dest.write('\n#endif /* {0!s} */\n'.format(waf_guard))
 	dest.close()
 
 @conf
@@ -710,11 +710,11 @@ def get_config_header(self):
 	for key in tbl.allkeys:
 		value = tbl[key]
 		if value is None:
-			config_header.append('#define %s' % key)
+			config_header.append('#define {0!s}'.format(key))
 		elif value is UNDEFINED:
-			config_header.append('/* #undef %s */' % key)
+			config_header.append('/* #undef {0!s} */'.format(key))
 		else:
-			config_header.append('#define %s %s' % (key, value))
+			config_header.append('#define {0!s} {1!s}'.format(key, value))
 	return "\n".join(config_header)
 
 @conftest

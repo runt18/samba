@@ -65,7 +65,7 @@ class GPOS(dns.rdata.Rdata):
         self.altitude = altitude
 
     def to_text(self, origin=None, relativize=True, **kw):
-        return '%s %s %s' % (self.latitude, self.longitude, self.altitude)
+        return '{0!s} {1!s} {2!s}'.format(self.latitude, self.longitude, self.altitude)
 
     def from_text(cls, rdclass, rdtype, tok, origin = None, relativize = True):
         latitude = tok.get_string()

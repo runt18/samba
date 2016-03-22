@@ -41,7 +41,7 @@ def is_domain_controller(info101):
     return info101['server_type'] & srvsvc.SV_TYPE_DOMAIN_CTRL
 
 def os_version(name):
-    info = srvsvc.netservergetinfo("\\\\%s" % name, 101)
+    info = srvsvc.netservergetinfo("\\\\{0!s}".format(name), 101)
     return platform_type(info)
 
 if __name__ == "__main__":
@@ -49,7 +49,7 @@ if __name__ == "__main__":
     if len(sys.argv) != 2:
         print "Usage: osver.py server"
         sys.exit(0)
-    info = srvsvc.netservergetinfo("\\\\%s" % sys.argv[1], 101)
-    print "platform type = %d" % platform_type(info)
+    info = srvsvc.netservergetinfo("\\\\{0!s}".format(sys.argv[1]), 101)
+    print "platform type = {0:d}".format(platform_type(info))
     if is_domain_controller(info):
-        print "%s is a domain controller" % sys.argv[1]
+        print "{0!s} is a domain controller".format(sys.argv[1])

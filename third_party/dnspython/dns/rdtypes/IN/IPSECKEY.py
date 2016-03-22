@@ -53,7 +53,7 @@ class IPSECKEY(dns.rdata.Rdata):
         elif gateway_type == 3:
             pass
         else:
-            raise SyntaxError('invalid IPSECKEY gateway type: %d' % gateway_type)
+            raise SyntaxError('invalid IPSECKEY gateway type: {0:d}'.format(gateway_type))
         self.precedence = precedence
         self.gateway_type = gateway_type
         self.algorithm = algorithm
@@ -71,7 +71,7 @@ class IPSECKEY(dns.rdata.Rdata):
             gateway = str(self.gateway.choose_relativity(origin, relativize))
         else:
             raise ValueError('invalid gateway type')
-        return '%d %d %d %s %s' % (self.precedence, self.gateway_type,
+        return '{0:d} {1:d} {2:d} {3!s} {4!s}'.format(self.precedence, self.gateway_type,
                                    self.algorithm, gateway,
                                    dns.rdata._base64ify(self.key))
 

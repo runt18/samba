@@ -90,11 +90,11 @@ def scan(self):
 					to_see.append(u)
 					break
 			else:
-				Logs.warn('could not find %r' % n)
+				Logs.warn('could not find {0!r}'.format(n))
 
 	# list of nodes this one depends on, and module name if present
 	if Logs.verbose:
-		Logs.debug('deps: deps for %s: %s' % (str(self), str(lst_src)))
+		Logs.debug('deps: deps for {0!s}: {1!s}'.format(str(self), str(lst_src)))
 	return (lst_src, [])
 cls.scan = scan
 
@@ -104,7 +104,7 @@ def swig(fun):
 	swig_langs[fun.__name__.replace('swig_', '')] = fun
 
 def swig_c(self):
-	ext = '.swigwrap_%d.c' % self.generator.idx
+	ext = '.swigwrap_{0:d}.c'.format(self.generator.idx)
 	flags = self.env['SWIGFLAGS']
 	if '-c++' in flags:
 		ext += 'xx'
@@ -116,7 +116,7 @@ def swig_c(self):
 		else:
 			fun = self.generator.c_hook
 	except AttributeError:
-		raise Utils.WafError('No c%s compiler was found to process swig files' % ('-c++' in flags and '++' or ''))
+		raise Utils.WafError('No c{0!s} compiler was found to process swig files'.format(('-c++' in flags and '++' or '')))
 
 	task = fun(out_node)
 	task.set_run_after(self)
@@ -167,7 +167,7 @@ def check_swig_version(conf, minver=None):
 	or conf.check_swig_version((1,3,28)) """
 	reg_swig = re.compile(r'SWIG Version\s(.*)', re.M)
 
-	swig_out = Utils.cmd_output('%s -version' % conf.env['SWIG'])
+	swig_out = Utils.cmd_output('{0!s} -version'.format(conf.env['SWIG']))
 
 	swigver = [int(s) for s in reg_swig.findall(swig_out)[0].split('.')]
 	if isinstance(minver, basestring):
@@ -182,7 +182,7 @@ def check_swig_version(conf, minver=None):
 	if minver is None:
 		conf.check_message_custom('swig version', '', swigver_full)
 	else:
-		conf.check_message('swig version', '>= %s' % (minver_str,), result, option=swigver_full)
+		conf.check_message('swig version', '>= {0!s}'.format(minver_str), result, option=swigver_full)
 	return result
 
 def detect(conf):

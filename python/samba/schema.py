@@ -113,12 +113,12 @@ class Schema(object):
 
         if additional_prefixmap is not None:
             for map in additional_prefixmap:
-                self.prefixmap_data += "%s\n" % map
+                self.prefixmap_data += "{0!s}\n".format(map)
 
         self.prefixmap_data = b64encode(self.prefixmap_data)
 
         # We don't actually add this ldif, just parse it
-        prefixmap_ldif = "dn: %s\nprefixMap:: %s\n\n" % (self.schemadn, self.prefixmap_data)
+        prefixmap_ldif = "dn: {0!s}\nprefixMap:: {1!s}\n\n".format(self.schemadn, self.prefixmap_data)
         self.set_from_ldif(prefixmap_ldif, self.schema_data, self.schemadn)
 
     def set_from_ldif(self, pf, df, dn):

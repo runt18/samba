@@ -9,4 +9,4 @@ if len(sys.argv) < 2:
 
 db = tdb.Tdb(sys.argv[1])
 for (k, v) in db.iteritems():
-    print "{\nkey(%d) = %r\ndata(%d) = %r\n}" % (len(k), k, len(v), v)
+    print "{{\nkey({0:d}) = {1!r}\ndata({2:d}) = {3!r}\n}}".format(len(k), k, len(v), v)

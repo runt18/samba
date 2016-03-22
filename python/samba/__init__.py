@@ -245,9 +245,9 @@ def substitute_var(text, values):
     """
 
     for (name, value) in values.items():
-        assert isinstance(name, str), "%r is not a string" % name
-        assert isinstance(value, str), "Value %r for %s is not a string" % (value, name)
-        text = text.replace("${%s}" % name, value)
+        assert isinstance(name, str), "{0!r} is not a string".format(name)
+        assert isinstance(value, str), "Value {0!r} for {1!s} is not a string".format(value, name)
+        text = text.replace("${{{0!s}}}".format(name), value)
 
     return text
 
@@ -265,8 +265,8 @@ def check_all_substituted(text):
     var_start = text.find("${")
     var_end = text.find("}", var_start)
 
-    raise Exception("Not all variables substituted: %s" %
-        text[var_start:var_end+1])
+    raise Exception("Not all variables substituted: {0!s}".format(
+        text[var_start:var_end+1]))
 
 
 def read_and_sub_file(file_name, subst_vars):
@@ -337,7 +337,7 @@ def import_bundled_package(modulename, location, source_tree_container,
         sys.modules[modulename] = __import__(modulename)
     else:
         sys.modules[modulename] = __import__(
-            "%s.%s" % (namespace, modulename), fromlist=[namespace])
+            "{0!s}.{1!s}".format(namespace, modulename), fromlist=[namespace])
 
 
 def ensure_third_party_module(modulename, location):

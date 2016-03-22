@@ -615,7 +615,7 @@ class _MasterReader(object):
         try:
             rdtype = dns.rdatatype.from_text(token.value)
         except:
-            raise dns.exception.SyntaxError("unknown rdatatype '%s'" % token.value)
+            raise dns.exception.SyntaxError("unknown rdatatype '{0!s}'".format(token.value))
         n = self.zone.nodes.get(name)
         if n is None:
             n = self.zone.node_factory()
@@ -634,7 +634,7 @@ class _MasterReader(object):
             # We convert them to syntax errors so that we can emit
             # helpful filename:line info.
             (ty, va) = sys.exc_info()[:2]
-            raise dns.exception.SyntaxError("caught exception %s: %s" % (str(ty), str(va)))
+            raise dns.exception.SyntaxError("caught exception {0!s}: {1!s}".format(str(ty), str(va)))
 
         rd.choose_relativity(self.zone.origin, self.relativize)
         covers = rd.covers()
@@ -712,7 +712,7 @@ class _MasterReader(object):
             (filename, line_number) = self.tok.where()
             if detail is None:
                 detail = "syntax error"
-            raise dns.exception.SyntaxError("%s:%d: %s" % (filename, line_number, detail))
+            raise dns.exception.SyntaxError("{0!s}:{1:d}: {2!s}".format(filename, line_number, detail))
 
         # Now that we're done reading, do some basic checking of the zone.
         if self.check_origin:

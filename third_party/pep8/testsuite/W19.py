@@ -55,7 +55,7 @@ def long_function_name(
 #: E101 W191
 if ((row < 0 or self.moduleCount <= row or
      col < 0 or self.moduleCount <= col)):
-	raise Exception("%s,%s - %s" % (row, col, self.moduleCount))
+	raise Exception("{0!s},{1!s} - {2!s}".format(row, col, self.moduleCount))
 #: E101 E101 E101 E101 W191 W191 W191 W191 W191 W191
 if bar:
 	return(
@@ -89,7 +89,7 @@ jkl mno"""):
 #: W191:2:1 W191:3:1 E101:3:2
 if length > options.max_line_length:
 	return options.max_line_length, \
-	    "E501 line too long (%d characters)" % length
+	    "E501 line too long ({0:d} characters)".format(length)
 
 
 #

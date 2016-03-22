@@ -111,7 +111,7 @@ def add_posix_attrs(logger, samdb, sid, name, nisdomain, xid_type, home=None,
 
     try:
         m = ldb.Message()
-        m.dn = ldb.Dn(samdb, "<SID=%s>" % str(sid))
+        m.dn = ldb.Dn(samdb, "<SID={0!s}>".format(str(sid)))
         if xid_type == "ID_TYPE_UID":
             m['unixHomeDirectory'] = ldb.MessageElement(
                 str(home), ldb.FLAG_MOD_REPLACE, 'unixHomeDirectory')
@@ -141,7 +141,7 @@ def add_ad_posix_idmap_entry(samdb, sid, xid, xid_type, logger):
 
     try:
         m = ldb.Message()
-        m.dn = ldb.Dn(samdb, "<SID=%s>" % str(sid))
+        m.dn = ldb.Dn(samdb, "<SID={0!s}>".format(str(sid)))
         if xid_type == "ID_TYPE_UID":
             m['uidNumber'] = ldb.MessageElement(
                 str(xid), ldb.FLAG_MOD_REPLACE, 'uidNumber')
@@ -172,7 +172,7 @@ def add_idmap_entry(idmapdb, sid, xid, xid_type, logger):
 
     # First try to see if we already have this entry
     found = False
-    msg = idmapdb.search(expression='objectSid=%s' % str(sid))
+    msg = idmapdb.search(expression='objectSid={0!s}'.format(str(sid)))
     if msg.count == 1:
         found = True
 
@@ -191,7 +191,7 @@ def add_idmap_entry(idmapdb, sid, xid, xid_type, logger):
                 str(sid), str(xid), xid_type, str(e))
     else:
         try:
-            idmapdb.add({"dn": "CN=%s" % str(sid),
+            idmapdb.add({"dn": "CN={0!s}".format(str(sid)),
                         "cn": str(sid),
                         "objectClass": "sidMap",
                         "objectSid": ndr_pack(sid),
@@ -253,7 +253,7 @@ def add_group_from_mapping_entry(samdb, groupmap, logger):
     # First try to see if we already have this entry
     try:
         msg = samdb.search(
-            base='<SID=%s>' % str(groupmap.sid), scope=ldb.SCOPE_BASE)
+            base='<SID={0!s}>'.format(str(groupmap.sid)), scope=ldb.SCOPE_BASE)
         found = True
     except ldb.LdbError, (ecode, emsg):
         if ecode == ldb.ERR_NO_SUCH_OBJECT:
@@ -272,7 +272,7 @@ def add_group_from_mapping_entry(samdb, groupmap, logger):
                 return
 
         m = ldb.Message()
-        m.dn = ldb.Dn(samdb, "CN=%s,CN=Users,%s" % (groupmap.nt_name, samdb.get_default_basedn()))
+        m.dn = ldb.Dn(samdb, "CN={0!s},CN=Users,{1!s}".format(groupmap.nt_name, samdb.get_default_basedn()))
         m['cn'] = ldb.MessageElement(groupmap.nt_name, ldb.FLAG_MOD_ADD, 'cn')
         m['objectClass'] = ldb.MessageElement('group', ldb.FLAG_MOD_ADD, 'objectClass')
         m['objectSid'] = ldb.MessageElement(ndr_pack(groupmap.sid), ldb.FLAG_MOD_ADD,
@@ -305,8 +305,8 @@ def add_users_to_group(samdb, group, members, logger):
     """
     for member_sid in members:
         m = ldb.Message()
-        m.dn = ldb.Dn(samdb, "<SID=%s>" % str(group.sid))
-        m['a01'] = ldb.MessageElement("<SID=%s>" % str(member_sid), ldb.FLAG_MOD_ADD, 'member')
+        m.dn = ldb.Dn(samdb, "<SID={0!s}>".format(str(group.sid)))
+        m['a01'] = ldb.MessageElement("<SID={0!s}>".format(str(member_sid)), ldb.FLAG_MOD_ADD, 'member')
 
         try:
             samdb.modify(m)
@@ -314,9 +314,9 @@ def add_users_to_group(samdb, group, members, logger):
             if ecode == ldb.ERR_ENTRY_ALREADY_EXISTS:
                 logger.debug("skipped re-adding member '%s' to group '%s': %s", member_sid, group.sid, emsg)
             elif ecode == ldb.ERR_NO_SUCH_OBJECT:
-                raise ProvisioningError("Could not add member '%s' to group '%s' as either group or user record doesn't exist: %s" % (member_sid, group.sid, emsg))
+                raise ProvisioningError("Could not add member '{0!s}' to group '{1!s}' as either group or user record doesn't exist: {2!s}".format(member_sid, group.sid, emsg))
             else:
-                raise ProvisioningError("Could not add member '%s' to group '%s': %s" % (member_sid, group.sid, emsg))
+                raise ProvisioningError("Could not add member '{0!s}' to group '{1!s}': {2!s}".format(member_sid, group.sid, emsg))
 
 
 def import_wins(samba4_winsdb, samba3_winsdb):
@@ -353,7 +353,7 @@ def import_wins(samba4_winsdb, samba3_winsdb):
 
         nType = ((nb_flags & 0x60) >> 5)
 
-        samba4_winsdb.add({"dn": "name=%s,type=0x%s" % tuple(name.split("#")),
+        samba4_winsdb.add({"dn": "name={0!s},type=0x{1!s}".format(*tuple(name.split("#"))),
                            "type": name.split("#")[1],
                            "name": name.split("#")[0],
                            "objectClass": "winsRecord",
@@ -404,10 +404,9 @@ def get_posix_attr_from_ldap_backend(logger, ldb_object, base_dn, user, attr):
     """
     try:
         msg = ldb_object.search(base_dn, scope=ldb.SCOPE_SUBTREE,
-                        expression=("(&(objectClass=posixAccount)(uid=%s))"
-                        % (user)), attrs=[attr])
+                        expression=("(&(objectClass=posixAccount)(uid={0!s}))".format((user))), attrs=[attr])
     except ldb.LdbError, e:
-        raise ProvisioningError("Failed to retrieve attribute %s for user %s, the error is: %s" % (attr, user, e))
+        raise ProvisioningError("Failed to retrieve attribute {0!s} for user {1!s}, the error is: {2!s}".format(attr, user, e))
     else:
         if msg.count <= 1:
             # This will raise KeyError (which is what we want) if there isn't a entry for this user
@@ -439,7 +438,7 @@ def upgrade_from_samba3(samba3, logger, targetdir, session_info=None,
     try:
         secrets_db = samba3.get_secrets_db()
     except IOError, e:
-        raise ProvisioningError("Could not open '%s', the Samba3 secrets database: %s.  Perhaps you specified the incorrect smb.conf, --testparm or --dbdir option?" % (samba3.privatedir_path("secrets.tdb"), str(e)))
+        raise ProvisioningError("Could not open '{0!s}', the Samba3 secrets database: {1!s}.  Perhaps you specified the incorrect smb.conf, --testparm or --dbdir option?".format(samba3.privatedir_path("secrets.tdb"), str(e)))
 
     if not domainname:
         domainname = secrets_db.domains()[0]
@@ -486,11 +485,11 @@ def upgrade_from_samba3(samba3, logger, targetdir, session_info=None,
     try:
         domainsid = passdb.get_global_sam_sid()
     except passdb.error:
-        raise Exception("Can't find domain sid for '%s', Exiting." % domainname)
+        raise Exception("Can't find domain sid for '{0!s}', Exiting.".format(domainname))
 
     # Get machine account, sid, rid
     try:
-        machineacct = s3db.getsampwnam('%s$' % netbiosname)
+        machineacct = s3db.getsampwnam('{0!s}$'.format(netbiosname))
     except passdb.error:
         machinerid = None
         machinesid = None
@@ -566,23 +565,23 @@ def upgrade_from_samba3(samba3, logger, targetdir, session_info=None,
         user = s3db.getsampwnam(username)
         acct_type = (user.acct_ctrl & (samr.ACB_NORMAL|samr.ACB_WSTRUST|samr.ACB_SVRTRUST|samr.ACB_DOMTRUST))
         if acct_type == samr.ACB_SVRTRUST:
-            logger.warn("  Demoting BDC account trust for %s, this DC must be elevated to an AD DC using 'samba-tool domain dcpromo'" % username[:-1])
+            logger.warn("  Demoting BDC account trust for {0!s}, this DC must be elevated to an AD DC using 'samba-tool domain dcpromo'".format(username[:-1]))
             user.acct_ctrl = (user.acct_ctrl & ~samr.ACB_SVRTRUST) | samr.ACB_WSTRUST
 
         elif acct_type == samr.ACB_DOMTRUST:
-            logger.warn("  Skipping inter-domain trust from domain %s, this trust must be re-created as an AD trust" % username[:-1])
+            logger.warn("  Skipping inter-domain trust from domain {0!s}, this trust must be re-created as an AD trust".format(username[:-1]))
             continue
 
         elif acct_type == (samr.ACB_WSTRUST) and username[-1] != '$':
-            logger.warn("  Skipping account %s that has ACB_WSTRUST (W) set but does not end in $.  This account can not have worked, and is probably left over from a misconfiguration." % username)
+            logger.warn("  Skipping account {0!s} that has ACB_WSTRUST (W) set but does not end in $.  This account can not have worked, and is probably left over from a misconfiguration.".format(username))
             continue
 
         elif acct_type == (samr.ACB_NORMAL|samr.ACB_WSTRUST) and username[-1] == '$':
-            logger.warn("  Fixing account %s which had both ACB_NORMAL (U) and ACB_WSTRUST (W) set.  Account will be marked as ACB_WSTRUST (W), i.e. as a domain member" % username)
+            logger.warn("  Fixing account {0!s} which had both ACB_NORMAL (U) and ACB_WSTRUST (W) set.  Account will be marked as ACB_WSTRUST (W), i.e. as a domain member".format(username))
             user.acct_ctrl = (user.acct_ctrl & ~samr.ACB_NORMAL)
 
         elif acct_type == (samr.ACB_NORMAL|samr.ACB_SVRTRUST) and username[-1] == '$':
-            logger.warn("  Fixing account %s which had both ACB_NORMAL (U) and ACB_SVRTRUST (S) set.  Account will be marked as ACB_WSTRUST (S), i.e. as a domain member" % username)
+            logger.warn("  Fixing account {0!s} which had both ACB_NORMAL (U) and ACB_SVRTRUST (S) set.  Account will be marked as ACB_WSTRUST (S), i.e. as a domain member".format(username))
             user.acct_ctrl = (user.acct_ctrl & ~samr.ACB_NORMAL)
 
         elif acct_type == 0 and username[-1] != '$':
@@ -592,12 +591,11 @@ def upgrade_from_samba3(samba3, logger, targetdir, session_info=None,
             pass
 
         else:
-            raise ProvisioningError("""Failed to upgrade due to invalid account %s, account control flags 0x%08X must have exactly one of
-ACB_NORMAL (N, 0x%08X), ACB_WSTRUST (W 0x%08X), ACB_SVRTRUST (S 0x%08X) or ACB_DOMTRUST (D 0x%08X).
+            raise ProvisioningError("""Failed to upgrade due to invalid account {0!s}, account control flags 0x{1:08X} must have exactly one of
+ACB_NORMAL (N, 0x{2:08X}), ACB_WSTRUST (W 0x{3:08X}), ACB_SVRTRUST (S 0x{4:08X}) or ACB_DOMTRUST (D 0x{5:08X}).
 
 Please fix this account before attempting to upgrade again
-"""
-                                    % (username, user.acct_ctrl,
+""".format(username, user.acct_ctrl,
                                        samr.ACB_NORMAL, samr.ACB_WSTRUST, samr.ACB_SVRTRUST, samr.ACB_DOMTRUST))
 
         userdata[username] = user
@@ -635,21 +633,21 @@ Please fix this account before attempting to upgrade again
     if common_names:
         logger.error("Following names are both user names and group names:")
         for name in common_names:
-            logger.error("   %s" % name)
+            logger.error("   {0!s}".format(name))
         raise ProvisioningError("Please remove common user/group names before upgrade.")
 
     # Check for same user sid/group sid
     group_sids = set([str(g.sid) for g in grouplist])
     if len(grouplist) != len(group_sids):
         raise ProvisioningError("Please remove duplicate group sid entries before upgrade.")
-    user_sids = set(["%s-%u" % (domainsid, u['rid']) for u in userlist])
+    user_sids = set(["{0!s}-{1:d}".format(domainsid, u['rid']) for u in userlist])
     if len(userlist) != len(user_sids):
         raise ProvisioningError("Please remove duplicate user sid entries before upgrade.")
     common_sids = group_sids.intersection(user_sids)
     if common_sids:
         logger.error("Following sids are both user and group sids:")
         for sid in common_sids:
-            logger.error("   %s" % str(sid))
+            logger.error("   {0!s}".format(str(sid)))
         raise ProvisioningError("Please remove duplicate sid entries before upgrade.")
 
     # Get posix attributes from ldap or the os
@@ -666,7 +664,7 @@ Please fix this account before attempting to upgrade again
             try:
                 ldb_object = Ldb(url, credentials=creds)
             except ldb.LdbError, e:
-                raise ProvisioningError("Could not open ldb connection to %s, the error message is: %s" % (url, e))
+                raise ProvisioningError("Could not open ldb connection to {0!s}, the error message is: {1!s}".format(url, e))
             else:
                 break
     logger.info("Exporting posix attributes")
@@ -790,7 +788,7 @@ Please fix this account before attempting to upgrade again
         for username in userdata:
             if username.lower() == 'administrator':
                 if userdata[username].user_sid != dom_sid(str(domainsid) + "-500"):
-                    logger.error("User 'Administrator' in your existing directory has SID %s, expected it to be %s" % (userdata[username].user_sid, dom_sid(str(domainsid) + "-500")))
+                    logger.error("User 'Administrator' in your existing directory has SID {0!s}, expected it to be {1!s}".format(userdata[username].user_sid, dom_sid(str(domainsid) + "-500")))
                     raise ProvisioningError("User 'Administrator' in your existing directory does not have SID ending in -500")
             if username.lower() == 'root':
                 if userdata[username].user_sid == dom_sid(str(domainsid) + "-500"):

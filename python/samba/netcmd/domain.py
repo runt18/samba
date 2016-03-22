@@ -92,7 +92,7 @@ from samba.provision.common import (
 def get_testparm_var(testparm, smbconf, varname):
     errfile = open(os.devnull, 'w')
     p = subprocess.Popen([testparm, '-s', '-l',
-                          '--parameter-name=%s' % varname, smbconf],
+                          '--parameter-name={0!s}'.format(varname), smbconf],
                          stdout=subprocess.PIPE, stderr=errfile)
     (out,err) = p.communicate()
     errfile.close()
@@ -151,13 +151,13 @@ class cmd_domain_info(Command):
             res = netcmd_get_domain_infos_via_cldap(lp, None, address)
         except RuntimeError:
             raise CommandError("Invalid IP address '" + address + "'!")
-        self.outf.write("Forest           : %s\n" % res.forest)
-        self.outf.write("Domain           : %s\n" % res.dns_domain)
-        self.outf.write("Netbios domain   : %s\n" % res.domain_name)
-        self.outf.write("DC name          : %s\n" % res.pdc_dns_name)
-        self.outf.write("DC netbios name  : %s\n" % res.pdc_name)
-        self.outf.write("Server site      : %s\n" % res.server_site)
-        self.outf.write("Client site      : %s\n" % res.client_site)
+        self.outf.write("Forest           : {0!s}\n".format(res.forest))
+        self.outf.write("Domain           : {0!s}\n".format(res.dns_domain))
+        self.outf.write("Netbios domain   : {0!s}\n".format(res.domain_name))
+        self.outf.write("DC name          : {0!s}\n".format(res.pdc_dns_name))
+        self.outf.write("DC netbios name  : {0!s}\n".format(res.pdc_name))
+        self.outf.write("Server site      : {0!s}\n".format(res.server_site))
+        self.outf.write("Client site      : {0!s}\n".format(res.client_site))
 
 
 class cmd_domain_provision(Command):
@@ -327,9 +327,9 @@ class cmd_domain_provision(Command):
 
             def ask(prompt, default=None):
                 if default is not None:
-                    print "%s [%s]: " % (prompt, default),
+                    print "{0!s} [{1!s}]: ".format(prompt, default),
                 else:
-                    print "%s: " % (prompt,),
+                    print "{0!s}: ".format(prompt),
                 return sys.stdin.readline().rstrip("\n") or default
 
             try:
@@ -427,7 +427,7 @@ class cmd_domain_provision(Command):
             self.logger.info("not using extended attributes to store ACLs and other metadata. If you intend to use this provision in production, rerun the script as root on a system supporting xattrs.")
         if ldap_backend_type == "existing":
             if ldap_backend_forced_uri is not None:
-                self.logger.warn("You have specified to use an existing LDAP server as the backend, please make sure an LDAP server is running at %s" % ldap_backend_forced_uri)
+                self.logger.warn("You have specified to use an existing LDAP server as the backend, please make sure an LDAP server is running at {0!s}".format(ldap_backend_forced_uri))
             else:
                 self.logger.info("You have specified to use an existing LDAP server as the backend, please make sure an LDAP server is running at the default location")
         else:
@@ -471,7 +471,7 @@ class cmd_domain_provision(Command):
         RESOLV_CONF="/etc/resolv.conf"
 
         if not path.isfile(RESOLV_CONF):
-            self.logger.warning("Failed to locate %s" % RESOLV_CONF)
+            self.logger.warning("Failed to locate {0!s}".format(RESOLV_CONF))
             return None
 
         handle = None
@@ -486,7 +486,7 @@ class cmd_domain_provision(Command):
             if handle is not None:
                 handle.close()
 
-        self.logger.warning("No nameserver found in %s" % RESOLV_CONF)
+        self.logger.warning("No nameserver found in {0!s}".format(RESOLV_CONF))
 
 
 class cmd_domain_dcpromo(Command):
@@ -568,7 +568,7 @@ class cmd_domain_dcpromo(Command):
                       machinepass=machinepass, use_ntvfs=use_ntvfs, dns_backend=dns_backend,
                       promote_existing=True)
         else:
-            raise CommandError("Invalid role '%s' (possible values: DC, RODC)" % role)
+            raise CommandError("Invalid role '{0!s}' (possible values: DC, RODC)".format(role))
 
 
 class cmd_domain_join(Command):
@@ -643,7 +643,7 @@ class cmd_domain_join(Command):
                 domain, netbios_name, LIBNET_JOIN_AUTOMATIC,
                 machinepass=machinepass)
 
-            self.errf.write("Joined domain %s (%s)\n" % (domain_name, sid))
+            self.errf.write("Joined domain {0!s} ({1!s})\n".format(domain_name, sid))
         elif role == "DC":
             join_DC(logger=logger, server=server, creds=creds, lp=lp, domain=domain,
                     site=site, netbios_name=netbios_name, targetdir=targetdir,
@@ -669,7 +669,7 @@ class cmd_domain_join(Command):
                            use_ntvfs=use_ntvfs, dns_backend=dns_backend,
                            adminpass=adminpass)
         else:
-            raise CommandError("Invalid role '%s' (possible values: MEMBER, DC, RODC, SUBDOMAIN)" % role)
+            raise CommandError("Invalid role '{0!s}' (possible values: MEMBER, DC, RODC, SUBDOMAIN)".format(role))
 
 
 class cmd_domain_demote(Command):
@@ -711,7 +711,7 @@ class cmd_domain_demote(Command):
 
         if remove_other_dead_server is not None:
             if server is not None:
-                samdb = SamDB(url="ldap://%s" % server,
+                samdb = SamDB(url="ldap://{0!s}".format(server),
                               session_info=system_session(),
                               credentials=creds, lp=lp)
             else:
@@ -719,7 +719,7 @@ class cmd_domain_demote(Command):
             try:
                 remove_dc.remove_dc(samdb, logger, remove_other_dead_server)
             except remove_dc.DemoteException as err:
-                raise CommandError("Demote failed: %s" % err)
+                raise CommandError("Demote failed: {0!s}".format(err))
             return
 
         netbios_name = lp.get("netbios name")
@@ -740,22 +740,22 @@ class cmd_domain_demote(Command):
 
         ntds_guid = samdb.get_ntds_GUID()
         msg = samdb.search(base=str(samdb.get_config_basedn()),
-            scope=ldb.SCOPE_SUBTREE, expression="(objectGUID=%s)" % ntds_guid,
+            scope=ldb.SCOPE_SUBTREE, expression="(objectGUID={0!s})".format(ntds_guid),
             attrs=['options'])
         if len(msg) == 0 or "options" not in msg[0]:
-            raise CommandError("Failed to find options on %s" % ntds_guid)
+            raise CommandError("Failed to find options on {0!s}".format(ntds_guid))
 
         ntds_dn = msg[0].dn
         dsa_options = int(str(msg[0]['options']))
 
-        res = samdb.search(expression="(fSMORoleOwner=%s)" % str(ntds_dn),
+        res = samdb.search(expression="(fSMORoleOwner={0!s})".format(str(ntds_dn)),
                             controls=["search_options:1:2"])
 
         if len(res) != 0:
-            raise CommandError("Current DC is still the owner of %d role(s), use the role command to transfer roles to another DC" % len(res))
+            raise CommandError("Current DC is still the owner of {0:d} role(s), use the role command to transfer roles to another DC".format(len(res)))
 
-        self.errf.write("Using %s as partner server for the demotion\n" %
-                        server)
+        self.errf.write("Using {0!s} as partner server for the demotion\n".format(
+                        server))
         (drsuapiBind, drsuapi_handle, supportedExtensions) = drsuapi_connect(server, lp, creds)
 
         self.errf.write("Deactivating inbound replication\n")
@@ -769,8 +769,7 @@ class cmd_domain_demote(Command):
             samdb.modify(nmsg)
 
 
-            self.errf.write("Asking partner server %s to synchronize from us\n"
-                            % server)
+            self.errf.write("Asking partner server {0!s} to synchronize from us\n".format(server))
             for part in (samdb.get_schema_basedn(),
                             samdb.get_config_basedn(),
                             samdb.get_root_basedn()):
@@ -794,16 +793,16 @@ class cmd_domain_demote(Command):
                         dsa_options ^= DS_NTDSDSA_OPT_DISABLE_INBOUND_REPL
                         nmsg["options"] = ldb.MessageElement(str(dsa_options), ldb.FLAG_MOD_REPLACE, "options")
                         samdb.modify(nmsg)
-                        raise CommandError("Error while sending a DsReplicaSync for partion %s" % str(part), e)
+                        raise CommandError("Error while sending a DsReplicaSync for partion {0!s}".format(str(part)), e)
         try:
-            remote_samdb = SamDB(url="ldap://%s" % server,
+            remote_samdb = SamDB(url="ldap://{0!s}".format(server),
                                 session_info=system_session(),
                                 credentials=creds, lp=lp)
 
             self.errf.write("Changing userControl and container\n")
             res = remote_samdb.search(base=str(remote_samdb.domain_dn()),
-                                expression="(&(objectClass=user)(sAMAccountName=%s$))" %
-                                            netbios_name.upper(),
+                                expression="(&(objectClass=user)(sAMAccountName={0!s}$))".format(
+                                            netbios_name.upper()),
                                 attrs=["userAccountControl"])
             dc_dn = res[0].dn
             uac = int(str(res[0]["userAccountControl"]))
@@ -833,7 +832,7 @@ class cmd_domain_demote(Command):
         msg = ldb.Message()
         msg.dn = dc_dn
 
-        msg["userAccountControl"] = ldb.MessageElement("%d" % uac,
+        msg["userAccountControl"] = ldb.MessageElement("{0:d}".format(uac),
                                                         ldb.FLAG_MOD_REPLACE,
                                                         "userAccountControl")
         try:
@@ -849,21 +848,21 @@ class cmd_domain_demote(Command):
 
         parent = msg.dn.parent()
         dc_name = res[0].dn.get_rdn_value()
-        rdn = "CN=%s" % dc_name
+        rdn = "CN={0!s}".format(dc_name)
 
         # Let's move to the Computer container
         i = 0
         newrdn = str(rdn)
 
-        computer_dn = ldb.Dn(remote_samdb, "CN=Computers,%s" % str(remote_samdb.domain_dn()))
+        computer_dn = ldb.Dn(remote_samdb, "CN=Computers,{0!s}".format(str(remote_samdb.domain_dn())))
         res = remote_samdb.search(base=computer_dn, expression=rdn, scope=ldb.SCOPE_ONELEVEL)
 
         if (len(res) != 0):
-            res = remote_samdb.search(base=computer_dn, expression="%s-%d" % (rdn, i),
+            res = remote_samdb.search(base=computer_dn, expression="{0!s}-{1:d}".format(rdn, i),
                                         scope=ldb.SCOPE_ONELEVEL)
             while(len(res) != 0 and i < 100):
                 i = i + 1
-                res = remote_samdb.search(base=computer_dn, expression="%s-%d" % (rdn, i),
+                res = remote_samdb.search(base=computer_dn, expression="{0!s}-{1:d}".format(rdn, i),
                                             scope=ldb.SCOPE_ONELEVEL)
 
             if i == 100:
@@ -876,7 +875,7 @@ class cmd_domain_demote(Command):
                 msg = ldb.Message()
                 msg.dn = dc_dn
 
-                msg["userAccountControl"] = ldb.MessageElement("%d" % uac,
+                msg["userAccountControl"] = ldb.MessageElement("{0:d}".format(uac),
                                                         ldb.FLAG_MOD_REPLACE,
                                                         "userAccountControl")
 
@@ -886,10 +885,10 @@ class cmd_domain_demote(Command):
                                     " all names from %s-1 to %s-%d seemed used" %
                                     (str(dc_dn), rdn, rdn, i - 9))
 
-            newrdn = "%s-%d" % (rdn, i)
+            newrdn = "{0!s}-{1:d}".format(rdn, i)
 
         try:
-            newdn = ldb.Dn(remote_samdb, "%s,%s" % (newrdn, str(computer_dn)))
+            newdn = ldb.Dn(remote_samdb, "{0!s},{1!s}".format(newrdn, str(computer_dn)))
             remote_samdb.rename(dc_dn, newdn)
         except Exception, e:
             self.errf.write(
@@ -901,12 +900,12 @@ class cmd_domain_demote(Command):
             msg = ldb.Message()
             msg.dn = dc_dn
 
-            msg["userAccountControl"] = ldb.MessageElement("%d" % uac,
+            msg["userAccountControl"] = ldb.MessageElement("{0:d}".format(uac),
                                                     ldb.FLAG_MOD_REPLACE,
                                                     "userAccountControl")
 
             remote_samdb.modify(msg)
-            raise CommandError("Error while renaming %s to %s" % (str(dc_dn), str(newdn)), e)
+            raise CommandError("Error while renaming {0!s} to {1!s}".format(str(dc_dn), str(newdn)), e)
 
 
         server_dsa_dn = samdb.get_serverName()
@@ -930,26 +929,26 @@ class cmd_domain_demote(Command):
             msg = ldb.Message()
             msg.dn = newdn
 
-            msg["userAccountControl"] = ldb.MessageElement("%d" % uac,
+            msg["userAccountControl"] = ldb.MessageElement("{0:d}".format(uac),
                                                            ldb.FLAG_MOD_REPLACE,
                                                            "userAccountControl")
             remote_samdb.modify(msg)
             remote_samdb.rename(newdn, dc_dn)
             if werr == 8452: #WERR_DS_DRA_NO_REPLICA
-                raise CommandError("The DC %s is not present on (already removed from) the remote server: " % server_dsa_dn, e)
+                raise CommandError("The DC {0!s} is not present on (already removed from) the remote server: ".format(server_dsa_dn), e)
             else:
-                raise CommandError("Error while sending a removeDsServer of %s: " % server_dsa_dn, e)
+                raise CommandError("Error while sending a removeDsServer of {0!s}: ".format(server_dsa_dn), e)
 
         remove_dc.remove_sysvol_references(remote_samdb, dc_name)
 
         # These are objects under the computer account that should be deleted
         for s in ("CN=Enterprise,CN=NTFRS Subscriptions",
-                  "CN=%s, CN=NTFRS Subscriptions" % lp.get("realm"),
+                  "CN={0!s}, CN=NTFRS Subscriptions".format(lp.get("realm")),
                   "CN=Domain system Volumes (SYSVOL Share), CN=NTFRS Subscriptions",
                   "CN=NTFRS Subscriptions"):
             try:
                 remote_samdb.delete(ldb.Dn(remote_samdb,
-                                    "%s,%s" % (s, str(newdn))))
+                                    "{0!s},{1!s}".format(s, str(newdn))))
             except ldb.LdbError, l:
                 pass
 
@@ -989,7 +988,7 @@ class cmd_domain_level(Command):
 
         domain_dn = samdb.domain_dn()
 
-        res_forest = samdb.search("CN=Partitions,%s" % samdb.get_config_basedn(),
+        res_forest = samdb.search("CN=Partitions,{0!s}".format(samdb.get_config_basedn()),
           scope=ldb.SCOPE_BASE, attrs=["msDS-Behavior-Version"])
         assert len(res_forest) == 1
 
@@ -997,7 +996,7 @@ class cmd_domain_level(Command):
           attrs=["msDS-Behavior-Version", "nTMixedDomain"])
         assert len(res_domain) == 1
 
-        res_dc_s = samdb.search("CN=Sites,%s" % samdb.get_config_basedn(),
+        res_dc_s = samdb.search("CN=Sites,{0!s}".format(samdb.get_config_basedn()),
           scope=ldb.SCOPE_SUBTREE, expression="(objectClass=nTDSDSA)",
           attrs=["msDS-Behavior-Version"])
         assert len(res_dc_s) >= 1
@@ -1032,7 +1031,7 @@ class cmd_domain_level(Command):
             raise CommandError("Domain function level is higher than the lowest function level of a DC. Correct this or reprovision!")
 
         if subcommand == "show":
-            self.message("Domain and forest function level for domain '%s'" % domain_dn)
+            self.message("Domain and forest function level for domain '{0!s}'".format(domain_dn))
             if level_forest == DS_DOMAIN_FUNCTION_2000 and level_domain_mixed != 0:
                 self.message("\nATTENTION: You run SAMBA 4 on a forest function level lower than Windows 2000 (Native). This isn't supported! Please raise!")
             if level_domain == DS_DOMAIN_FUNCTION_2000 and level_domain_mixed != 0:
@@ -1126,7 +1125,7 @@ class cmd_domain_level(Command):
                     samdb.modify(m)
                     # Under partitions
                     m = ldb.Message()
-                    m.dn = ldb.Dn(samdb, "CN=" + lp.get("workgroup") + ",CN=Partitions,%s" % samdb.get_config_basedn())
+                    m.dn = ldb.Dn(samdb, "CN=" + lp.get("workgroup") + ",CN=Partitions,{0!s}".format(samdb.get_config_basedn()))
                     m["nTMixedDomain"] = ldb.MessageElement("0",
                       ldb.FLAG_MOD_REPLACE, "nTMixedDomain")
                     try:
@@ -1145,7 +1144,7 @@ class cmd_domain_level(Command):
                 # Under partitions
                 m = ldb.Message()
                 m.dn = ldb.Dn(samdb, "CN=" + lp.get("workgroup")
-                  + ",CN=Partitions,%s" % samdb.get_config_basedn())
+                  + ",CN=Partitions,{0!s}".format(samdb.get_config_basedn()))
                 m["msDS-Behavior-Version"]= ldb.MessageElement(
                   str(new_level_domain), ldb.FLAG_MOD_REPLACE,
                           "msDS-Behavior-Version")
@@ -1176,7 +1175,7 @@ class cmd_domain_level(Command):
                     raise CommandError("Forest function level can't be higher than the domain function level(s). Please raise it/them first!")
 
                 m = ldb.Message()
-                m.dn = ldb.Dn(samdb, "CN=Partitions,%s" % samdb.get_config_basedn())
+                m.dn = ldb.Dn(samdb, "CN=Partitions,{0!s}".format(samdb.get_config_basedn()))
                 m["msDS-Behavior-Version"]= ldb.MessageElement(
                   str(new_level_forest), ldb.FLAG_MOD_REPLACE,
                           "msDS-Behavior-Version")
@@ -1185,7 +1184,7 @@ class cmd_domain_level(Command):
             msgs.append("All changes applied successfully!")
             self.message("\n".join(msgs))
         else:
-            raise CommandError("invalid argument: '%s' (choose from 'show', 'raise')" % subcommand)
+            raise CommandError("invalid argument: '{0!s}' (choose from 'show', 'raise')".format(subcommand))
 
 
 class cmd_domain_passwordsettings(Command):
@@ -1270,7 +1269,7 @@ class cmd_domain_passwordsettings(Command):
             raise CommandError("Could not retrieve password properties!", e)
 
         if subcommand == "show":
-            self.message("Password informations for domain '%s'" % domain_dn)
+            self.message("Password informations for domain '{0!s}'".format(domain_dn))
             self.message("")
             if pwd_props & DOMAIN_PASSWORD_COMPLEX != 0:
                 self.message("Password complexity: on")
@@ -1280,13 +1279,13 @@ class cmd_domain_passwordsettings(Command):
                 self.message("Store plaintext passwords: on")
             else:
                 self.message("Store plaintext passwords: off")
-            self.message("Password history length: %d" % pwd_hist_len)
-            self.message("Minimum password length: %d" % cur_min_pwd_len)
-            self.message("Minimum password age (days): %d" % cur_min_pwd_age)
-            self.message("Maximum password age (days): %d" % cur_max_pwd_age)
-            self.message("Account lockout duration (mins): %d" % cur_account_lockout_duration)
-            self.message("Account lockout threshold (attempts): %d" % cur_account_lockout_threshold)
-            self.message("Reset account lockout after (mins): %d" % cur_reset_account_lockout_after)
+            self.message("Password history length: {0:d}".format(pwd_hist_len))
+            self.message("Minimum password length: {0:d}".format(cur_min_pwd_len))
+            self.message("Minimum password age (days): {0:d}".format(cur_min_pwd_age))
+            self.message("Maximum password age (days): {0:d}".format(cur_max_pwd_age))
+            self.message("Account lockout duration (mins): {0:d}".format(cur_account_lockout_duration))
+            self.message("Account lockout threshold (attempts): {0:d}".format(cur_account_lockout_threshold))
+            self.message("Reset account lockout after (mins): {0:d}".format(cur_reset_account_lockout_after))
         elif subcommand == "set":
             msgs = []
             m = ldb.Message()
@@ -1422,7 +1421,7 @@ class cmd_domain_passwordsettings(Command):
                 msgs.append("Duration to reset account lockout after changed!")
 
             if max_pwd_age > 0 and min_pwd_age >= max_pwd_age:
-                raise CommandError("Maximum password age (%d) must be greater than minimum password age (%d)!" % (max_pwd_age, min_pwd_age))
+                raise CommandError("Maximum password age ({0:d}) must be greater than minimum password age ({1:d})!".format(max_pwd_age, min_pwd_age))
 
             if len(m) == 0:
                 raise CommandError("You must specify at least one option to set. Try --help")
@@ -1430,7 +1429,7 @@ class cmd_domain_passwordsettings(Command):
             msgs.append("All changes applied successfully!")
             self.message("\n".join(msgs))
         else:
-            raise CommandError("Wrong argument '%s'!" % subcommand)
+            raise CommandError("Wrong argument '{0!s}'!".format(subcommand))
 
 
 class cmd_domain_classicupgrade(Command):
@@ -1481,13 +1480,13 @@ class cmd_domain_classicupgrade(Command):
             dns_backend=None, use_ntvfs=False):
 
         if not os.path.exists(smbconf):
-            raise CommandError("File %s does not exist" % smbconf)
+            raise CommandError("File {0!s} does not exist".format(smbconf))
 
         if testparm and not os.path.exists(testparm):
-            raise CommandError("Testparm utility %s does not exist" % testparm)
+            raise CommandError("Testparm utility {0!s} does not exist".format(testparm))
 
         if dbdir and not os.path.exists(dbdir):
-            raise CommandError("Directory %s does not exist" % dbdir)
+            raise CommandError("Directory {0!s} does not exist".format(dbdir))
 
         if not dbdir and not testparm:
             raise CommandError("Please specify either dbdir or testparm")
@@ -1619,7 +1618,7 @@ class DomainTrustCommand(Command):
         def __init__(exception_self, self, runtime, message):
             err32 = self._uint32(runtime[0])
             errstr = runtime[1]
-            msg = "LOCAL_DC[%s]: %s - ERROR(0x%08X) - %s" % (
+            msg = "LOCAL_DC[{0!s}]: {1!s} - ERROR(0x{2:08X}) - {3!s}".format(
                   self.local_server, message, err32, errstr)
             CommandError.__init__(exception_self, msg)
 
@@ -1627,7 +1626,7 @@ class DomainTrustCommand(Command):
         def __init__(exception_self, self, runtime, message):
             err32 = self._uint32(runtime[0])
             errstr = runtime[1]
-            msg = "REMOTE_DC[%s]: %s - ERROR(0x%08X) - %s" % (
+            msg = "REMOTE_DC[{0!s}]: {1!s} - ERROR(0x{2:08X}) - {3!s}".format(
                   self.remote_server, message, err32, errstr)
             CommandError.__init__(exception_self, msg)
 
@@ -1635,7 +1634,7 @@ class DomainTrustCommand(Command):
         def __init__(exception_self, self, ldb_error, message):
             errval = ldb_error[0]
             errstr = ldb_error[1]
-            msg = "LOCAL_DC[%s]: %s - ERROR(%d) - %s" % (
+            msg = "LOCAL_DC[{0!s}]: {1!s} - ERROR({2:d}) - {3!s}".format(
                   self.local_server, message, errval, errstr)
             CommandError.__init__(exception_self, msg)
 
@@ -1649,7 +1648,7 @@ class DomainTrustCommand(Command):
         if local_server is None:
             server_role = lp.server_role()
             if server_role != "ROLE_ACTIVE_DIRECTORY_DC":
-                raise CommandError("Invalid server_role %s" % (server_role))
+                raise CommandError("Invalid server_role {0!s}".format((server_role)))
             local_server = lp.get('netbios name')
             local_transport = "ncalrpc"
             local_binding_options = ""
@@ -1659,13 +1658,13 @@ class DomainTrustCommand(Command):
         else:
             local_transport = "ncacn_np"
             local_binding_options = ""
-            local_ldap_url = "ldap://%s" % local_server
+            local_ldap_url = "ldap://{0!s}".format(local_server)
             local_creds = localdcopts.get_credentials(lp)
 
         self.local_lp = lp
 
         self.local_server = local_server
-        self.local_binding_string = "%s:%s[%s]" % (local_transport, local_server, local_binding_options)
+        self.local_binding_string = "{0!s}:{1!s}[{2!s}]".format(local_transport, local_server, local_binding_options)
         self.local_ldap_url = local_ldap_url
         self.local_creds = local_creds
         return self.local_server
@@ -1692,7 +1691,7 @@ class DomainTrustCommand(Command):
         if self.remote_server is not None:
             return self.remote_server
 
-        self.remote_server = "__unknown__remote_server__.%s" % domain
+        self.remote_server = "__unknown__remote_server__.{0!s}".format(domain)
         assert self.local_server is not None
 
         remote_creds = credopts.get_credentials(self.local_lp)
@@ -1711,7 +1710,7 @@ class DomainTrustCommand(Command):
                 remote_flags |= nbt.NBT_SERVER_PDC
             remote_info = remote_net.finddc(flags=remote_flags, domain=domain, address=remote_server)
         except Exception:
-            raise CommandError("Failed to find a writeable DC for domain '%s'" % domain)
+            raise CommandError("Failed to find a writeable DC for domain '{0!s}'".format(domain))
         flag_map = {
             nbt.NBT_SERVER_PDC: "PDC",
             nbt.NBT_SERVER_GC: "GC",
@@ -1733,13 +1732,13 @@ class DomainTrustCommand(Command):
         }
         server_type_string = self.generic_bitmap_to_string(flag_map,
                                 remote_info.server_type, names_only=True)
-        self.outf.write("RemoteDC Netbios[%s] DNS[%s] ServerType[%s]\n" % (
+        self.outf.write("RemoteDC Netbios[{0!s}] DNS[{1!s}] ServerType[{2!s}]\n".format(
                         remote_info.pdc_name,
                         remote_info.pdc_dns_name,
                         server_type_string))
 
         self.remote_server = remote_info.pdc_dns_name
-        self.remote_binding_string="ncacn_np:%s[%s]" % (self.remote_server, remote_binding_options)
+        self.remote_binding_string="ncacn_np:{0!s}[{1!s}]".format(self.remote_server, remote_binding_options)
         self.remote_creds = remote_creds
         return self.remote_server
 
@@ -1830,9 +1829,9 @@ class DomainTrustCommand(Command):
             w = e_dict[v]
         except KeyError:
             v32 = self._uint32(v)
-            w = "__unknown__%08X__" % v32
+            w = "__unknown__{0:08X}__".format(v32)
 
-        r = "0x%x (%s)" % (v, w)
+        r = "0x{0:x} ({1!s})".format(v, w)
         return r;
 
     def generic_bitmap_to_string(self, b_dict, v, names_only=False):
@@ -1848,12 +1847,12 @@ class DomainTrustCommand(Command):
 
         if c != 0:
             c32 = self._uint32(c)
-            s += ["__unknown_%08X__" % c32]
+            s += ["__unknown_{0:08X}__".format(c32)]
 
         w = ",".join(s)
         if names_only:
             return w
-        r = "0x%x (%s)" % (v, w)
+        r = "0x{0:x} ({1!s})".format(v, w)
         return r;
 
     def trustType_string(self, v):
@@ -1910,7 +1909,7 @@ class DomainTrustCommand(Command):
             lsa.LSA_TLN_DISABLED_ADMIN : "Disabled",
             lsa.LSA_TLN_DISABLED_CONFLICT : "Disabled-Conflicting",
         }
-        return "Status[%s]" % self.generic_bitmap_to_string(flags, e_flags, names_only=True)
+        return "Status[{0!s}]".format(self.generic_bitmap_to_string(flags, e_flags, names_only=True))
 
     def entry_dom_status(self, e_flags):
         if e_flags == 0:
@@ -1922,15 +1921,15 @@ class DomainTrustCommand(Command):
             lsa.LSA_NB_DISABLED_ADMIN : "Disabled-NB",
             lsa.LSA_NB_DISABLED_CONFLICT : "Disabled-NB-Conflicting",
         }
-        return "Status[%s]" % self.generic_bitmap_to_string(flags, e_flags, names_only=True)
+        return "Status[{0!s}]".format(self.generic_bitmap_to_string(flags, e_flags, names_only=True))
 
     def write_forest_trust_info(self, fti, tln=None, collisions=None):
         if tln is not None:
-            tln_string = " TDO[%s]" % tln
+            tln_string = " TDO[{0!s}]".format(tln)
         else:
             tln_string = ""
 
-        self.outf.write("Namespaces[%d]%s:\n" % (
+        self.outf.write("Namespaces[{0:d}]{1!s}:\n".format(
                         len(fti.entries), tln_string))
 
         for i in xrange(0, len(fti.entries)):
@@ -1944,18 +1943,18 @@ class DomainTrustCommand(Command):
                     if c.index != i:
                         continue
                     flags = c.flags
-                    collision_string = " Collision[%s]" % (c.name.string)
+                    collision_string = " Collision[{0!s}]".format((c.name.string))
 
             d = e.forest_trust_data
             if e.type == lsa.LSA_FOREST_TRUST_TOP_LEVEL_NAME:
-                self.outf.write("TLN: %-32s DNS[*.%s]%s\n" % (
+                self.outf.write("TLN: {0:<32!s} DNS[*.{1!s}]{2!s}\n".format(
                                 self.entry_tln_status(flags),
                                 d.string, collision_string))
             elif e.type == lsa.LSA_FOREST_TRUST_TOP_LEVEL_NAME_EX:
-                self.outf.write("TLN_EX: %-29s DNS[*.%s]\n" % (
+                self.outf.write("TLN_EX: {0:<29!s} DNS[*.{1!s}]\n".format(
                                 "", d.string))
             elif e.type == lsa.LSA_FOREST_TRUST_DOMAIN_INFO:
-                self.outf.write("DOM: %-32s DNS[%s] Netbios[%s] SID[%s]%s\n" % (
+                self.outf.write("DOM: {0:<32!s} DNS[{1!s}] Netbios[{2!s}] SID[{3!s}]{4!s}\n".format(
                                 self.entry_dom_status(flags),
                                 d.dns_domain_name.string,
                                 d.netbios_domain_name.string,
@@ -1992,19 +1991,19 @@ class cmd_domain_trust_list(DomainTrustCommand):
         except RuntimeError as error:
             if self.check_runtime_error(error, self.NT_STATUS_RPC_PROCNUM_OUT_OF_RANGE):
                 # TODO: we could implement a fallback to lsa.EnumTrustDom()
-                raise CommandError("LOCAL_DC[%s]: netr_DsrEnumerateDomainTrusts not supported." % (
-                                   self.local_server))
+                raise CommandError("LOCAL_DC[{0!s}]: netr_DsrEnumerateDomainTrusts not supported.".format((
+                                   self.local_server)))
             raise self.LocalRuntimeError(self, error, "netr_DsrEnumerateDomainTrusts failed")
 
         a = local_netlogon_trusts.array
         for t in a:
             if t.trust_flags & netlogon.NETR_TRUST_FLAG_PRIMARY:
                 continue
-            self.outf.write("%-14s %-15s %-19s %s\n" % (
-                            "Type[%s]" % self.netr_DomainTrust_to_type(a, t),
-                            "Transitive[%s]" % self.netr_DomainTrust_to_transitive(t),
-                            "Direction[%s]" % self.netr_DomainTrust_to_direction(t),
-                            "Name[%s]" % self.netr_DomainTrust_to_name(t)))
+            self.outf.write("{0:<14!s} {1:<15!s} {2:<19!s} {3!s}\n".format(
+                            "Type[{0!s}]".format(self.netr_DomainTrust_to_type(a, t)),
+                            "Transitive[{0!s}]".format(self.netr_DomainTrust_to_transitive(t)),
+                            "Direction[{0!s}]".format(self.netr_DomainTrust_to_direction(t)),
+                            "Name[{0!s}]".format(self.netr_DomainTrust_to_name(t))))
         return
 
 class cmd_domain_trust_show(DomainTrustCommand):
@@ -2037,7 +2036,7 @@ class cmd_domain_trust_show(DomainTrustCommand):
         except RuntimeError as error:
             raise self.LocalRuntimeError(self, error, "failed to query LSA_POLICY_INFO_DNS")
 
-        self.outf.write("LocalDomain Netbios[%s] DNS[%s] SID[%s]\n" % (
+        self.outf.write("LocalDomain Netbios[{0!s}] DNS[{1!s}] SID[{2!s}]\n".format(
                         local_lsa_info.name.string,
                         local_lsa_info.dns_domain.string,
                         local_lsa_info.sid))
@@ -2051,7 +2050,7 @@ class cmd_domain_trust_show(DomainTrustCommand):
             local_tdo_posix = local_tdo_full.posix_offset
         except RuntimeError as error:
             if self.check_runtime_error(error, self.NT_STATUS_OBJECT_NAME_NOT_FOUND):
-                raise CommandError("trusted domain object does not exist for domain [%s]" % domain)
+                raise CommandError("trusted domain object does not exist for domain [{0!s}]".format(domain))
 
             raise self.LocalRuntimeError(self, error, "QueryTrustedDomainInfoByName(FULL_INFO) failed")
 
@@ -2089,17 +2088,17 @@ class cmd_domain_trust_show(DomainTrustCommand):
             local_tdo_forest.entries = []
 
         self.outf.write("TrusteDomain:\n\n");
-        self.outf.write("NetbiosName:    %s\n" % local_tdo_info.netbios_name.string)
+        self.outf.write("NetbiosName:    {0!s}\n".format(local_tdo_info.netbios_name.string))
         if local_tdo_info.netbios_name.string != local_tdo_info.domain_name.string:
-            self.outf.write("DnsName:        %s\n" % local_tdo_info.domain_name.string)
-        self.outf.write("SID:            %s\n" % local_tdo_info.sid)
-        self.outf.write("Type:           %s\n" % self.trustType_string(local_tdo_info.trust_type))
-        self.outf.write("Direction:      %s\n" % self.trustDirection_string(local_tdo_info.trust_direction))
-        self.outf.write("Attributes:     %s\n" % self.trustAttributes_string(local_tdo_info.trust_attributes))
+            self.outf.write("DnsName:        {0!s}\n".format(local_tdo_info.domain_name.string))
+        self.outf.write("SID:            {0!s}\n".format(local_tdo_info.sid))
+        self.outf.write("Type:           {0!s}\n".format(self.trustType_string(local_tdo_info.trust_type)))
+        self.outf.write("Direction:      {0!s}\n".format(self.trustDirection_string(local_tdo_info.trust_direction)))
+        self.outf.write("Attributes:     {0!s}\n".format(self.trustAttributes_string(local_tdo_info.trust_attributes)))
         posix_offset_u32 = ctypes.c_uint32(local_tdo_posix.posix_offset).value
         posix_offset_i32 = ctypes.c_int32(local_tdo_posix.posix_offset).value
-        self.outf.write("PosixOffset:    0x%08X (%d)\n" % (posix_offset_u32, posix_offset_i32))
-        self.outf.write("kerb_EncTypes:  %s\n" % self.kerb_EncTypes_string(local_tdo_enctypes.enc_types))
+        self.outf.write("PosixOffset:    0x{0:08X} ({1:d})\n".format(posix_offset_u32, posix_offset_i32))
+        self.outf.write("kerb_EncTypes:  {0!s}\n".format(self.kerb_EncTypes_string(local_tdo_enctypes.enc_types)))
 
         if local_tdo_info.trust_attributes & lsa.LSA_TRUST_ATTRIBUTE_FOREST_TRANSITIVE:
             self.write_forest_trust_info(local_tdo_forest,
@@ -2224,8 +2223,8 @@ class cmd_domain_trust_create(DomainTrustCommand):
             while True:
                 if password is not None and password is not '':
                     return password
-                password = getpass("New %s Password: " % name)
-                passwordverify = getpass("Retype %s Password: " % name)
+                password = getpass("New {0!s} Password: ".format(name))
+                passwordverify = getpass("Retype {0!s} Password: ".format(name))
                 if not password == passwordverify:
                     password = None
                     self.outf.write("Sorry, passwords do not match.\n")
@@ -2317,7 +2316,7 @@ class cmd_domain_trust_create(DomainTrustCommand):
         except RuntimeError as error:
             raise self.LocalRuntimeError(self, error, "failed to query LSA_POLICY_INFO_DNS")
 
-        self.outf.write("LocalDomain Netbios[%s] DNS[%s] SID[%s]\n" % (
+        self.outf.write("LocalDomain Netbios[{0!s}] DNS[{1!s}] SID[{2!s}]\n".format(
                         local_lsa_info.name.string,
                         local_lsa_info.dns_domain.string,
                         local_lsa_info.sid))
@@ -2337,7 +2336,7 @@ class cmd_domain_trust_create(DomainTrustCommand):
         except RuntimeError as error:
             raise self.RemoteRuntimeError(self, error, "failed to query LSA_POLICY_INFO_DNS")
 
-        self.outf.write("RemoteDomain Netbios[%s] DNS[%s] SID[%s]\n" % (
+        self.outf.write("RemoteDomain Netbios[{0!s}] DNS[{1!s}] SID[{2!s}]\n".format(
                         remote_lsa_info.name.string,
                         remote_lsa_info.dns_domain.string,
                         remote_lsa_info.sid))
@@ -2355,46 +2354,46 @@ class cmd_domain_trust_create(DomainTrustCommand):
             lsaString.string = local_trust_info.domain_name.string
             local_old_netbios = local_lsa.QueryTrustedDomainInfoByName(local_policy,
                                         lsaString, lsa.LSA_TRUSTED_DOMAIN_INFO_FULL_INFO)
-            raise CommandError("TrustedDomain %s already exist'" % lsaString.string)
+            raise CommandError("TrustedDomain {0!s} already exist'".format(lsaString.string))
         except RuntimeError as error:
             if not self.check_runtime_error(error, self.NT_STATUS_OBJECT_NAME_NOT_FOUND):
                 raise self.LocalRuntimeError(self, error,
-                                "QueryTrustedDomainInfoByName(%s, FULL_INFO) failed" % (
-                                lsaString.string))
+                                "QueryTrustedDomainInfoByName({0!s}, FULL_INFO) failed".format((
+                                lsaString.string)))
 
         try:
             lsaString.string = local_trust_info.netbios_name.string
             local_old_dns = local_lsa.QueryTrustedDomainInfoByName(local_policy,
                                         lsaString, lsa.LSA_TRUSTED_DOMAIN_INFO_FULL_INFO)
-            raise CommandError("TrustedDomain %s already exist'" % lsaString.string)
+            raise CommandError("TrustedDomain {0!s} already exist'".format(lsaString.string))
         except RuntimeError as error:
             if not self.check_runtime_error(error, self.NT_STATUS_OBJECT_NAME_NOT_FOUND):
                 raise self.LocalRuntimeError(self, error,
-                                "QueryTrustedDomainInfoByName(%s, FULL_INFO) failed" % (
-                                lsaString.string))
+                                "QueryTrustedDomainInfoByName({0!s}, FULL_INFO) failed".format((
+                                lsaString.string)))
 
         if remote_trust_info:
             try:
                 lsaString.string = remote_trust_info.domain_name.string
                 remote_old_netbios = remote_lsa.QueryTrustedDomainInfoByName(remote_policy,
                                             lsaString, lsa.LSA_TRUSTED_DOMAIN_INFO_FULL_INFO)
-                raise CommandError("TrustedDomain %s already exist'" % lsaString.string)
+                raise CommandError("TrustedDomain {0!s} already exist'".format(lsaString.string))
             except RuntimeError as error:
                 if not self.check_runtime_error(error, self.NT_STATUS_OBJECT_NAME_NOT_FOUND):
                     raise self.RemoteRuntimeError(self, error,
-                                    "QueryTrustedDomainInfoByName(%s, FULL_INFO) failed" % (
-                                    lsaString.string))
+                                    "QueryTrustedDomainInfoByName({0!s}, FULL_INFO) failed".format((
+                                    lsaString.string)))
 
             try:
                 lsaString.string = remote_trust_info.netbios_name.string
                 remote_old_dns = remote_lsa.QueryTrustedDomainInfoByName(remote_policy,
                                             lsaString, lsa.LSA_TRUSTED_DOMAIN_INFO_FULL_INFO)
-                raise CommandError("TrustedDomain %s already exist'" % lsaString.string)
+                raise CommandError("TrustedDomain {0!s} already exist'".format(lsaString.string))
             except RuntimeError as error:
                 if not self.check_runtime_error(error, self.NT_STATUS_OBJECT_NAME_NOT_FOUND):
                     raise self.RemoteRuntimeError(self, error,
-                                    "QueryTrustedDomainInfoByName(%s, FULL_INFO) failed" % (
-                                    lsaString.string))
+                                    "QueryTrustedDomainInfoByName({0!s}, FULL_INFO) failed".format((
+                                    lsaString.string)))
 
         try:
             local_netlogon = self.new_local_netlogon_connection()
@@ -2512,7 +2511,7 @@ class cmd_domain_trust_create(DomainTrustCommand):
                                                       lsa.LSA_TRUSTED_DOMAIN_SUPPORTED_ENCRYPTION_TYPES,
                                                       enc_types)
         except RuntimeError as error:
-            self.outf.write("Error: %s failed %sly - cleaning up\n" % (
+            self.outf.write("Error: {0!s} failed {1!s}ly - cleaning up\n".format(
                             current_request['name'], current_request['location']))
             if remote_tdo_handle:
                 self.outf.write("Deleting remote TDO.\n")
@@ -2523,10 +2522,10 @@ class cmd_domain_trust_create(DomainTrustCommand):
                 local_lsa.DeleteObject(local_tdo_handle)
                 local_tdo_handle = None
             if current_request['location'] is "remote":
-                raise self.RemoteRuntimeError(self, error, "%s" % (
-                                              current_request['name']))
-            raise self.LocalRuntimeError(self, error, "%s" % (
-                                         current_request['name']))
+                raise self.RemoteRuntimeError(self, error, "{0!s}".format((
+                                              current_request['name'])))
+            raise self.LocalRuntimeError(self, error, "{0!s}".format((
+                                         current_request['name'])))
 
         if validate:
             if local_trust_info.trust_attributes & lsa.LSA_TRUST_ATTRIBUTE_FOREST_TRANSITIVE:
@@ -2597,12 +2596,12 @@ class cmd_domain_trust_create(DomainTrustCommand):
                 local_conn_status = self._uint32(local_trust_verify.tc_connection_status[0])
 
                 if local_trust_verify.flags & netlogon.NETLOGON_VERIFY_STATUS_RETURNED:
-                    local_validation = "LocalValidation: DC[%s] CONNECTION[%s] TRUST[%s] VERIFY_STATUS_RETURNED" % (
+                    local_validation = "LocalValidation: DC[{0!s}] CONNECTION[{1!s}] TRUST[{2!s}] VERIFY_STATUS_RETURNED".format(
                                        local_trust_verify.trusted_dc_name,
                                        local_trust_verify.tc_connection_status[1],
                                        local_trust_verify.pdc_connection_status[1])
                 else:
-                    local_validation = "LocalValidation: DC[%s] CONNECTION[%s] TRUST[%s]" % (
+                    local_validation = "LocalValidation: DC[{0!s}] CONNECTION[{1!s}] TRUST[{2!s}]".format(
                                        local_trust_verify.trusted_dc_name,
                                        local_trust_verify.tc_connection_status[1],
                                        local_trust_verify.pdc_connection_status[1])
@@ -2610,7 +2609,7 @@ class cmd_domain_trust_create(DomainTrustCommand):
                 if local_trust_status != self.WERR_OK or local_conn_status != self.WERR_OK:
                     raise CommandError(local_validation)
                 else:
-                    self.outf.write("OK: %s\n" % local_validation)
+                    self.outf.write("OK: {0!s}\n".format(local_validation))
 
             if remote_trust_info:
                 if remote_trust_info.trust_direction & lsa.LSA_TRUST_DIRECTION_OUTBOUND:
@@ -2627,12 +2626,12 @@ class cmd_domain_trust_create(DomainTrustCommand):
                     remote_conn_status = self._uint32(remote_trust_verify.tc_connection_status[0])
 
                     if remote_trust_verify.flags & netlogon.NETLOGON_VERIFY_STATUS_RETURNED:
-                        remote_validation = "RemoteValidation: DC[%s] CONNECTION[%s] TRUST[%s] VERIFY_STATUS_RETURNED" % (
+                        remote_validation = "RemoteValidation: DC[{0!s}] CONNECTION[{1!s}] TRUST[{2!s}] VERIFY_STATUS_RETURNED".format(
                                            remote_trust_verify.trusted_dc_name,
                                            remote_trust_verify.tc_connection_status[1],
                                            remote_trust_verify.pdc_connection_status[1])
                     else:
-                        remote_validation = "RemoteValidation: DC[%s] CONNECTION[%s] TRUST[%s]" % (
+                        remote_validation = "RemoteValidation: DC[{0!s}] CONNECTION[{1!s}] TRUST[{2!s}]".format(
                                            remote_trust_verify.trusted_dc_name,
                                            remote_trust_verify.tc_connection_status[1],
                                            remote_trust_verify.pdc_connection_status[1])
@@ -2640,7 +2639,7 @@ class cmd_domain_trust_create(DomainTrustCommand):
                     if remote_trust_status != self.WERR_OK or remote_conn_status != self.WERR_OK:
                         raise CommandError(remote_validation)
                     else:
-                        self.outf.write("OK: %s\n" % remote_validation)
+                        self.outf.write("OK: {0!s}\n".format(remote_validation))
 
         if remote_tdo_handle is not None:
             try:
@@ -2705,7 +2704,7 @@ class cmd_domain_trust_delete(DomainTrustCommand):
         except RuntimeError as error:
             raise self.LocalRuntimeError(self, error, "failed to query LSA_POLICY_INFO_DNS")
 
-        self.outf.write("LocalDomain Netbios[%s] DNS[%s] SID[%s]\n" % (
+        self.outf.write("LocalDomain Netbios[{0!s}] DNS[{1!s}] SID[{2!s}]\n".format(
                         local_lsa_info.name.string,
                         local_lsa_info.dns_domain.string,
                         local_lsa_info.sid))
@@ -2722,7 +2721,7 @@ class cmd_domain_trust_delete(DomainTrustCommand):
                                         lsaString, lsa.LSA_TRUSTED_DOMAIN_INFO_INFO_EX)
         except RuntimeError as error:
             if self.check_runtime_error(error, self.NT_STATUS_OBJECT_NAME_NOT_FOUND):
-                raise CommandError("Failed to find trust for domain '%s'" % domain)
+                raise CommandError("Failed to find trust for domain '{0!s}'".format(domain))
             raise self.RemoteRuntimeError(self, error, "failed to locate remote server")
 
 
@@ -2742,7 +2741,7 @@ class cmd_domain_trust_delete(DomainTrustCommand):
             except RuntimeError as error:
                 raise self.RemoteRuntimeError(self, error, "failed to query LSA_POLICY_INFO_DNS")
 
-            self.outf.write("RemoteDomain Netbios[%s] DNS[%s] SID[%s]\n" % (
+            self.outf.write("RemoteDomain Netbios[{0!s}] DNS[{1!s}] SID[{2!s}]\n".format(
                             remote_lsa_info.name.string,
                             remote_lsa_info.dns_domain.string,
                             remote_lsa_info.sid))
@@ -2750,7 +2749,7 @@ class cmd_domain_trust_delete(DomainTrustCommand):
             if remote_lsa_info.sid != local_tdo_info.sid or \
                remote_lsa_info.name.string != local_tdo_info.netbios_name.string or \
                remote_lsa_info.dns_domain.string != local_tdo_info.domain_name.string:
-                raise CommandError("LocalTDO inconsistend: Netbios[%s] DNS[%s] SID[%s]" % (
+                raise CommandError("LocalTDO inconsistend: Netbios[{0!s}] DNS[{1!s}] SID[{2!s}]".format(
                                    local_tdo_info.netbios_name.string,
                                    local_tdo_info.domain_name.string,
                                    local_tdo_info.sid))
@@ -2761,15 +2760,15 @@ class cmd_domain_trust_delete(DomainTrustCommand):
                                             lsaString, lsa.LSA_TRUSTED_DOMAIN_INFO_INFO_EX)
             except RuntimeError as error:
                 if not self.check_runtime_error(error, self.NT_STATUS_OBJECT_NAME_NOT_FOUND):
-                    raise self.RemoteRuntimeError(self, error, "QueryTrustedDomainInfoByName(%s)" % (
-                                                  lsaString.string))
+                    raise self.RemoteRuntimeError(self, error, "QueryTrustedDomainInfoByName({0!s})".format((
+                                                  lsaString.string)))
                 pass
 
             if remote_tdo_info is not None:
                 if local_lsa_info.sid != remote_tdo_info.sid or \
                    local_lsa_info.name.string != remote_tdo_info.netbios_name.string or \
                    local_lsa_info.dns_domain.string != remote_tdo_info.domain_name.string:
-                    raise CommandError("RemoteTDO inconsistend: Netbios[%s] DNS[%s] SID[%s]" % (
+                    raise CommandError("RemoteTDO inconsistend: Netbios[{0!s}] DNS[{1!s}] SID[{2!s}]".format(
                                        remote_tdo_info.netbios_name.string,
                                        remote_tdo_info.domain_name.string,
                                        remote_tdo_info.sid))
@@ -2781,8 +2780,8 @@ class cmd_domain_trust_delete(DomainTrustCommand):
                                                                      lsaString,
                                                                      security.SEC_STD_DELETE)
             except RuntimeError as error:
-                raise self.LocalRuntimeError(self, error, "OpenTrustedDomainByName(%s)" % (
-                                             lsaString.string))
+                raise self.LocalRuntimeError(self, error, "OpenTrustedDomainByName({0!s})".format((
+                                             lsaString.string)))
 
             local_lsa.DeleteObject(local_tdo_handle)
             local_tdo_handle = None
@@ -2794,8 +2793,8 @@ class cmd_domain_trust_delete(DomainTrustCommand):
                                                                        lsaString,
                                                                        security.SEC_STD_DELETE)
             except RuntimeError as error:
-                raise self.RemoteRuntimeError(self, error, "OpenTrustedDomainByName(%s)" % (
-                                              lsaString.string))
+                raise self.RemoteRuntimeError(self, error, "OpenTrustedDomainByName({0!s})".format((
+                                              lsaString.string)))
 
         if remote_tdo_handle is not None:
             try:
@@ -2803,7 +2802,7 @@ class cmd_domain_trust_delete(DomainTrustCommand):
                 remote_tdo_handle = None
                 self.outf.write("RemoteTDO deleted.\n")
             except RuntimeError as error:
-                self.outf.write("%s\n" % self.RemoteRuntimeError(self, error, "DeleteObject() failed"))
+                self.outf.write("{0!s}\n".format(self.RemoteRuntimeError(self, error, "DeleteObject() failed")))
 
         if local_tdo_handle is not None:
             try:
@@ -2811,7 +2810,7 @@ class cmd_domain_trust_delete(DomainTrustCommand):
                 local_tdo_handle = None
                 self.outf.write("LocalTDO deleted.\n")
             except RuntimeError as error:
-                self.outf.write("%s\n" % self.LocalRuntimeError(self, error, "DeleteObject() failed"))
+                self.outf.write("{0!s}\n".format(self.LocalRuntimeError(self, error, "DeleteObject() failed")))
 
         return
 
@@ -2853,7 +2852,7 @@ class cmd_domain_trust_validate(DomainTrustCommand):
         except RuntimeError as error:
             raise self.LocalRuntimeError(self, error, "failed to query LSA_POLICY_INFO_DNS")
 
-        self.outf.write("LocalDomain Netbios[%s] DNS[%s] SID[%s]\n" % (
+        self.outf.write("LocalDomain Netbios[{0!s}] DNS[{1!s}] SID[{2!s}]\n".format(
                         local_lsa_info.name.string,
                         local_lsa_info.dns_domain.string,
                         local_lsa_info.sid))
@@ -2865,11 +2864,11 @@ class cmd_domain_trust_validate(DomainTrustCommand):
                                         lsaString, lsa.LSA_TRUSTED_DOMAIN_INFO_INFO_EX)
         except RuntimeError as error:
             if self.check_runtime_error(error, self.NT_STATUS_OBJECT_NAME_NOT_FOUND):
-                raise CommandError("trusted domain object does not exist for domain [%s]" % domain)
+                raise CommandError("trusted domain object does not exist for domain [{0!s}]".format(domain))
 
             raise self.LocalRuntimeError(self, error, "QueryTrustedDomainInfoByName(INFO_EX) failed")
 
-        self.outf.write("LocalTDO Netbios[%s] DNS[%s] SID[%s]\n" % (
+        self.outf.write("LocalTDO Netbios[{0!s}] DNS[{1!s}] SID[{2!s}]\n".format(
                         local_tdo_info.netbios_name.string,
                         local_tdo_info.domain_name.string,
                         local_tdo_info.sid))
@@ -2891,12 +2890,12 @@ class cmd_domain_trust_validate(DomainTrustCommand):
         local_conn_status = self._uint32(local_trust_verify.tc_connection_status[0])
 
         if local_trust_verify.flags & netlogon.NETLOGON_VERIFY_STATUS_RETURNED:
-            local_validation = "LocalValidation: DC[%s] CONNECTION[%s] TRUST[%s] VERIFY_STATUS_RETURNED" % (
+            local_validation = "LocalValidation: DC[{0!s}] CONNECTION[{1!s}] TRUST[{2!s}] VERIFY_STATUS_RETURNED".format(
                                local_trust_verify.trusted_dc_name,
                                local_trust_verify.tc_connection_status[1],
                                local_trust_verify.pdc_connection_status[1])
         else:
-            local_validation = "LocalValidation: DC[%s] CONNECTION[%s] TRUST[%s]" % (
+            local_validation = "LocalValidation: DC[{0!s}] CONNECTION[{1!s}] TRUST[{2!s}]".format(
                                local_trust_verify.trusted_dc_name,
                                local_trust_verify.tc_connection_status[1],
                                local_trust_verify.pdc_connection_status[1])
@@ -2904,11 +2903,11 @@ class cmd_domain_trust_validate(DomainTrustCommand):
         if local_trust_status != self.WERR_OK or local_conn_status != self.WERR_OK:
             raise CommandError(local_validation)
         else:
-            self.outf.write("OK: %s\n" % local_validation)
+            self.outf.write("OK: {0!s}\n".format(local_validation))
 
         try:
             server = local_trust_verify.trusted_dc_name.replace('\\', '')
-            domain_and_server = "%s\\%s" % (local_tdo_info.domain_name.string, server)
+            domain_and_server = "{0!s}\\{1!s}".format(local_tdo_info.domain_name.string, server)
             local_trust_rediscover = local_netlogon.netr_LogonControl2Ex(local_server,
                                                                  netlogon.NETLOGON_CONTROL_REDISCOVER,
                                                                  2,
@@ -2917,14 +2916,14 @@ class cmd_domain_trust_validate(DomainTrustCommand):
             raise self.LocalRuntimeError(self, error, "NETLOGON_CONTROL_REDISCOVER failed")
 
         local_conn_status = self._uint32(local_trust_rediscover.tc_connection_status[0])
-        local_rediscover = "LocalRediscover: DC[%s] CONNECTION[%s]" % (
+        local_rediscover = "LocalRediscover: DC[{0!s}] CONNECTION[{1!s}]".format(
                                local_trust_rediscover.trusted_dc_name,
                                local_trust_rediscover.tc_connection_status[1])
 
         if local_conn_status != self.WERR_OK:
             raise CommandError(local_rediscover)
         else:
-            self.outf.write("OK: %s\n" % local_rediscover)
+            self.outf.write("OK: {0!s}\n".format(local_rediscover))
 
         if validate_location != "local":
             try:
@@ -2949,12 +2948,12 @@ class cmd_domain_trust_validate(DomainTrustCommand):
             remote_conn_status = self._uint32(remote_trust_verify.tc_connection_status[0])
 
             if remote_trust_verify.flags & netlogon.NETLOGON_VERIFY_STATUS_RETURNED:
-                remote_validation = "RemoteValidation: DC[%s] CONNECTION[%s] TRUST[%s] VERIFY_STATUS_RETURNED" % (
+                remote_validation = "RemoteValidation: DC[{0!s}] CONNECTION[{1!s}] TRUST[{2!s}] VERIFY_STATUS_RETURNED".format(
                                    remote_trust_verify.trusted_dc_name,
                                    remote_trust_verify.tc_connection_status[1],
                                    remote_trust_verify.pdc_connection_status[1])
             else:
-                remote_validation = "RemoteValidation: DC[%s] CONNECTION[%s] TRUST[%s]" % (
+                remote_validation = "RemoteValidation: DC[{0!s}] CONNECTION[{1!s}] TRUST[{2!s}]".format(
                                    remote_trust_verify.trusted_dc_name,
                                    remote_trust_verify.tc_connection_status[1],
                                    remote_trust_verify.pdc_connection_status[1])
@@ -2962,11 +2961,11 @@ class cmd_domain_trust_validate(DomainTrustCommand):
             if remote_trust_status != self.WERR_OK or remote_conn_status != self.WERR_OK:
                 raise CommandError(remote_validation)
             else:
-                self.outf.write("OK: %s\n" % remote_validation)
+                self.outf.write("OK: {0!s}\n".format(remote_validation))
 
             try:
                 server = remote_trust_verify.trusted_dc_name.replace('\\', '')
-                domain_and_server = "%s\\%s" % (local_lsa_info.dns_domain.string, server)
+                domain_and_server = "{0!s}\\{1!s}".format(local_lsa_info.dns_domain.string, server)
                 remote_trust_rediscover = remote_netlogon.netr_LogonControl2Ex(remote_server,
                                                                      netlogon.NETLOGON_CONTROL_REDISCOVER,
                                                                      2,
@@ -2976,14 +2975,14 @@ class cmd_domain_trust_validate(DomainTrustCommand):
 
             remote_conn_status = self._uint32(remote_trust_rediscover.tc_connection_status[0])
 
-            remote_rediscover = "RemoteRediscover: DC[%s] CONNECTION[%s]" % (
+            remote_rediscover = "RemoteRediscover: DC[{0!s}] CONNECTION[{1!s}]".format(
                                    remote_trust_rediscover.trusted_dc_name,
                                    remote_trust_rediscover.tc_connection_status[1])
 
             if remote_conn_status != self.WERR_OK:
                 raise CommandError(remote_rediscover)
             else:
-                self.outf.write("OK: %s\n" % remote_rediscover)
+                self.outf.write("OK: {0!s}\n".format(remote_rediscover))
 
         return
 
@@ -3094,7 +3093,7 @@ class cmd_domain_trust_namespaces(DomainTrustCommand):
 
         if domain is None:
             if refresh == "store":
-                raise CommandError("--refresh=%s not allowed without DOMAIN" % refresh)
+                raise CommandError("--refresh={0!s} not allowed without DOMAIN".format(refresh))
 
             if enable_all:
                 raise CommandError("--enable-all not allowed without DOMAIN")
@@ -3123,37 +3122,37 @@ class cmd_domain_trust_namespaces(DomainTrustCommand):
                 for n in add_upn:
                     if not n.startswith("*."):
                         continue
-                    raise CommandError("value[%s] specified for --add-upn-suffix should not include with '*.'" % n)
+                    raise CommandError("value[{0!s}] specified for --add-upn-suffix should not include with '*.'".format(n))
                 require_update = True
             if len(delete_upn) > 0:
                 for n in delete_upn:
                     if not n.startswith("*."):
                         continue
-                    raise CommandError("value[%s] specified for --delete-upn-suffix should not include with '*.'" % n)
+                    raise CommandError("value[{0!s}] specified for --delete-upn-suffix should not include with '*.'".format(n))
                 require_update = True
             for a in add_upn:
                 for d in delete_upn:
                     if a.lower() != d.lower():
                         continue
-                    raise CommandError("value[%s] specified for --add-upn-suffix and --delete-upn-suffix" % a)
+                    raise CommandError("value[{0!s}] specified for --add-upn-suffix and --delete-upn-suffix".format(a))
 
             if len(add_spn) > 0:
                 for n in add_spn:
                     if not n.startswith("*."):
                         continue
-                    raise CommandError("value[%s] specified for --add-spn-suffix should not include with '*.'" % n)
+                    raise CommandError("value[{0!s}] specified for --add-spn-suffix should not include with '*.'".format(n))
                 require_update = True
             if len(delete_spn) > 0:
                 for n in delete_spn:
                     if not n.startswith("*."):
                         continue
-                    raise CommandError("value[%s] specified for --delete-spn-suffix should not include with '*.'" % n)
+                    raise CommandError("value[{0!s}] specified for --delete-spn-suffix should not include with '*.'".format(n))
                 require_update = True
             for a in add_spn:
                 for d in delete_spn:
                     if a.lower() != d.lower():
                         continue
-                    raise CommandError("value[%s] specified for --add-spn-suffix and --delete-spn-suffix" % a)
+                    raise CommandError("value[{0!s}] specified for --add-spn-suffix and --delete-spn-suffix".format(a))
         else:
             if len(add_upn) > 0:
                 raise CommandError("--add-upn-suffix not allowed together with DOMAIN")
@@ -3169,7 +3168,7 @@ class cmd_domain_trust_namespaces(DomainTrustCommand):
                 require_update = True
 
             if enable_all and refresh != "store":
-                raise CommandError("--enable-all not allowed together with --refresh=%s" % refresh)
+                raise CommandError("--enable-all not allowed together with --refresh={0!s}".format(refresh))
 
             if len(enable_tln) > 0:
                 raise CommandError("--enable-tln not allowed together with --refresh")
@@ -3211,25 +3210,25 @@ class cmd_domain_trust_namespaces(DomainTrustCommand):
                 for d in disable_tln:
                     if e.lower() != d.lower():
                         continue
-                    raise CommandError("value[%s] specified for --enable-tln and --disable-tln" % e)
+                    raise CommandError("value[{0!s}] specified for --enable-tln and --disable-tln".format(e))
 
             if len(add_tln_ex) > 0:
                 for n in add_tln_ex:
                     if not n.startswith("*."):
                         continue
-                    raise CommandError("value[%s] specified for --add-tln-ex should not include with '*.'" % n)
+                    raise CommandError("value[{0!s}] specified for --add-tln-ex should not include with '*.'".format(n))
                 require_update = True
             if len(delete_tln_ex) > 0:
                 for n in delete_tln_ex:
                     if not n.startswith("*."):
                         continue
-                    raise CommandError("value[%s] specified for --delete-tln-ex should not include with '*.'" % n)
+                    raise CommandError("value[{0!s}] specified for --delete-tln-ex should not include with '*.'".format(n))
                 require_update = True
             for a in add_tln_ex:
                 for d in delete_tln_ex:
                     if a.lower() != d.lower():
                         continue
-                    raise CommandError("value[%s] specified for --add-tln-ex and --delete-tln-ex" % a)
+                    raise CommandError("value[{0!s}] specified for --add-tln-ex and --delete-tln-ex".format(a))
 
             if len(enable_nb) > 0:
                 require_update = True
@@ -3239,21 +3238,21 @@ class cmd_domain_trust_namespaces(DomainTrustCommand):
                 for d in disable_nb:
                     if e.upper() != d.upper():
                         continue
-                    raise CommandError("value[%s] specified for --enable-nb and --disable-nb" % e)
+                    raise CommandError("value[{0!s}] specified for --enable-nb and --disable-nb".format(e))
 
             enable_sid = []
             for s in enable_sid_str:
                 try:
                     sid = security.dom_sid(s)
                 except TypeError as error:
-                    raise CommandError("value[%s] specified for --enable-sid is not a valid SID" % s)
+                    raise CommandError("value[{0!s}] specified for --enable-sid is not a valid SID".format(s))
                 enable_sid.append(sid)
             disable_sid = []
             for s in disable_sid_str:
                 try:
                     sid = security.dom_sid(s)
                 except TypeError as error:
-                    raise CommandError("value[%s] specified for --disable-sid is not a valid SID" % s)
+                    raise CommandError("value[{0!s}] specified for --disable-sid is not a valid SID".format(s))
                 disable_sid.append(sid)
             if len(enable_sid) > 0:
                 require_update = True
@@ -3263,7 +3262,7 @@ class cmd_domain_trust_namespaces(DomainTrustCommand):
                 for d in disable_sid:
                     if e != d:
                         continue
-                    raise CommandError("value[%s] specified for --enable-sid and --disable-sid" % e)
+                    raise CommandError("value[{0!s}] specified for --enable-sid and --disable-sid".format(e))
 
         local_policy_access =  lsa.LSA_POLICY_VIEW_LOCAL_INFORMATION
         if require_update:
@@ -3280,7 +3279,7 @@ class cmd_domain_trust_namespaces(DomainTrustCommand):
         except RuntimeError as error:
             raise self.LocalRuntimeError(self, error, "failed to query LSA_POLICY_INFO_DNS")
 
-        self.outf.write("LocalDomain Netbios[%s] DNS[%s] SID[%s]\n" % (
+        self.outf.write("LocalDomain Netbios[{0!s}] DNS[{1!s}] SID[{2!s}]\n".format(
                         local_lsa_info.name.string,
                         local_lsa_info.dns_domain.string,
                         local_lsa_info.sid))
@@ -3297,7 +3296,7 @@ class cmd_domain_trust_namespaces(DomainTrustCommand):
                 raise self.LocalRuntimeError(self, error, "failed to get netlogon dc info")
 
             if local_netlogon_info.domain_name != local_netlogon_info.forest_name:
-                raise CommandError("The local domain [%s] is not the forest root [%s]" % (
+                raise CommandError("The local domain [{0!s}] is not the forest root [{1!s}]".format(
                                    local_netlogon_info.domain_name,
                                    local_netlogon_info.forest_name))
 
@@ -3307,16 +3306,16 @@ class cmd_domain_trust_namespaces(DomainTrustCommand):
                                                                                    None, 0)
             except RuntimeError as error:
                 if self.check_runtime_error(error, self.NT_STATUS_RPC_PROCNUM_OUT_OF_RANGE):
-                    raise CommandError("LOCAL_DC[%s]: netr_DsRGetForestTrustInformation() not supported." % (
-                                       self.local_server))
+                    raise CommandError("LOCAL_DC[{0!s}]: netr_DsRGetForestTrustInformation() not supported.".format((
+                                       self.local_server)))
 
                 if self.check_runtime_error(error, self.WERR_INVALID_FUNCTION):
-                    raise CommandError("LOCAL_DC[%s]: netr_DsRGetForestTrustInformation() not supported." % (
-                                       self.local_server))
+                    raise CommandError("LOCAL_DC[{0!s}]: netr_DsRGetForestTrustInformation() not supported.".format((
+                                       self.local_server)))
 
                 if self.check_runtime_error(error, self.WERR_NERR_ACFNOTLOADED):
-                    raise CommandError("LOCAL_DC[%s]: netr_DsRGetForestTrustInformation() not supported." % (
-                                       self.local_server))
+                    raise CommandError("LOCAL_DC[{0!s}]: netr_DsRGetForestTrustInformation() not supported.".format((
+                                       self.local_server)))
 
                 raise self.LocalRuntimeError(self, error, "netr_DsRGetForestTrustInformation() failed")
 
@@ -3329,7 +3328,7 @@ class cmd_domain_trust_namespaces(DomainTrustCommand):
             except RuntimeError as error:
                 raise self.LocalRuntimeError(self, error, "failed to connect to SamDB")
 
-            local_partitions_dn = "CN=Partitions,%s" % str(local_samdb.get_config_basedn())
+            local_partitions_dn = "CN=Partitions,{0!s}".format(str(local_samdb.get_config_basedn()))
             attrs = ['uPNSuffixes', 'msDS-SPNSuffixes']
             try:
                 msgs = local_samdb.search(base=local_partitions_dn,
@@ -3348,12 +3347,12 @@ class cmd_domain_trust_namespaces(DomainTrustCommand):
             if 'msDS-SPNSuffixes' in stored_msg:
                 stored_spn_vals.extend(stored_msg['msDS-SPNSuffixes'])
 
-            self.outf.write("Stored uPNSuffixes attributes[%d]:\n" % len(stored_upn_vals))
+            self.outf.write("Stored uPNSuffixes attributes[{0:d}]:\n".format(len(stored_upn_vals)))
             for v in stored_upn_vals:
-                  self.outf.write("TLN: %-32s DNS[*.%s]\n" % ("", v))
-            self.outf.write("Stored msDS-SPNSuffixes attributes[%d]:\n" % len(stored_spn_vals))
+                  self.outf.write("TLN: {0:<32!s} DNS[*.{1!s}]\n".format("", v))
+            self.outf.write("Stored msDS-SPNSuffixes attributes[{0:d}]:\n".format(len(stored_spn_vals)))
             for v in stored_spn_vals:
-                  self.outf.write("TLN: %-32s DNS[*.%s]\n" % ("", v))
+                  self.outf.write("TLN: {0:<32!s} DNS[*.{1!s}]\n".format("", v))
 
             if not require_update:
                 return
@@ -3375,7 +3374,7 @@ class cmd_domain_trust_namespaces(DomainTrustCommand):
                     idx = i
                     break
                 if idx is not None:
-                    raise CommandError("Entry already present for value[%s] specified for --add-upn-suffix" % upn)
+                    raise CommandError("Entry already present for value[{0!s}] specified for --add-upn-suffix".format(upn))
                 update_upn_vals.append(upn)
                 replace_upn = True
 
@@ -3388,7 +3387,7 @@ class cmd_domain_trust_namespaces(DomainTrustCommand):
                     idx = i
                     break
                 if idx is None:
-                    raise CommandError("Entry not found for value[%s] specified for --delete-upn-suffix" % upn)
+                    raise CommandError("Entry not found for value[{0!s}] specified for --delete-upn-suffix".format(upn))
 
                 update_upn_vals.pop(idx)
                 replace_upn = True
@@ -3402,7 +3401,7 @@ class cmd_domain_trust_namespaces(DomainTrustCommand):
                     idx = i
                     break
                 if idx is not None:
-                    raise CommandError("Entry already present for value[%s] specified for --add-spn-suffix" % spn)
+                    raise CommandError("Entry already present for value[{0!s}] specified for --add-spn-suffix".format(spn))
                 update_spn_vals.append(spn)
                 replace_spn = True
 
@@ -3415,17 +3414,17 @@ class cmd_domain_trust_namespaces(DomainTrustCommand):
                     idx = i
                     break
                 if idx is None:
-                    raise CommandError("Entry not found for value[%s] specified for --delete-spn-suffix" % spn)
+                    raise CommandError("Entry not found for value[{0!s}] specified for --delete-spn-suffix".format(spn))
 
                 update_spn_vals.pop(idx)
                 replace_spn = True
 
-            self.outf.write("Update uPNSuffixes attributes[%d]:\n" % len(update_upn_vals))
+            self.outf.write("Update uPNSuffixes attributes[{0:d}]:\n".format(len(update_upn_vals)))
             for v in update_upn_vals:
-                  self.outf.write("TLN: %-32s DNS[*.%s]\n" % ("", v))
-            self.outf.write("Update msDS-SPNSuffixes attributes[%d]:\n" % len(update_spn_vals))
+                  self.outf.write("TLN: {0:<32!s} DNS[*.{1!s}]\n".format("", v))
+            self.outf.write("Update msDS-SPNSuffixes attributes[{0:d}]:\n".format(len(update_spn_vals)))
             for v in update_spn_vals:
-                  self.outf.write("TLN: %-32s DNS[*.%s]\n" % ("", v))
+                  self.outf.write("TLN: {0:<32!s} DNS[*.{1!s}]\n".format("", v))
 
             update_msg = ldb.Message()
             update_msg.dn = stored_msg.dn
@@ -3461,17 +3460,17 @@ class cmd_domain_trust_namespaces(DomainTrustCommand):
                                         lsaString, lsa.LSA_TRUSTED_DOMAIN_INFO_INFO_EX)
         except RuntimeError as error:
             if self.check_runtime_error(error, self.NT_STATUS_OBJECT_NAME_NOT_FOUND):
-                raise CommandError("trusted domain object does not exist for domain [%s]" % domain)
+                raise CommandError("trusted domain object does not exist for domain [{0!s}]".format(domain))
 
             raise self.LocalRuntimeError(self, error, "QueryTrustedDomainInfoByName(INFO_EX) failed")
 
-        self.outf.write("LocalTDO Netbios[%s] DNS[%s] SID[%s]\n" % (
+        self.outf.write("LocalTDO Netbios[{0!s}] DNS[{1!s}] SID[{2!s}]\n".format(
                         local_tdo_info.netbios_name.string,
                         local_tdo_info.domain_name.string,
                         local_tdo_info.sid))
 
         if not local_tdo_info.trust_attributes & lsa.LSA_TRUST_ATTRIBUTE_FOREST_TRANSITIVE:
-            raise CommandError("trusted domain object for domain [%s] is not marked as FOREST_TRANSITIVE." % domain)
+            raise CommandError("trusted domain object for domain [{0!s}] is not marked as FOREST_TRANSITIVE.".format(domain))
 
         if refresh is not None:
             try:
@@ -3589,9 +3588,9 @@ class cmd_domain_trust_namespaces(DomainTrustCommand):
                 idx = i
                 break
             if idx is None:
-                raise CommandError("Entry not found for value[%s] specified for --enable-tln" % tln)
+                raise CommandError("Entry not found for value[{0!s}] specified for --enable-tln".format(tln))
             if not update_forest_info.entries[idx].flags & lsa.LSA_TLN_DISABLED_MASK:
-                raise CommandError("Entry found for value[%s] specified for --enable-tln is already enabled" % tln)
+                raise CommandError("Entry found for value[{0!s}] specified for --enable-tln is already enabled".format(tln))
             update_forest_info.entries[idx].time = 0
             update_forest_info.entries[idx].flags &= ~lsa.LSA_TLN_DISABLED_MASK
 
@@ -3606,9 +3605,9 @@ class cmd_domain_trust_namespaces(DomainTrustCommand):
                 idx = i
                 break
             if idx is None:
-                raise CommandError("Entry not found for value[%s] specified for --disable-tln" % tln)
+                raise CommandError("Entry not found for value[{0!s}] specified for --disable-tln".format(tln))
             if update_forest_info.entries[idx].flags & lsa.LSA_TLN_DISABLED_ADMIN:
-                raise CommandError("Entry found for value[%s] specified for --disable-tln is already disabled" % tln)
+                raise CommandError("Entry found for value[{0!s}] specified for --disable-tln is already disabled".format(tln))
             update_forest_info.entries[idx].time = 0
             update_forest_info.entries[idx].flags &= ~lsa.LSA_TLN_DISABLED_MASK
             update_forest_info.entries[idx].flags |= lsa.LSA_TLN_DISABLED_ADMIN
@@ -3624,24 +3623,24 @@ class cmd_domain_trust_namespaces(DomainTrustCommand):
                 idx = i
                 break
             if idx is not None:
-                raise CommandError("Entry already present for value[%s] specified for --add-tln-ex" % tln_ex)
+                raise CommandError("Entry already present for value[{0!s}] specified for --add-tln-ex".format(tln_ex))
 
-            tln_dot = ".%s" % tln_ex.lower()
+            tln_dot = ".{0!s}".format(tln_ex.lower())
             idx = None
             for i in xrange(0, len(update_forest_info.entries)):
                 r = update_forest_info.entries[i]
                 if r.type != lsa.LSA_FOREST_TRUST_TOP_LEVEL_NAME:
                     continue
-                r_dot = ".%s" % r.forest_trust_data.string.lower()
+                r_dot = ".{0!s}".format(r.forest_trust_data.string.lower())
                 if tln_dot == r_dot:
-                    raise CommandError("TLN entry present for value[%s] specified for --add-tln-ex" % tln_ex)
+                    raise CommandError("TLN entry present for value[{0!s}] specified for --add-tln-ex".format(tln_ex))
                 if not tln_dot.endswith(r_dot):
                     continue
                 idx = i
                 break
 
             if idx is None:
-                raise CommandError("No TLN parent present for value[%s] specified for --add-tln-ex" % tln_ex)
+                raise CommandError("No TLN parent present for value[{0!s}] specified for --add-tln-ex".format(tln_ex))
 
             r = lsa.ForestTrustRecord()
             r.type = lsa.LSA_FOREST_TRUST_TOP_LEVEL_NAME_EX
@@ -3666,7 +3665,7 @@ class cmd_domain_trust_namespaces(DomainTrustCommand):
                 idx = i
                 break
             if idx is None:
-                raise CommandError("Entry not found for value[%s] specified for --delete-tln-ex" % tln_ex)
+                raise CommandError("Entry not found for value[{0!s}] specified for --delete-tln-ex".format(tln_ex))
 
             entries = []
             entries.extend(update_forest_info.entries)
@@ -3685,9 +3684,9 @@ class cmd_domain_trust_namespaces(DomainTrustCommand):
                 idx = i
                 break
             if idx is None:
-                raise CommandError("Entry not found for value[%s] specified for --enable-nb" % nb)
+                raise CommandError("Entry not found for value[{0!s}] specified for --enable-nb".format(nb))
             if not update_forest_info.entries[idx].flags & lsa.LSA_NB_DISABLED_MASK:
-                raise CommandError("Entry found for value[%s] specified for --enable-nb is already enabled" % nb)
+                raise CommandError("Entry found for value[{0!s}] specified for --enable-nb is already enabled".format(nb))
             update_forest_info.entries[idx].time = 0
             update_forest_info.entries[idx].flags &= ~lsa.LSA_NB_DISABLED_MASK
 
@@ -3702,9 +3701,9 @@ class cmd_domain_trust_namespaces(DomainTrustCommand):
                 idx = i
                 break
             if idx is None:
-                raise CommandError("Entry not found for value[%s] specified for --delete-nb" % nb)
+                raise CommandError("Entry not found for value[{0!s}] specified for --delete-nb".format(nb))
             if update_forest_info.entries[idx].flags & lsa.LSA_NB_DISABLED_ADMIN:
-                raise CommandError("Entry found for value[%s] specified for --disable-nb is already disabled" % nb)
+                raise CommandError("Entry found for value[{0!s}] specified for --disable-nb is already disabled".format(nb))
             update_forest_info.entries[idx].time = 0
             update_forest_info.entries[idx].flags &= ~lsa.LSA_NB_DISABLED_MASK
             update_forest_info.entries[idx].flags |= lsa.LSA_NB_DISABLED_ADMIN
@@ -3720,9 +3719,9 @@ class cmd_domain_trust_namespaces(DomainTrustCommand):
                 idx = i
                 break
             if idx is None:
-                raise CommandError("Entry not found for value[%s] specified for --enable-sid" % sid)
+                raise CommandError("Entry not found for value[{0!s}] specified for --enable-sid".format(sid))
             if not update_forest_info.entries[idx].flags & lsa.LSA_SID_DISABLED_MASK:
-                raise CommandError("Entry found for value[%s] specified for --enable-sid is already enabled" % nb)
+                raise CommandError("Entry found for value[{0!s}] specified for --enable-sid is already enabled".format(nb))
             update_forest_info.entries[idx].time = 0
             update_forest_info.entries[idx].flags &= ~lsa.LSA_SID_DISABLED_MASK
 
@@ -3737,9 +3736,9 @@ class cmd_domain_trust_namespaces(DomainTrustCommand):
                 idx = i
                 break
             if idx is None:
-                raise CommandError("Entry not found for value[%s] specified for --delete-sid" % sid)
+                raise CommandError("Entry not found for value[{0!s}] specified for --delete-sid".format(sid))
             if update_forest_info.entries[idx].flags & lsa.LSA_SID_DISABLED_ADMIN:
-                raise CommandError("Entry found for value[%s] specified for --disable-sid is already disabled" % nb)
+                raise CommandError("Entry found for value[{0!s}] specified for --disable-sid is already disabled".format(nb))
             update_forest_info.entries[idx].time = 0
             update_forest_info.entries[idx].flags &= ~lsa.LSA_SID_DISABLED_MASK
             update_forest_info.entries[idx].flags |= lsa.LSA_SID_DISABLED_ADMIN

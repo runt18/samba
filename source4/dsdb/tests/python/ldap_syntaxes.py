@@ -60,7 +60,7 @@ class SyntaxTests(samba.tests.TestCase):
         attr_ldap_display_name = attr_name.replace("-", "")
 
         ldif = """
-dn: CN=%s,%s""" % (attr_name, self.schema_dn) + """
+dn: CN={0!s},{1!s}""".format(attr_name, self.schema_dn) + """
 ldapDisplayName: """ + attr_ldap_display_name + """
 objectClass: top
 objectClass: attributeSchema
@@ -77,7 +77,7 @@ systemOnly: FALSE
 
         # search for created attribute
         res = []
-        res = self.ldb.search("cn=%s,%s" % (attr_name, self.schema_dn), scope=SCOPE_BASE, attrs=["*"])
+        res = self.ldb.search("cn={0!s},{1!s}".format(attr_name, self.schema_dn), scope=SCOPE_BASE, attrs=["*"])
         self.assertEquals(len(res), 1)
         self.assertEquals(res[0]["lDAPDisplayName"][0], attr_ldap_display_name)
         self.assertTrue("schemaIDGUID" in res[0])
@@ -86,7 +86,7 @@ systemOnly: FALSE
         class_ldap_display_name = class_name.replace("-", "")
 
         ldif = """
-dn: CN=%s,%s""" % (class_name, self.schema_dn) + """
+dn: CN={0!s},{1!s}""".format(class_name, self.schema_dn) + """
 objectClass: top
 objectClass: classSchema
 adminDescription: """ + class_name + """
@@ -103,7 +103,7 @@ systemOnly: FALSE
 
         # search for created objectclass
         res = []
-        res = self.ldb.search("cn=%s,%s" % (class_name, self.schema_dn), scope=SCOPE_BASE, attrs=["*"])
+        res = self.ldb.search("cn={0!s},{1!s}".format(class_name, self.schema_dn), scope=SCOPE_BASE, attrs=["*"])
         self.assertEquals(len(res), 1)
         self.assertEquals(res[0]["lDAPDisplayName"][0], class_ldap_display_name)
         self.assertEquals(res[0]["defaultObjectCategory"][0], res[0]["distinguishedName"][0])
@@ -120,7 +120,7 @@ systemOnly: FALSE
         attr_ldap_display_name = attr_name.replace("-", "")
 
         ldif = """
-dn: CN=%s,%s""" % (attr_name, self.schema_dn) + """
+dn: CN={0!s},{1!s}""".format(attr_name, self.schema_dn) + """
 ldapDisplayName: """ + attr_ldap_display_name + """
 objectClass: top
 objectClass: attributeSchema
@@ -137,7 +137,7 @@ systemOnly: FALSE
 
         # search for created attribute
         res = []
-        res = self.ldb.search("cn=%s,%s" % (attr_name, self.schema_dn), scope=SCOPE_BASE, attrs=["*"])
+        res = self.ldb.search("cn={0!s},{1!s}".format(attr_name, self.schema_dn), scope=SCOPE_BASE, attrs=["*"])
         self.assertEquals(len(res), 1)
         self.assertEquals(res[0]["lDAPDisplayName"][0], attr_ldap_display_name)
         self.assertTrue("schemaIDGUID" in res[0])
@@ -146,7 +146,7 @@ systemOnly: FALSE
         class_ldap_display_name = class_name.replace("-", "")
 
         ldif = """
-dn: CN=%s,%s""" % (class_name, self.schema_dn) + """
+dn: CN={0!s},{1!s}""".format(class_name, self.schema_dn) + """
 objectClass: top
 objectClass: classSchema
 adminDescription: """ + class_name + """
@@ -163,7 +163,7 @@ systemOnly: FALSE
 
         # search for created objectclass
         res = []
-        res = self.ldb.search("cn=%s,%s" % (class_name, self.schema_dn), scope=SCOPE_BASE, attrs=["*"])
+        res = self.ldb.search("cn={0!s},{1!s}".format(class_name, self.schema_dn), scope=SCOPE_BASE, attrs=["*"])
         self.assertEquals(len(res), 1)
         self.assertEquals(res[0]["lDAPDisplayName"][0], class_ldap_display_name)
         self.assertEquals(res[0]["defaultObjectCategory"][0], res[0]["distinguishedName"][0])
@@ -177,15 +177,15 @@ systemOnly: FALSE
     def _get_object_ldif(self, object_name, class_name, class_ldap_display_name, attr_name, attr_value):
         # add object with correct syntax
         ldif = """
-dn: CN=%s,CN=Users,%s"""% (object_name, self.base_dn) + """
+dn: CN={0!s},CN=Users,{1!s}""".format(object_name, self.base_dn) + """
 objectClass: organizationalPerson
 objectClass: person
 objectClass: """ + class_ldap_display_name + """
 objectClass: top
 cn: """ + object_name + """
 instanceType: 4
-objectCategory: CN=%s,%s"""% (class_name, self.schema_dn) + """
-distinguishedName: CN=%s,CN=Users,%s"""% (object_name, self.base_dn) + """
+objectCategory: CN={0!s},{1!s}""".format(class_name, self.schema_dn) + """
+distinguishedName: CN={0!s},CN=Users,{1!s}""".format(object_name, self.base_dn) + """
 name: """ + object_name + """
 """ + attr_name + attr_value  + """
 """
@@ -201,19 +201,19 @@ name: """ + object_name + """
         # search by specifying the DN part only
         res = self.ldb.search(base=self.base_dn,
                          scope=SCOPE_SUBTREE,
-                         expression="(%s=%s)" % (self.dn_string_attribute, self.base_dn))
+                         expression="({0!s}={1!s})".format(self.dn_string_attribute, self.base_dn))
         self.assertEquals(len(res), 0)
 
         # search by specifying the string part only
         res = self.ldb.search(base=self.base_dn,
                          scope=SCOPE_SUBTREE,
-                         expression="(%s=S:5:ABCDE)" % self.dn_string_attribute)
+                         expression="({0!s}=S:5:ABCDE)".format(self.dn_string_attribute))
         self.assertEquals(len(res), 0)
 
         # search by DN+Stirng
         res = self.ldb.search(base=self.base_dn,
                          scope=SCOPE_SUBTREE,
-                         expression="(%s=S:5:ABCDE:%s)" % (self.dn_string_attribute, self.base_dn))
+                         expression="({0!s}=S:5:ABCDE:{1!s})".format(self.dn_string_attribute, self.base_dn))
         self.assertEquals(len(res), 1)
 
         # add object with wrong format
@@ -260,7 +260,7 @@ name: """ + object_name + """
         # add object with GUID instead of DN
         object_name3 = "obj-DN-String3" + time.strftime("%s", time.gmtime())
         ldif = self._get_object_ldif(object_name3, self.dn_string_class_name, self.dn_string_class_ldap_display_name,
-                               self.dn_string_attribute, ": S:5:ABCDE:<GUID=%s>" % str(uuid.uuid4()))
+                               self.dn_string_attribute, ": S:5:ABCDE:<GUID={0!s}>".format(str(uuid.uuid4())))
         try:
             self.ldb.add_ldif(ldif)
         except LdbError, (num, _):
@@ -269,7 +269,7 @@ name: """ + object_name + """
         # add object with SID instead of DN
         object_name4 = "obj-DN-String4" + time.strftime("%s", time.gmtime())
         ldif = self._get_object_ldif(object_name4, self.dn_string_class_name, self.dn_string_class_ldap_display_name,
-                               self.dn_string_attribute, ": S:5:ABCDE:<SID=%s>" % self.ldb.get_domain_sid())
+                               self.dn_string_attribute, ": S:5:ABCDE:<SID={0!s}>".format(self.ldb.get_domain_sid()))
         try:
             self.ldb.add_ldif(ldif)
         except LdbError, (num, _):
@@ -294,19 +294,19 @@ name: """ + object_name + """
         # search by specifyingthe DN part
         res = self.ldb.search(base=self.base_dn,
                          scope=SCOPE_SUBTREE,
-                         expression="(%s=%s)" % (self.dn_binary_attribute, self.base_dn))
+                         expression="({0!s}={1!s})".format(self.dn_binary_attribute, self.base_dn))
         self.assertEquals(len(res), 0)
 
         # search by specifying the binary part
         res = self.ldb.search(base=self.base_dn,
                          scope=SCOPE_SUBTREE,
-                         expression="(%s=B:4:1234)" % self.dn_binary_attribute)
+                         expression="({0!s}=B:4:1234)".format(self.dn_binary_attribute))
         self.assertEquals(len(res), 0)
 
         # search by DN+Binary
         res = self.ldb.search(base=self.base_dn,
                          scope=SCOPE_SUBTREE,
-                         expression="(%s=B:4:1234:%s)" % (self.dn_binary_attribute, self.base_dn))
+                         expression="({0!s}=B:4:1234:{1!s})".format(self.dn_binary_attribute, self.base_dn))
         self.assertEquals(len(res), 1)
 
         # add object with wrong format - 5 bytes instead of 4, 8, 16, 32...
@@ -345,7 +345,7 @@ name: """ + object_name + """
         # add object with GUID instead of DN
         object_name3 = "obj-DN-Binary3" + time.strftime("%s", time.gmtime())
         ldif = self._get_object_ldif(object_name3, self.dn_binary_class_name, self.dn_binary_class_ldap_display_name,
-                               self.dn_binary_attribute, ": B:4:1234:<GUID=%s>" % str(uuid.uuid4()))
+                               self.dn_binary_attribute, ": B:4:1234:<GUID={0!s}>".format(str(uuid.uuid4())))
         try:
             self.ldb.add_ldif(ldif)
         except LdbError, (num, _):
@@ -354,7 +354,7 @@ name: """ + object_name + """
         # add object with SID instead of DN
         object_name4 = "obj-DN-Binary4" + time.strftime("%s", time.gmtime())
         ldif = self._get_object_ldif(object_name4, self.dn_binary_class_name, self.dn_binary_class_ldap_display_name,
-                               self.dn_binary_attribute, ": B:4:1234:<SID=%s>" % self.ldb.get_domain_sid())
+                               self.dn_binary_attribute, ": B:4:1234:<SID={0!s}>".format(self.ldb.get_domain_sid()))
         try:
             self.ldb.add_ldif(ldif)
         except LdbError, (num, _):

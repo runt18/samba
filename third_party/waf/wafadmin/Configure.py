@@ -132,13 +132,13 @@ class ConfigurationContext(Utils.Context):
 		try:
 			self.log = open(path, 'w')
 		except (OSError, IOError):
-			self.fatal('could not open %r for writing' % path)
+			self.fatal('could not open {0!r} for writing'.format(path))
 
 		app = Utils.g_module.APPNAME
 		if app:
 			ver = getattr(Utils.g_module, 'VERSION', '')
 			if ver:
-				app = "%s (%s)" % (app, ver)
+				app = "{0!s} ({1!s})".format(app, ver)
 
 		now = time.ctime()
 		pyver = sys.hexversion
@@ -186,7 +186,7 @@ class ConfigurationContext(Utils.Context):
 					# try to download the tool from the repository then
 					# the default is set to false
 					for x in Utils.to_list(Options.remote_repo):
-						for sub in ['branches/waf-%s/wafadmin/3rdparty' % WAFVERSION, 'trunk/wafadmin/3rdparty']:
+						for sub in ['branches/waf-{0!s}/wafadmin/3rdparty'.format(WAFVERSION), 'trunk/wafadmin/3rdparty']:
 							url = '/'.join((x, sub, tool + '.py'))
 							try:
 								web = urlopen(url)
@@ -204,11 +204,11 @@ class ConfigurationContext(Utils.Context):
 								finally:
 									if loc:
 										loc.close()
-								Logs.warn('downloaded %s from %s' % (tool, url))
+								Logs.warn('downloaded {0!s} from {1!s}'.format(tool, url))
 								try:
 									module = Utils.load_tool(tool, tooldir)
 								except:
-									Logs.warn('module %s from %s is unusable' % (tool, url))
+									Logs.warn('module {0!s} from {1!s} is unusable'.format(tool, url))
 									try:
 										os.unlink(_3rdparty + os.sep + tool + '.py')
 									except:
@@ -218,10 +218,10 @@ class ConfigurationContext(Utils.Context):
 							break
 
 					if not module:
-						Logs.error('Could not load the tool %r or download a suitable replacement from the repository (sys.path %r)\n%s' % (tool, sys.path, e))
+						Logs.error('Could not load the tool {0!r} or download a suitable replacement from the repository (sys.path {1!r})\n{2!s}'.format(tool, sys.path, e))
 						raise ex
 				else:
-					Logs.error('Could not load the tool %r in %r (try the --download option?):\n%s' % (tool, sys.path, e))
+					Logs.error('Could not load the tool {0!r} in {1!r} (try the --download option?):\n{2!s}'.format(tool, sys.path, e))
 					raise ex
 
 			if funs is not None:
@@ -254,8 +254,8 @@ class ConfigurationContext(Utils.Context):
 
 		if not file:
 			file = open(os.path.join(self.cachedir, 'build.config.py'), 'w')
-		file.write('version = 0x%x\n' % HEXVERSION)
-		file.write('tools = %r\n' % self.tools)
+		file.write('version = 0x{0:x}\n'.format(HEXVERSION))
+		file.write('tools = {0!r}\n'.format(self.tools))
 		file.close()
 
 		if not self.all_envs:
@@ -278,7 +278,7 @@ class ConfigurationContext(Utils.Context):
 			env['PREFIX'] = os.path.abspath(os.path.expanduser(Options.options.prefix))
 			self.all_envs[name] = env
 		else:
-			if fromenv: warn("The environment %s may have been configured already" % name)
+			if fromenv: warn("The environment {0!s} may have been configured already".format(name))
 		return env
 
 	def setenv(self, name):
@@ -295,7 +295,7 @@ class ConfigurationContext(Utils.Context):
 		self.line_just = max(self.line_just, len(sr))
 		for x in ('\n', self.line_just * '-', '\n', sr, '\n'):
 			self.log.write(x)
-		Utils.pprint('NORMAL', "%s :" % sr.ljust(self.line_just), sep='')
+		Utils.pprint('NORMAL', "{0!s} :".format(sr.ljust(self.line_just)), sep='')
 
 	def check_message_2(self, sr, color='GREEN'):
 		self.log.write(sr)
@@ -303,7 +303,7 @@ class ConfigurationContext(Utils.Context):
 		Utils.pprint(color, sr)
 
 	def check_message(self, th, msg, state, option=''):
-		sr = 'Checking for %s %s' % (th, msg)
+		sr = 'Checking for {0!s} {1!s}'.format(th, msg)
 		self.check_message_1(sr)
 		p = self.check_message_2
 		if state: p('ok ' + str(option))
@@ -312,7 +312,7 @@ class ConfigurationContext(Utils.Context):
 	# FIXME remove in waf 1.6
 	# the parameter 'option' is not used (kept for compatibility)
 	def check_message_custom(self, th, msg, custom, option='', color='PINK'):
-		sr = 'Checking for %s %s' % (th, msg)
+		sr = 'Checking for {0!s} {1!s}'.format(th, msg)
 		self.check_message_1(sr)
 		self.check_message_2(custom, color)
 
@@ -336,7 +336,7 @@ class ConfigurationContext(Utils.Context):
 		self.line_just = max(self.line_just, len(msg))
 		for x in ('\n', self.line_just * '-', '\n', msg, '\n'):
 			self.log.write(x)
-		Utils.pprint('NORMAL', "%s :" % msg.ljust(self.line_just), sep='')
+		Utils.pprint('NORMAL', "{0!s} :".format(msg.ljust(self.line_just)), sep='')
 
 	def end_msg(self, result, color):
 		self.in_msg -= 1
@@ -375,14 +375,14 @@ class ConfigurationContext(Utils.Context):
 				ret = find_program_impl(self.env, x, path_list, var, environ=self.environ)
 				if ret: break
 
-		self.check_message_1('Checking for program %s' % ' or '.join(filename))
-		self.log.write('  find program=%r paths=%r var=%r\n  -> %r\n' % (filename, path_list, var, ret))
+		self.check_message_1('Checking for program {0!s}'.format(' or '.join(filename)))
+		self.log.write('  find program={0!r} paths={1!r} var={2!r}\n  -> {3!r}\n'.format(filename, path_list, var, ret))
 		if ret:
 			Utils.pprint('GREEN', str(ret))
 		else:
 			Utils.pprint('YELLOW', 'not found')
 			if mandatory:
-				self.fatal('The program %r is required' % filename)
+				self.fatal('The program {0!r} is required'.format(filename))
 
 		if var:
 			self.env[var] = ret
@@ -414,13 +414,13 @@ class ConfigurationContext(Utils.Context):
 							self.fatal('requirement failure')
 						return r
 					return run
-		self.fatal('No such method %r' % name)
+		self.fatal('No such method {0!r}'.format(name))
 
 	def eval_rules(self, rules):
 		self.rules = Utils.to_list(rules)
 		for x in self.rules:
 			f = getattr(self, x)
-			if not f: self.fatal("No such method '%s'." % x)
+			if not f: self.fatal("No such method '{0!s}'.".format(x))
 			try:
 				f()
 			except Exception, e:

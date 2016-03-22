@@ -23,7 +23,7 @@ def find_tru64cc(conf):
 
     try:
         if not Utils.cmd_output(cc + ['-V']):
-            conf.fatal('tru64cc %r was not found' % cc)
+            conf.fatal('tru64cc {0!r} was not found'.format(cc))
     except ValueError:
         conf.fatal('tru64cc -V could not be executed')
 

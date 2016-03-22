@@ -212,7 +212,7 @@ class PosixAclMappingTests(TestCaseInTempDir):
         user_SID = s4_passdb.uid_to_sid(os.stat(self.tempf).st_uid)
         smbd.set_simple_acl(self.tempf, 0640)
         facl = getntacl(self.lp, self.tempf, direct_db_access=False)
-        acl = "O:%sG:%sD:(A;;0x001f019f;;;%s)(A;;0x00120089;;;%s)(A;;;;;WD)" % (user_SID, group_SID, user_SID, group_SID)
+        acl = "O:{0!s}G:{1!s}D:(A;;0x001f019f;;;{2!s})(A;;0x00120089;;;{3!s})(A;;;;;WD)".format(user_SID, group_SID, user_SID, group_SID)
         anysid = security.dom_sid(security.SID_NT_SELF)
         self.assertEquals(acl, facl.as_sddl(anysid))
 
@@ -244,7 +244,7 @@ class PosixAclMappingTests(TestCaseInTempDir):
         smbd.set_simple_acl(self.tempf, 0640, BA_gid)
         facl = getntacl(self.lp, self.tempf, direct_db_access=False)
         domsid = passdb.get_global_sam_sid()
-        acl = "O:%sG:%sD:(A;;0x001f019f;;;%s)(A;;0x00120089;;;BA)(A;;0x00120089;;;%s)(A;;;;;WD)" % (user_SID, group_SID, user_SID, group_SID)
+        acl = "O:{0!s}G:{1!s}D:(A;;0x001f019f;;;{2!s})(A;;0x00120089;;;BA)(A;;0x00120089;;;{3!s})(A;;;;;WD)".format(user_SID, group_SID, user_SID, group_SID)
         anysid = security.dom_sid(security.SID_NT_SELF)
         self.assertEquals(acl, facl.as_sddl(anysid))
 

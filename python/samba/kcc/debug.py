@@ -49,7 +49,7 @@ REV_RED = "\033[01;41m"
 
 
 def _color_debug(*args, **kwargs):
-    DEBUG('%s%s%s' % (kwargs['color'], args[0], C_NORMAL), *args[1:])
+    DEBUG('{0!s}{1!s}{2!s}'.format(kwargs['color'], args[0], C_NORMAL), *args[1:])
 
 _globals = globals()
 for _color in ('DARK_RED', 'RED', 'DARK_GREEN', 'GREEN', 'YELLOW',
@@ -60,7 +60,7 @@ for _color in ('DARK_RED', 'RED', 'DARK_GREEN', 'GREEN', 'YELLOW',
 
 def DEBUG_FN(msg=''):
     filename, lineno, function, text = traceback.extract_stack(None, 2)[0]
-    DEBUG("%s%s:%s%s %s%s()%s '%s'" % (CYAN, filename, BLUE, lineno,
+    DEBUG("{0!s}{1!s}:{2!s}{3!s} {4!s}{5!s}(){6!s} '{7!s}'".format(CYAN, filename, BLUE, lineno,
                                        CYAN, function, C_NORMAL, msg))
 
 

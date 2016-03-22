@@ -115,7 +115,7 @@ def process_args(extra_options=None):
 
 def print_begin(t, delim='='):
     print delim * 40
-    print "%s:" % (t)
+    print "{0!s}:".format((t))
 
 def print_end():
     print "-" * 40
@@ -236,11 +236,10 @@ class Node(object):
         self.imbalance = -1
 
     def __str__(self):
-        return "%s %s%s" % \
-            ("*" if len(self.public_addresses) == 0 else \
+        return "{0!s} {1!s}{2!s}".format("*" if len(self.public_addresses) == 0 else \
                  (" " if self.healthy else "#"),
              sorted(list(self.current_addresses)),
-             " %d" % self.imbalance if options.lcp2 else "")
+             " {0:d}".format(self.imbalance) if options.lcp2 else "")
 
     def can_node_serve_ip(self, ip):
         return ip in self.public_addresses
@@ -281,7 +280,7 @@ class Cluster(object):
         self.prev = None
 
     def __str__(self):
-        return "\n".join(["%2d %s" % (i, n) \
+        return "\n".join(["{0:2d} {1!s}".format(i, n) \
                               for (i, n) in enumerate(self.nodes)])
 
     # This is naive.  It assumes that IP groups are indicated by the
@@ -291,26 +290,26 @@ class Cluster(object):
 
     def print_statistics(self):
         print_begin("STATISTICS")
-        print "Events:                      %6d" % self.events
-        print "Total IP moves:              %6d" % sum(self.ip_moves)
-        print "Gratuitous IP moves:         %6d" % sum(self.grat_ip_moves)
-        print "Max imbalance:               %6d" % max(self.imbalance)
+        print "Events:                      {0:6d}".format(self.events)
+        print "Total IP moves:              {0:6d}".format(sum(self.ip_moves))
+        print "Gratuitous IP moves:         {0:6d}".format(sum(self.grat_ip_moves))
+        print "Max imbalance:               {0:6d}".format(max(self.imbalance))
         if self.have_ip_groups():
             print "Max group imbalance counts:    ", map(max, zip(*self.imbalance_groups))
-        print "Mean imbalance:              %f" % mean(self.imbalance)
+        print "Mean imbalance:              {0:f}".format(mean(self.imbalance))
         if self.have_ip_groups():
             print "Mean group imbalances counts:   ", map(mean, zip(*self.imbalance_groups))
-        print "Final imbalance:             %6d" % self.imbalance[-1]
+        print "Final imbalance:             {0:6d}".format(self.imbalance[-1])
         if self.have_ip_groups():
             print "Final group imbalances:         ", self.imbalance_groups[-1]
         if options.lcp2:
-            print "Max LCP2 imbalance  :        %6d" % max(self.imbalance_metric)
-        print "Soft imbalance count:        %6d" % self.imbalance_count
+            print "Max LCP2 imbalance  :        {0:6d}".format(max(self.imbalance_metric))
+        print "Soft imbalance count:        {0:6d}".format(self.imbalance_count)
         if self.have_ip_groups():
             print "Soft imbalance group counts:    ", self.imbalance_groups_count
         if options.lcp2:
-            print "Final LCP2 imbalance  :      %6d" % self.imbalance_metric[-1]
-        print "Maximum unhealthy:           %6d" % max(self.num_unhealthy)
+            print "Final LCP2 imbalance  :      {0:6d}".format(self.imbalance_metric[-1])
+        print "Maximum unhealthy:           {0:6d}".format(max(self.num_unhealthy))
         print_end()
 
     def find_pnn_with_ip(self, ip):
@@ -390,7 +389,7 @@ class Cluster(object):
     def random_iterations(self):
         i = 1
         while i <= options.iterations:
-            verbose_begin("EVENT %d" % i)
+            verbose_begin("EVENT {0:d}".format(i))
             verbose_end()
             self.do_something_random()
             if self.recover() and options.exit:
@@ -476,8 +475,7 @@ class Cluster(object):
                         grat_ip_moves += 1
                     else:
                         prefix = "  "
-                    details.append("%s %s: %d -> %d" %
-                                   (prefix, ip, old, new))
+                    details.append("{0!s} {1!s}: {2:d} -> {3:d}".format(prefix, ip, old, new))
 
         return (ip_moves, grat_ip_moves, details)
 
@@ -503,12 +501,12 @@ class Cluster(object):
                     min = num
 
         if pnn == -1:
-            verbose_print("Could not find node to take over public address %s" % ip)
+            verbose_print("Could not find node to take over public address {0!s}".format(ip))
             return False
 
         self.nodes[pnn].current_addresses.add(ip)
 
-        verbose_print("%s -> %d" % (ip, pnn))
+        verbose_print("{0!s} -> {1:d}".format(ip, pnn))
         return True
 
     def basic_allocate_unassigned(self):
@@ -563,7 +561,7 @@ class Cluster(object):
                 # Remove the 1st ip from maxnode
                 t = sorted(list(self.nodes[maxnode].current_addresses))
                 realloc = t[0]
-                verbose_print("%s <- %d" % (realloc, maxnode))
+                verbose_print("{0!s} <- {1:d}".format(realloc, maxnode))
                 self.nodes[maxnode].current_addresses.remove(realloc)
                 # Redo the outer loop.
                 retries_l[0] += 1
@@ -596,8 +594,7 @@ class Cluster(object):
                             self.nodes[dstnode].healthy:
                         dstdsum = ip_distance_2_sum(ip, self.nodes[dstnode].current_addresses)
                         dstimbl = self.nodes[dstnode].get_imbalance() + dstdsum
-                        debug_print(" %s -> %d [+%d]" % \
-                                        (ip,
+                        debug_print(" {0!s} -> {1:d} [+{2:d}]".format(ip,
                                          dstnode,
                                          dstimbl - self.nodes[dstnode].get_imbalance()))
 
@@ -612,11 +609,11 @@ class Cluster(object):
             if minnode != -1:
                 self.nodes[minnode].current_addresses.add(minip)
                 self.nodes[minnode].set_imbalance(self.nodes[minnode].get_imbalance() + mindsum)
-                verbose_print("%s -> %d [+%d]" % (minip, minnode, mindsum))
+                verbose_print("{0!s} -> {1:d} [+{2:d}]".format(minip, minnode, mindsum))
                 unassigned.remove(minip)
 
         for ip in unassigned:
-            verbose_print("Could not find node to take over public address %s" % ip)
+            verbose_print("Could not find node to take over public address {0!s}".format(ip))
 
     def lcp2_failback(self, targets):
 
@@ -639,7 +636,7 @@ class Cluster(object):
 
         # Find an IP and destination node that best reduces imbalance.
         optimum = None
-        debug_begin(" CONSIDERING MOVES FROM %d [%d]" % (srcnode, maximbl))
+        debug_begin(" CONSIDERING MOVES FROM {0:d} [{1:d}]".format(srcnode, maximbl))
         for ip in ips:
             # What is this IP address costing the source node?
             srcdsum = ip_distance_2_sum(ip, ips - set([ip]))
@@ -655,8 +652,7 @@ class Cluster(object):
                         self.nodes[dstnode].healthy:
                     dstdsum = ip_distance_2_sum(ip, self.nodes[dstnode].current_addresses)
                     dstimbl = self.nodes[dstnode].get_imbalance() + dstdsum
-                    debug_print(" %d [%d] -> %s -> %d [+%d]" % \
-                                    (srcnode,
+                    debug_print(" {0:d} [{1:d}] -> {2!s} -> {3:d} [+{4:d}]".format(srcnode,
                                      srcimbl - self.nodes[srcnode].get_imbalance(),
                                      ip,
                                      dstnode,
@@ -683,8 +679,7 @@ class Cluster(object):
             self.nodes[dstnode].current_addresses.add(ip)
             self.nodes[dstnode].set_imbalance(dstimbl)
 
-            verbose_print("%d [%d] -> %s -> %d [+%d]" % \
-                              (srcnode,
+            verbose_print("{0:d} [{1:d}] -> {2!s} -> {3:d} [+{4:d}]".format(srcnode,
                                srcimbl - ini_srcimbl,
                                ip,
                                dstnode,
@@ -710,18 +705,18 @@ class Cluster(object):
                 # Add addresses to new node.
                 pnn = i % len(self.nodes)
                 self.nodes[pnn].current_addresses.add(ip)
-                verbose_print("%s -> %d" % (ip, pnn))
+                verbose_print("{0!s} -> {1:d}".format(ip, pnn))
 
         # Remove public addresses from unhealthy nodes.
         for (pnn, n) in enumerate(self.nodes):
             if not n.healthy:
-                verbose_print(["%s <- %d" % (ip, pnn)
+                verbose_print(["{0!s} <- {1:d}".format(ip, pnn)
                                for ip in n.current_addresses])
                 n.current_addresses = set()
 
         # If a node can't serve an assigned address then remove it.
         for n in self.nodes:
-            verbose_print(["%s <- %d" % (ip, pnn)
+            verbose_print(["{0!s} <- {1:d}".format(ip, pnn)
                            for ip in n.current_addresses - n.public_addresses])
             n.current_addresses &= n.public_addresses
 
@@ -771,10 +766,10 @@ class Cluster(object):
             assigned = -1
             for (i, n) in enumerate(self.nodes):
                 if n.can_node_serve_ip(ip):
-                    allowed.append("%s" % i)
+                    allowed.append("{0!s}".format(i))
                 if ip in n.current_addresses:
                     assigned = i
-            line = "%s\t%d\t%s" % (ip, assigned, ",".join(allowed))
+            line = "{0!s}\t{1:d}\t{2!s}".format(ip, assigned, ",".join(allowed))
             in_lines.append(line)
 
         nodestates = ",".join(["0" if n.healthy else "1" for n in self.nodes])
@@ -788,7 +783,7 @@ class Cluster(object):
         else:
             os.environ["CTDB_TEST_LOGLEVEL"] = "0"
 
-        p = subprocess.Popen("../../bin/ctdb_takeover_tests ipalloc %s 2>&1" % nodestates,
+        p = subprocess.Popen("../../bin/ctdb_takeover_tests ipalloc {0!s} 2>&1".format(nodestates),
                              shell=True,
                              stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         p.stdin.write("\n".join(in_lines))

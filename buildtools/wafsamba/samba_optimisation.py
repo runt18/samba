@@ -217,7 +217,7 @@ def apply_lib_vars(self):
 
         y = self.get_tgen_by_name(lib_name)
         if not y:
-            raise Utils.WafError('object %r was not found in uselib_local (required by %r)' % (lib_name, self.name))
+            raise Utils.WafError('object {0!r} was not found in uselib_local (required by {1!r})'.format(lib_name, self.name))
         y.post()
         seen.add(lib_name)
 

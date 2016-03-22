@@ -50,9 +50,9 @@ class LDAPBase(object):
         samdb_url = host
         if not "://" in host:
             if os.path.isfile(host):
-                samdb_url = "tdb://%s" % host
+                samdb_url = "tdb://{0!s}".format(host)
             else:
-                samdb_url = "ldap://%s" % host
+                samdb_url = "ldap://{0!s}".format(host)
         # use 'paged_search' module when connecting remotely
         if samdb_url.lower().startswith("ldap://"):
             ldb_options = ["modules:paged_searches"]
@@ -85,15 +85,15 @@ class LDAPBase(object):
         # Log some domain controller specific place-holers that are being used
         # when compare content of two DCs. Uncomment for DEBUG purposes.
         if self.two_domains and not self.quiet:
-            self.outf.write("\n* Place-holders for %s:\n" % self.host)
-            self.outf.write(4*" " + "${DOMAIN_DN}      => %s\n" %
-                self.base_dn)
-            self.outf.write(4*" " + "${DOMAIN_NETBIOS} => %s\n" %
-                self.domain_netbios)
-            self.outf.write(4*" " + "${SERVER_NAME}     => %s\n" %
-                self.server_names)
-            self.outf.write(4*" " + "${DOMAIN_NAME}    => %s\n" %
-                self.domain_name)
+            self.outf.write("\n* Place-holders for {0!s}:\n".format(self.host))
+            self.outf.write(4*" " + "${{DOMAIN_DN}}      => {0!s}\n".format(
+                self.base_dn))
+            self.outf.write(4*" " + "${{DOMAIN_NETBIOS}} => {0!s}\n".format(
+                self.domain_netbios))
+            self.outf.write(4*" " + "${{SERVER_NAME}}     => {0!s}\n".format(
+                self.server_names))
+            self.outf.write(4*" " + "${{DOMAIN_NAME}}    => {0!s}\n".format(
+                self.domain_name))
 
     def find_domain_sid(self):
         res = self.ldb.search(base=self.base_dn, expression="(objectClass=*)", scope=SCOPE_BASE)
@@ -102,7 +102,7 @@ class LDAPBase(object):
     def find_servers(self):
         """
         """
-        res = self.ldb.search(base="OU=Domain Controllers,%s" % self.base_dn,
+        res = self.ldb.search(base="OU=Domain Controllers,{0!s}".format(self.base_dn),
                 scope=SCOPE_SUBTREE, expression="(objectClass=computer)", attrs=["cn"])
         assert len(res) > 0
         srv = []
@@ -111,7 +111,7 @@ class LDAPBase(object):
         return srv
 
     def find_netbios(self):
-        res = self.ldb.search(base="CN=Partitions,%s" % self.config_dn,
+        res = self.ldb.search(base="CN=Partitions,{0!s}".format(self.config_dn),
                 scope=SCOPE_SUBTREE, attrs=["nETBIOSName"])
         assert len(res) > 0
         for x in res:
@@ -166,7 +166,7 @@ class LDAPBase(object):
         # until we get a response with '*' at the end
         while True:
 
-            n = "%s;range=%d-*" % (attr, hi + 1)
+            n = "{0!s};range={1:d}-*".format(attr, hi + 1)
             res = self.ldb.search(base=object_dn, scope=SCOPE_BASE, attrs=[n])
             assert len(res) == 1
             res = dict(res[0])
@@ -227,7 +227,7 @@ class LDAPBase(object):
         """ Translate binary representation of schemaIDGUID to standard string representation.
             @gid_blob: binary schemaIDGUID
         """
-        blob = "%s" % guid_blob
+        blob = "{0!s}".format(guid_blob)
         stops = [4, 2, 2, 2, 6]
         index = 0
         res = ""
@@ -257,7 +257,7 @@ class LDAPBase(object):
                               expression="(objectSid=*)", scope=SCOPE_SUBTREE, attrs=["objectSid", "sAMAccountName"])
         for item in res:
             try:
-                self.sid_map["%s" % ndr_unpack(security.dom_sid, item["objectSid"][0])] = item["sAMAccountName"][0]
+                self.sid_map["{0!s}".format(ndr_unpack(security.dom_sid, item["objectSid"][0]))] = item["sAMAccountName"][0]
             except KeyError:
                 pass
 
@@ -285,7 +285,7 @@ class Descriptor(object):
         return re.findall("(\(.*?\))", res)
 
     def fix_sid(self, ace):
-        res = "%s" % ace
+        res = "{0!s}".format(ace)
         sids = re.findall("S-[-0-9]+", res)
         # If there are not SIDs to replace return the same ACE
         if len(sids) == 0:
@@ -303,8 +303,8 @@ class Descriptor(object):
         res = ""
         if len(self.dacl_list) != len(other.dacl_list):
             res += 4*" " + "Difference in ACE count:\n"
-            res += 8*" " + "=> %s\n" % len(self.dacl_list)
-            res += 8*" " + "=> %s\n" % len(other.dacl_list)
+            res += 8*" " + "=> {0!s}\n".format(len(self.dacl_list))
+            res += 8*" " + "=> {0!s}\n".format(len(other.dacl_list))
         #
         i = 0
         flag = True
@@ -312,23 +312,23 @@ class Descriptor(object):
             self_ace = None
             other_ace = None
             try:
-                self_ace = "%s" % self.dacl_list[i]
+                self_ace = "{0!s}".format(self.dacl_list[i])
             except IndexError:
                 self_ace = ""
             #
             try:
-                other_ace = "%s" % other.dacl_list[i]
+                other_ace = "{0!s}".format(other.dacl_list[i])
             except IndexError:
                 other_ace = ""
             if len(self_ace) + len(other_ace) == 0:
                 break
-            self_ace_fixed = "%s" % self.fix_sid(self_ace)
-            other_ace_fixed = "%s" % other.fix_sid(other_ace)
+            self_ace_fixed = "{0!s}".format(self.fix_sid(self_ace))
+            other_ace_fixed = "{0!s}".format(other.fix_sid(other_ace))
             if self_ace_fixed != other_ace_fixed:
-                res += "%60s * %s\n" % ( self_ace_fixed, other_ace_fixed )
+                res += "{0:60!s} * {1!s}\n".format(self_ace_fixed, other_ace_fixed )
                 flag = False
             else:
-                res += "%60s | %s\n" % ( self_ace_fixed, other_ace_fixed )
+                res += "{0:60!s} | {1!s}\n".format(self_ace_fixed, other_ace_fixed )
             i += 1
         return (flag, res)
 
@@ -336,8 +336,8 @@ class Descriptor(object):
         res = ""
         if len(self.dacl_list) != len(other.dacl_list):
             res += 4*" " + "Difference in ACE count:\n"
-            res += 8*" " + "=> %s\n" % len(self.dacl_list)
-            res += 8*" " + "=> %s\n" % len(other.dacl_list)
+            res += 8*" " + "=> {0!s}\n".format(len(self.dacl_list))
+            res += 8*" " + "=> {0!s}\n".format(len(other.dacl_list))
         #
         common_aces = []
         self_aces = []
@@ -355,7 +355,7 @@ class Descriptor(object):
                 common_aces.append(ace)
         self_aces = sorted(self_aces)
         if len(self_aces) > 0:
-            res += 4*" " + "ACEs found only in %s:\n" % self.con.host
+            res += 4*" " + "ACEs found only in {0!s}:\n".format(self.con.host)
             for ace in self_aces:
                 res += 8*" " + ace + "\n"
         #
@@ -368,7 +368,7 @@ class Descriptor(object):
                 common_aces.append(ace)
         other_aces = sorted(other_aces)
         if len(other_aces) > 0:
-            res += 4*" " + "ACEs found only in %s:\n" % other.con.host
+            res += 4*" " + "ACEs found only in {0!s}:\n".format(other.con.host)
             for ace in other_aces:
                 res += 8*" " + ace + "\n"
         #
@@ -390,9 +390,9 @@ class LDAPObject(object):
         self.verbose = self.con.verbose
         self.summary = summary
         self.dn = dn.replace("${DOMAIN_DN}", self.con.base_dn)
-        self.dn = self.dn.replace("CN=${DOMAIN_NETBIOS}", "CN=%s" % self.con.domain_netbios)
+        self.dn = self.dn.replace("CN=${DOMAIN_NETBIOS}", "CN={0!s}".format(self.con.domain_netbios))
         for x in self.con.server_names:
-            self.dn = self.dn.replace("CN=${SERVER_NAME}", "CN=%s" % x)
+            self.dn = self.dn.replace("CN=${SERVER_NAME}", "CN={0!s}".format(x))
         self.attributes = self.con.get_attributes(self.dn)
         # One domain - two domain controllers
         #
@@ -504,7 +504,7 @@ class LDAPObject(object):
             self.outf.write(msg+"\n")
 
     def fix_dn(self, s):
-        res = "%s" % s
+        res = "{0!s}".format(s)
         if not self.two_domains:
             return res
         if res.upper().endswith(self.con.base_dn.upper()):
@@ -512,7 +512,7 @@ class LDAPObject(object):
         return res
 
     def fix_domain_name(self, s):
-        res = "%s" % s
+        res = "{0!s}".format(s)
         if not self.two_domains:
             return res
         res = res.replace(self.con.domain_name.lower(), self.con.domain_name.upper())
@@ -520,7 +520,7 @@ class LDAPObject(object):
         return res
 
     def fix_domain_netbios(self, s):
-        res = "%s" % s
+        res = "{0!s}".format(s)
         if not self.two_domains:
             return res
         res = res.replace(self.con.domain_netbios.lower(), self.con.domain_netbios.upper())
@@ -528,7 +528,7 @@ class LDAPObject(object):
         return res
 
     def fix_server_name(self, s):
-        res = "%s" % s
+        res = "{0!s}".format(s)
         if not self.two_domains or len(self.con.server_names) > 1:
             return res
         for x in self.con.server_names:
@@ -562,7 +562,7 @@ class LDAPObject(object):
         other.unique_attrs = []
         if self.attributes.keys() != other.attributes.keys():
             #
-            title = 4*" " + "Attributes found only in %s:" % self.con.host
+            title = 4*" " + "Attributes found only in {0!s}:".format(self.con.host)
             for x in self.attributes.keys():
                 if not x in other.attributes.keys() and \
                 not x.upper() in [q.upper() for q in other.ignore_attributes]:
@@ -572,7 +572,7 @@ class LDAPObject(object):
                     res += 8*" " + x + "\n"
                     self.unique_attrs.append(x)
             #
-            title = 4*" " + "Attributes found only in %s:" % other.con.host
+            title = 4*" " + "Attributes found only in {0!s}:".format(other.con.host)
             for x in other.attributes.keys():
                 if not x in self.attributes.keys() and \
                 not x.upper() in [q.upper() for q in self.ignore_attributes]:
@@ -654,9 +654,9 @@ class LDAPObject(object):
                     res += title + "\n"
                     title = None
                 if p and q:
-                    res += 8*" " + x + " => \n%s\n%s" % (p, q) + "\n"
+                    res += 8*" " + x + " => \n{0!s}\n{1!s}".format(p, q) + "\n"
                 else:
-                    res += 8*" " + x + " => \n%s\n%s" % (self.attributes[x], other.attributes[x]) + "\n"
+                    res += 8*" " + x + " => \n{0!s}\n{1!s}".format(self.attributes[x], other.attributes[x]) + "\n"
                 self.df_value_attrs.append(x)
         #
         if self.unique_attrs + other.unique_attrs != []:
@@ -703,10 +703,10 @@ class LDAPBundel(object):
             # Use alias reference
             tmp = self.dn_list[counter]
             tmp = tmp[:len(tmp)-len(self.con.base_dn)] + "${DOMAIN_DN}"
-            tmp = tmp.replace("CN=%s" % self.con.domain_netbios, "CN=${DOMAIN_NETBIOS}")
+            tmp = tmp.replace("CN={0!s}".format(self.con.domain_netbios), "CN=${DOMAIN_NETBIOS}")
             if len(self.con.server_names) == 1:
                 for x in self.con.server_names:
-                    tmp = tmp.replace("CN=%s" % x, "CN=${SERVER_NAME}")
+                    tmp = tmp.replace("CN={0!s}".format(x), "CN=${SERVER_NAME}")
             self.dn_list[counter] = tmp
             counter += 1
         self.dn_list = list(set(self.dn_list))
@@ -727,7 +727,7 @@ class LDAPBundel(object):
     def __eq__(self, other):
         res = True
         if self.size != other.size:
-            self.log( "\n* DN lists have different size: %s != %s" % (self.size, other.size) )
+            self.log( "\n* DN lists have different size: {0!s} != {1!s}".format(self.size, other.size) )
             if not self.skip_missing_dn:
                 res = False
         #
@@ -735,7 +735,7 @@ class LDAPBundel(object):
         # It does not matter if they are in the same DC, in two DC in one domain or in two
         # different domains.
         if self.search_scope != SCOPE_BASE:
-            title= "\n* DNs found only in %s:" % self.con.host
+            title= "\n* DNs found only in {0!s}:".format(self.con.host)
             for x in self.dn_list:
                 if not x.upper() in [q.upper() for q in other.dn_list]:
                     if title and not self.skip_missing_dn:
@@ -746,7 +746,7 @@ class LDAPBundel(object):
                     self.dn_list[self.dn_list.index(x)] = ""
             self.dn_list = [x for x in self.dn_list if x]
             #
-            title= "\n* DNs found only in %s:" % other.con.host
+            title= "\n* DNs found only in {0!s}:".format(other.con.host)
             for x in other.dn_list:
                 if not x.upper() in [q.upper() for q in self.dn_list]:
                     if title and not self.skip_missing_dn:
@@ -761,7 +761,7 @@ class LDAPBundel(object):
             other.update_size()
             assert self.size == other.size
             assert sorted([x.upper() for x in self.dn_list]) == sorted([x.upper() for x in other.dn_list])
-        self.log( "\n* Objects to be compared: %s" % self.size )
+        self.log( "\n* Objects to be compared: {0!s}".format(self.size) )
 
         index = 0
         while index < self.size:
@@ -774,7 +774,7 @@ class LDAPBundel(object):
                                      outf=self.outf, errf=self.errf)
             except LdbError, (enum, estr):
                 if enum == ERR_NO_SUCH_OBJECT:
-                    self.log( "\n!!! Object not found: %s" % self.dn_list[index] )
+                    self.log( "\n!!! Object not found: {0!s}".format(self.dn_list[index]) )
                     skip = True
                 raise
             try:
@@ -785,7 +785,7 @@ class LDAPBundel(object):
                         outf=self.outf, errf=self.errf)
             except LdbError, (enum, estr):
                 if enum == ERR_NO_SUCH_OBJECT:
-                    self.log( "\n!!! Object not found: %s" % other.dn_list[index] )
+                    self.log( "\n!!! Object not found: {0!s}".format(other.dn_list[index]) )
                     skip = True
                 raise
             if skip:
@@ -794,13 +794,13 @@ class LDAPBundel(object):
             if object1 == object2:
                 if self.con.verbose:
                     self.log( "\nComparing:" )
-                    self.log( "'%s' [%s]" % (object1.dn, object1.con.host) )
-                    self.log( "'%s' [%s]" % (object2.dn, object2.con.host) )
+                    self.log( "'{0!s}' [{1!s}]".format(object1.dn, object1.con.host) )
+                    self.log( "'{0!s}' [{1!s}]".format(object2.dn, object2.con.host) )
                     self.log( 4*" " + "OK" )
             else:
                 self.log( "\nComparing:" )
-                self.log( "'%s' [%s]" % (object1.dn, object1.con.host) )
-                self.log( "'%s' [%s]" % (object2.dn, object2.con.host) )
+                self.log( "'{0!s}' [{1!s}]".format(object1.dn, object1.con.host) )
+                self.log( "'{0!s}' [{1!s}]".format(object2.dn, object2.con.host) )
                 self.log( object1.screen_output )
                 self.log( 4*" " + "FAILED" )
                 res = False
@@ -821,9 +821,9 @@ class LDAPBundel(object):
         elif context.upper() == "SCHEMA":
             search_base = self.con.schema_dn
         elif context.upper() == "DNSDOMAIN":
-            search_base = "DC=DomainDnsZones,%s" % self.con.base_dn
+            search_base = "DC=DomainDnsZones,{0!s}".format(self.con.base_dn)
         elif context.upper() == "DNSFOREST":
-            search_base = "DC=ForestDnsZones,%s" % self.con.root_dn
+            search_base = "DC=ForestDnsZones,{0!s}".format(self.con.root_dn)
 
         dn_list = []
         if not self.search_base:
@@ -840,7 +840,7 @@ class LDAPBundel(object):
         try:
             res = self.con.ldb.search(base=self.search_base, scope=self.search_scope, attrs=["dn"])
         except LdbError, (enum, estr):
-            self.outf.write("Failed search of base=%s\n" % self.search_base)
+            self.outf.write("Failed search of base={0!s}\n".format(self.search_base))
             raise
         for x in res:
            dn_list.append(x["dn"].get_linearized())
@@ -854,7 +854,7 @@ class LDAPBundel(object):
         self.summary["df_value_attrs"] = list(set(self.summary["df_value_attrs"]))
         #
         if self.summary["unique_attrs"]:
-            self.log( "\nAttributes found only in %s:" % self.con.host )
+            self.log( "\nAttributes found only in {0!s}:".format(self.con.host) )
             self.log( "".join([str("\n" + 4*" " + x) for x in self.summary["unique_attrs"]]) )
         #
         if self.summary["df_value_attrs"]:
@@ -944,7 +944,7 @@ class cmd_ldapcmp(Command):
                 if c is None:
                     continue
                 if not c.upper() in ["DOMAIN", "CONFIGURATION", "SCHEMA", "DNSDOMAIN", "DNSFOREST"]:
-                    raise CommandError("Incorrect argument: %s" % c)
+                    raise CommandError("Incorrect argument: {0!s}".format(c))
                 contexts.append(c.upper())
 
         if verbose and quiet:
@@ -973,7 +973,7 @@ class cmd_ldapcmp(Command):
         status = 0
         for context in contexts:
             if not quiet:
-                self.outf.write("\n* Comparing [%s] context...\n" % context)
+                self.outf.write("\n* Comparing [{0!s}] context...\n".format(context))
 
             b1 = LDAPBundel(con1, context=context, filter_list=filter_list,
                             outf=self.outf, errf=self.errf)
@@ -982,11 +982,11 @@ class cmd_ldapcmp(Command):
 
             if b1 == b2:
                 if not quiet:
-                    self.outf.write("\n* Result for [%s]: SUCCESS\n" %
-                        context)
+                    self.outf.write("\n* Result for [{0!s}]: SUCCESS\n".format(
+                        context))
             else:
                 if not quiet:
-                    self.outf.write("\n* Result for [%s]: FAILURE\n" % context)
+                    self.outf.write("\n* Result for [{0!s}]: FAILURE\n".format(context))
                     if not descriptor:
                         assert len(b1.summary["df_value_attrs"]) == len(b2.summary["df_value_attrs"])
                         b2.summary["df_value_attrs"] = []
@@ -997,4 +997,4 @@ class cmd_ldapcmp(Command):
                 # mark exit status as FAILURE if a least one comparison failed
                 status = -1
         if status != 0:
-            raise CommandError("Compare failed: %d" % status)
+            raise CommandError("Compare failed: {0:d}".format(status))

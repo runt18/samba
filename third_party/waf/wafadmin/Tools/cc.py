@@ -69,7 +69,7 @@ def apply_defines_cc(self):
 	for l in libs:
 		val = self.env['CCDEFINES_'+l]
 		if val: milst += val
-	self.env['DEFLINES'] = ["%s %s" % (x[0], Utils.trimquotes('='.join(x[1:]))) for x in [y.split('=') for y in milst]]
+	self.env['DEFLINES'] = ["{0!s} {1!s}".format(x[0], Utils.trimquotes('='.join(x[1:]))) for x in [y.split('=') for y in milst]]
 	y = self.env['CCDEFINES_ST']
 	self.env.append_unique('_CCDEFFLAGS', [y%x for x in milst])
 
@@ -79,13 +79,13 @@ def c_hook(self, node):
 	if getattr(self, 'obj_ext', None):
 		obj_ext = self.obj_ext
 	else:
-		obj_ext = '_%d.o' % self.idx
+		obj_ext = '_{0:d}.o'.format(self.idx)
 
 	task = self.create_task('cc', node, node.change_ext(obj_ext))
 	try:
 		self.compiled_tasks.append(task)
 	except AttributeError:
-		raise Utils.WafError('Have you forgotten to set the feature "cc" on %s?' % str(self))
+		raise Utils.WafError('Have you forgotten to set the feature "cc" on {0!s}?'.format(str(self)))
 	return task
 
 cc_str = '${CC} ${CCFLAGS} ${CPPFLAGS} ${_CCINCFLAGS} ${_CCDEFFLAGS} ${CC_SRC_F}${SRC} ${CC_TGT_F}${TGT}'

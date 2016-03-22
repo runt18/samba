@@ -33,7 +33,7 @@ parser.add_option("", "--clean", help="run make clean before each build",
 
 def run_cmd(cmd, dir=".", show=True, output=False, checkfail=True):
     if show:
-        print("Running: '%s' in '%s'" % (cmd, dir))
+        print("Running: '{0!s}' in '{1!s}'".format(cmd, dir))
     if output:
         return Popen([cmd], shell=True, stdout=PIPE, cwd=dir).communicate()[0]
     elif checkfail:
@@ -56,19 +56,19 @@ gitroot = find_git_root()
 # create a bisect script
 f = tempfile.NamedTemporaryFile(delete=False)
 f.write("set -x\n")
-f.write("cd %s || exit 125\n" % cwd)
+f.write("cd {0!s} || exit 125\n".format(cwd))
 if opts.autogen:
-    f.write("%s || exit 125\n" % opts.autogen_command)
+    f.write("{0!s} || exit 125\n".format(opts.autogen_command))
 if opts.configure:
-    f.write("%s || exit 125\n" % opts.configure_command)
+    f.write("{0!s} || exit 125\n".format(opts.configure_command))
 if opts.clean:
     f.write("make clean || exit 125\n")
 if opts.skip_build_errors:
     build_err = 125
 else:
     build_err = 1
-f.write("%s || exit %u\n" % (opts.build_command, build_err))
-f.write("%s || exit 1\n" % opts.test_command)
+f.write("{0!s} || exit {1:d}\n".format(opts.build_command, build_err))
+f.write("{0!s} || exit 1\n".format(opts.test_command))
 f.write("exit 0\n")
 f.close()
 
@@ -81,13 +81,13 @@ def cleanup():
 ret = -1
 try:
     run_cmd("git bisect reset", dir=gitroot, show=False, checkfail=False)
-    run_cmd("git bisect start %s %s --" % (opts.bad, opts.good), dir=gitroot)
-    ret = run_cmd("git bisect run bash %s" % f.name, dir=gitroot, show=True, checkfail=False)
+    run_cmd("git bisect start {0!s} {1!s} --".format(opts.bad, opts.good), dir=gitroot)
+    ret = run_cmd("git bisect run bash {0!s}".format(f.name), dir=gitroot, show=True, checkfail=False)
 except KeyboardInterrupt:
     print("Cleaning up")
     cleanup()
 except Exception, reason:
-    print("Failed bisect: %s" % reason)
+    print("Failed bisect: {0!s}".format(reason))
     cleanup()
 
 run_cmd("git bisect reset", dir=gitroot)

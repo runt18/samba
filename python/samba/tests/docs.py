@@ -33,7 +33,7 @@ class TestCase(samba.tests.TestCaseInTempDir):
         parameters = list(parameters)
         parameters = map(str, parameters)
         parameters.sort()
-        return message + '\n\n    %s' % ('\n    '.join(parameters))
+        return message + '\n\n    {0!s}'.format(('\n    '.join(parameters)))
 
 
 def get_documented_parameters(sourcedir):
@@ -144,7 +144,7 @@ def get_documented_tuples(sourcedir, omit_no_default=True):
             if omit_no_default:
                 continue
         elif len(defaults) > 1:
-            raise Exception("More than one default found for parameter %s" % name)
+            raise Exception("More than one default found for parameter {0!s}".format(name))
         else:
             default_text = defaults[0].text
 
@@ -249,14 +249,14 @@ class SmbDotConfTests(TestCase):
             elif context == "S":
                 section = "test"
             else:
-                 self.fail("%s has no valid context" % param)
+                 self.fail("{0!s} has no valid context".format(param))
             p = subprocess.Popen(program + ["-s", self.smbconf,
                     "--section-name", section, "--parameter-name", param],
                     stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.topdir).communicate()
             if p[0].upper().strip() != default.upper():
                 if not (p[0].upper().strip() == "" and default == '""'):
-                    doc_triple = "%s\n      Expected: %s" % (param, default)
-                    failset.add("%s\n      Got: %s" % (doc_triple, p[0].upper().strip()))
+                    doc_triple = "{0!s}\n      Expected: {1!s}".format(param, default)
+                    failset.add("{0!s}\n      Got: {1!s}".format(doc_triple, p[0].upper().strip()))
 
         if len(failset) > 0:
             self.fail(self._format_message(failset,
@@ -278,15 +278,15 @@ class SmbDotConfTests(TestCase):
             elif context == "S":
                 section = "test"
             else:
-                 self.fail("%s has no valid context" % param)
+                 self.fail("{0!s} has no valid context".format(param))
             p = subprocess.Popen(program + ["-s", self.smbconf,
                     "--section-name", section, "--parameter-name", param,
-                    "--option", "%s = %s" % (param, default)],
+                    "--option", "{0!s} = {1!s}".format(param, default)],
                     stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.topdir).communicate()
             if p[0].upper().strip() != default.upper():
                 if not (p[0].upper().strip() == "" and default == '""'):
-                    doc_triple = "%s\n      Expected: %s" % (param, default)
-                    failset.add("%s\n      Got: %s" % (doc_triple, p[0].upper().strip()))
+                    doc_triple = "{0!s}\n      Expected: {1!s}".format(param, default)
+                    failset.add("{0!s}\n      Got: {1!s}".format(doc_triple, p[0].upper().strip()))
 
         if len(failset) > 0:
             self.fail(self._format_message(failset,
@@ -331,15 +331,15 @@ class SmbDotConfTests(TestCase):
             elif context == "S":
                 section = "test"
             else:
-                 self.fail("%s has no valid context" % param)
+                 self.fail("{0!s} has no valid context".format(param))
 
             value_to_use = arbitrary.get(param_type)
             if value_to_use is None:
-                self.fail("%s has an invalid type" % param)
+                self.fail("{0!s} has an invalid type".format(param))
 
             p = subprocess.Popen(program + ["-s", self.smbconf,
                     "--section-name", section, "--parameter-name", param,
-                    "--option", "%s = %s" % (param, value_to_use)],
+                    "--option", "{0!s} = {1!s}".format(param, value_to_use)],
                     stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.topdir).communicate()
             if p[0].upper().strip() != value_to_use.upper():
                 # currently no way to distinguish command lists
@@ -355,8 +355,8 @@ class SmbDotConfTests(TestCase):
                     except:
                         pass
 
-                doc_triple = "%s\n      Expected: %s" % (param, value_to_use)
-                failset.add("%s\n      Got: %s" % (doc_triple, p[0].upper().strip()))
+                doc_triple = "{0!s}\n      Expected: {1!s}".format(param, value_to_use)
+                failset.add("{0!s}\n      Got: {1!s}".format(doc_triple, p[0].upper().strip()))
 
             opposite_value = opposite_arbitrary.get(param_type)
             tempconf = os.path.join(self.tempdir, "tempsmb.conf")
@@ -369,7 +369,7 @@ class SmbDotConfTests(TestCase):
                 g.close()
 
             p = subprocess.Popen(program + ["-s", tempconf, "--suppress-prompt",
-                    "--option", "%s = %s" % (param, value_to_use)],
+                    "--option", "{0!s} = {1!s}".format(param, value_to_use)],
                     stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.topdir).communicate()
 
             os.unlink(tempconf)
@@ -395,8 +395,8 @@ class SmbDotConfTests(TestCase):
                             except:
                                 pass
 
-                        doc_triple = "%s\n      Expected: %s" % (param, value_to_use)
-                        failset.add("%s\n      Got: %s" % (doc_triple, value_found))
+                        doc_triple = "{0!s}\n      Expected: {1!s}".format(param, value_to_use)
+                        failset.add("{0!s}\n      Got: {1!s}".format(doc_triple, value_found))
 
 
         if len(failset) > 0:

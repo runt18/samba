@@ -55,7 +55,7 @@ class DrsReplSchemaTestCase(drs_base.DrsBaseTestCase):
         # initialize objects prefix if not done yet
         if self.obj_prefix is None:
             t = time.strftime("%s", time.gmtime())
-            DrsReplSchemaTestCase.obj_prefix = "DrsReplSchema-%s" % t
+            DrsReplSchemaTestCase.obj_prefix = "DrsReplSchema-{0!s}".format(t)
 
     def tearDown(self):
         super(DrsReplSchemaTestCase, self).tearDown()
@@ -64,9 +64,9 @@ class DrsReplSchemaTestCase(drs_base.DrsBaseTestCase):
         '''Try to create a unique name for an object
            that is to be added to schema'''
         self.obj_id += 1
-        obj_name = "%s-%d-%s" % (self.obj_prefix, self.obj_id, base_name)
+        obj_name = "{0!s}-{1:d}-{2!s}".format(self.obj_prefix, self.obj_id, base_name)
         obj_ldn = obj_name.replace("-", "")
-        obj_dn = "CN=%s,%s" % (obj_name, self.schema_dn)
+        obj_dn = "CN={0!s},{1!s}".format(obj_name, self.schema_dn)
         return (obj_dn, obj_name, obj_ldn)
 
     def _schema_new_class(self, ldb_ctx, base_name, attrs=None):
@@ -87,7 +87,7 @@ class DrsReplSchemaTestCase(drs_base.DrsBaseTestCase):
         try:
             ldb_ctx.add(rec)
         except LdbError, (enum, estr):
-            self.fail("Adding record failed with %d/%s" % (enum, estr))
+            self.fail("Adding record failed with {0:d}/{1!s}".format(enum, estr))
 
         self._ldap_schemaUpdateNow(ldb_ctx)
         return (rec["lDAPDisplayName"], rec["dn"])
@@ -118,17 +118,17 @@ class DrsReplSchemaTestCase(drs_base.DrsBaseTestCase):
                                       scope=SCOPE_BASE,
                                       attrs=["*"])
         self.assertEquals(len(res_dc1), 1,
-                          "%s doesn't exists on %s" % (obj_dn, self.dnsname_dc1))
+                          "{0!s} doesn't exists on {1!s}".format(obj_dn, self.dnsname_dc1))
         try:
             res_dc2 = self.ldb_dc2.search(base=obj_dn,
                                           scope=SCOPE_BASE,
                                           attrs=["*"])
         except LdbError, (enum, estr):
             if enum == ERR_NO_SUCH_OBJECT:
-                self.fail("%s doesn't exists on %s" % (obj_dn, self.dnsname_dc2))
+                self.fail("{0!s} doesn't exists on {1!s}".format(obj_dn, self.dnsname_dc2))
             raise
         self.assertEquals(len(res_dc2), 1,
-                          "%s doesn't exists on %s" % (obj_dn, self.dnsname_dc2))
+                          "{0!s} doesn't exists on {1!s}".format(obj_dn, self.dnsname_dc2))
 
     def test_class(self):
         """Simple test for classSchema replication"""
@@ -146,7 +146,7 @@ class DrsReplSchemaTestCase(drs_base.DrsBaseTestCase):
         c_dn_list = []
         c_ldn_last = None
         for i in range(1, 6):
-            base_name = "cls-I-%02d" % i
+            base_name = "cls-I-{0:02d}".format(i)
             (c_ldn, c_dn) = self._schema_new_class(self.ldb_dc1, base_name)
             c_dn_list.append(c_dn)
             if c_ldn_last:

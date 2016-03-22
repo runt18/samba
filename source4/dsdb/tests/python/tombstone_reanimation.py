@@ -62,7 +62,7 @@ class RestoredObjectAttributesBaseTestCase(samba.tests.TestCase):
         return self.samdb.schema_format_value("objectGUID", guid)
 
     def search_guid(self, guid):
-        res = self.samdb.search(base="<GUID=%s>" % self.GUID_string(guid),
+        res = self.samdb.search(base="<GUID={0!s}>".format(self.GUID_string(guid)),
                                 scope=SCOPE_BASE, controls=["show_deleted:1"])
         self.assertEquals(len(res), 1)
         return res[0]
@@ -84,8 +84,7 @@ class RestoredObjectAttributesBaseTestCase(samba.tests.TestCase):
 
     def assertAttributesEqual(self, obj_orig, attrs_orig, obj_restored, attrs_rest):
         self.assertEqual(attrs_orig, attrs_rest,
-                         "Actual object does not have expected attributes, missing from expected (%s), extra (%s)"
-                         % (str(attrs_orig.difference(attrs_rest)), str(attrs_rest.difference(attrs_orig))))
+                         "Actual object does not have expected attributes, missing from expected ({0!s}), extra ({1!s})".format(str(attrs_orig.difference(attrs_rest)), str(attrs_rest.difference(attrs_orig))))
         # remove volatile attributes, they can't be equal
         attrs_orig -= set(["uSNChanged", "dSCorePropagationData", "whenChanged"])
         for attr in attrs_orig:
@@ -121,12 +120,12 @@ class RestoredObjectAttributesBaseTestCase(samba.tests.TestCase):
         for name in attr_expected.keys():
             expected_val = attr_expected[name]
             actual_val = obj_msg.get(name)
-            self.assertFalse(actual_val is None, "No value for attribute '%s'" % name)
+            self.assertFalse(actual_val is None, "No value for attribute '{0!s}'".format(name))
             if expected_val == "**":
                 # "**" values means "any"
                 continue
             self.assertEqual(expected_val.lower(), str(actual_val).lower(),
-                             "Unexpected value for '%s'" % name)
+                             "Unexpected value for '{0!s}'".format(name))
 
     @staticmethod
     def restore_deleted_object(samdb, del_dn, new_dn, new_attrs=None):
@@ -336,14 +335,14 @@ class RestoreUserObjectTestCase(RestoredObjectAttributesBaseTestCase):
                 'logonCount': '0',
                 'sAMAccountName': username,
                 'sAMAccountType': '805306368',
-                'lastKnownParent': 'CN=Users,%s' % self.base_dn,
-                'objectCategory': 'CN=%s,%s' % (category, self.schema_dn)
+                'lastKnownParent': 'CN=Users,{0!s}'.format(self.base_dn),
+                'objectCategory': 'CN={0!s},{1!s}'.format(category, self.schema_dn)
                 }
 
     def test_restore_user(self):
         print "Test restored user attributes"
         username = "restore_user"
-        usr_dn = "cn=%s,cn=users,%s" % (username, self.base_dn)
+        usr_dn = "cn={0!s},cn=users,{1!s}".format(username, self.base_dn)
         samba.tests.delete_force(self.samdb, usr_dn)
         self.samdb.add({
             "dn": usr_dn,
@@ -369,7 +368,7 @@ class RestoreGroupObjectTestCase(RestoredObjectAttributesBaseTestCase):
     """Test different scenarios for delete/reanimate group objects"""
 
     def _make_object_dn(self, name):
-        return "cn=%s,cn=users,%s" % (name, self.base_dn)
+        return "cn={0!s},cn=users,{1!s}".format(name, self.base_dn)
 
     def _create_test_user(self, user_name):
         user_dn = self._make_object_dn(user_name)
@@ -407,10 +406,10 @@ class RestoreGroupObjectTestCase(RestoredObjectAttributesBaseTestCase):
                 'distinguishedName': group_dn,
                 'sAMAccountName': groupname,
                 'name': groupname,
-                'objectCategory': 'CN=%s,%s' % (category, self.schema_dn),
+                'objectCategory': 'CN={0!s},{1!s}'.format(category, self.schema_dn),
                 'objectClass': '**',
                 'objectGUID': '**',
-                'lastKnownParent': 'CN=Users,%s' % self.base_dn,
+                'lastKnownParent': 'CN=Users,{0!s}'.format(self.base_dn),
                 'whenChanged': '**',
                 'sAMAccountType': '268435456',
                 'objectSid': '**',
@@ -470,13 +469,13 @@ class RestoreContainerObjectTestCase(RestoredObjectAttributesBaseTestCase):
 
     def _expected_container_attributes(self, rdn, name, dn, category):
         if rdn == 'ou':
-            lastKnownParent = '%s' % self.base_dn
+            lastKnownParent = '{0!s}'.format(self.base_dn)
         else:
-            lastKnownParent = 'CN=Users,%s' % self.base_dn
+            lastKnownParent = 'CN=Users,{0!s}'.format(self.base_dn)
         return {'dn': dn,
                 'distinguishedName': dn,
                 'name': name,
-                'objectCategory': 'CN=%s,%s' % (category, self.schema_dn),
+                'objectCategory': 'CN={0!s},{1!s}'.format(category, self.schema_dn),
                 'objectClass': '**',
                 'objectGUID': '**',
                 'lastKnownParent': lastKnownParent,
@@ -488,7 +487,7 @@ class RestoreContainerObjectTestCase(RestoredObjectAttributesBaseTestCase):
                 rdn: name }
 
     def _create_test_ou(self, rdn, name=None, description=None):
-        ou_dn = "OU=%s,%s" % (rdn, self.base_dn)
+        ou_dn = "OU={0!s},{1!s}".format(rdn, self.base_dn)
         # delete an object if leftover from previous test
         samba.tests.delete_force(self.samdb, ou_dn)
         # create ou and return created object
@@ -523,7 +522,7 @@ class RestoreContainerObjectTestCase(RestoredObjectAttributesBaseTestCase):
         print "Test Container reanimation"
         # create test Container
         obj = self._create_object({
-            "dn": "CN=r_container,CN=Users,%s" % self.base_dn,
+            "dn": "CN=r_container,CN=Users,{0!s}".format(self.base_dn),
             "objectClass": "container"
         })
         guid = obj["objectGUID"][0]

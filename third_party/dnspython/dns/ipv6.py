@@ -114,7 +114,7 @@ def inet_aton(text):
     m = _v4_ending.match(text)
     if not m is None:
         b = dns.ipv4.inet_aton(m.group(2))
-        text = "%s:%02x%02x:%02x%02x" % (m.group(1), ord(b[0]), ord(b[1]),
+        text = "{0!s}:{1:02x}{2:02x}:{3:02x}{4:02x}".format(m.group(1), ord(b[0]), ord(b[1]),
                                          ord(b[2]), ord(b[3]))
     #
     # Try to turn '::<whatever>' into ':<whatever>'; if no match try to

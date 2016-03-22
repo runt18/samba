@@ -21,7 +21,7 @@ def find_scc(conf):
 
 	try:
 		if not Utils.cmd_output(cc + ['-flags']):
-			conf.fatal('suncc %r was not found' % cc)
+			conf.fatal('suncc {0!r} was not found'.format(cc))
 	except ValueError:
 		conf.fatal('suncc -flags could not be executed')
 

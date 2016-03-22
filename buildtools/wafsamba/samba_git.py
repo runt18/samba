@@ -54,4 +54,4 @@ def read_submodule_status(path, env=None):
         elif len(parts) > 2 and status == " ":
             yield (parts[1], "up-to-date")
         else:
-            raise RuntimeError("Unable to parse submodule status: %r, %r" % (status, parts))
+            raise RuntimeError("Unable to parse submodule status: {0!r}, {1!r}".format(status, parts))

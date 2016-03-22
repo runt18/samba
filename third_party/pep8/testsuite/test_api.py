@@ -152,7 +152,7 @@ class APITestCase(unittest.TestCase):
                   'doctest', 'quiet', 'show_pep8', 'show_source',
                   'statistics', 'testsuite', 'verbose'):
             oval = getattr(pep8style.options, o)
-            self.assertTrue(oval in (None, False), msg='%s = %r' % (o, oval))
+            self.assertTrue(oval in (None, False), msg='{0!s} = {1!r}'.format(o, oval))
 
         # Check default options
         self.assertTrue(pep8style.options.repeat)
@@ -171,7 +171,7 @@ class APITestCase(unittest.TestCase):
     def test_styleguide_ignore_code(self):
         def parse_argv(argstring):
             _saved_argv = sys.argv
-            sys.argv = shlex.split('pep8 %s /dev/null' % argstring)
+            sys.argv = shlex.split('pep8 {0!s} /dev/null'.format(argstring))
             try:
                 return pep8.StyleGuide(parse_argv=True)
             finally:
@@ -342,8 +342,7 @@ class APITestCase(unittest.TestCase):
         else:
             expected = "stdin:1:1: E901 TypeError"
         self.assertTrue(stdout.startswith(expected),
-                        msg='Output %r does not start with %r' %
-                        (stdout, expected))
+                        msg='Output {0!r} does not start with {1!r}'.format(stdout, expected))
         self.assertFalse(sys.stderr)
         self.assertEqual(count_errors, 1)
 

@@ -28,7 +28,7 @@ class SiteException(Exception):
         self.value = value
 
     def __str__(self):
-        return "%s: %s" % (self.__class__.__name__, self.value)
+        return "{0!s}: {1!s}".format(self.__class__.__name__, self.value)
 
 
 class SiteNotFoundException(SiteException):
@@ -55,24 +55,24 @@ def create_site(samdb, configDn, siteName):
     """
 
     ret = samdb.search(base=configDn, scope=ldb.SCOPE_SUBTREE,
-                    expression='(&(objectclass=Site)(cn=%s))' % siteName)
+                    expression='(&(objectclass=Site)(cn={0!s}))'.format(siteName))
     if len(ret) != 0:
-        raise SiteAlreadyExistsException('A site with the name %s already exists' % siteName)
+        raise SiteAlreadyExistsException('A site with the name {0!s} already exists'.format(siteName))
 
     m = ldb.Message()
-    m.dn = ldb.Dn(samdb, "Cn=%s,CN=Sites,%s" % (siteName, str(configDn)))
+    m.dn = ldb.Dn(samdb, "Cn={0!s},CN=Sites,{1!s}".format(siteName, str(configDn)))
     m["objectclass"] = ldb.MessageElement("site", FLAG_MOD_ADD, "objectclass")
 
     samdb.add(m)
 
     m2 = ldb.Message()
-    m2.dn = ldb.Dn(samdb, "Cn=NTDS Site Settings,%s" % str(m.dn))
+    m2.dn = ldb.Dn(samdb, "Cn=NTDS Site Settings,{0!s}".format(str(m.dn)))
     m2["objectclass"] = ldb.MessageElement("nTDSSiteSettings", FLAG_MOD_ADD, "objectclass")
 
     samdb.add(m2)
 
     m3 = ldb.Message()
-    m3.dn = ldb.Dn(samdb, "Cn=Servers,%s" % str(m.dn))
+    m3.dn = ldb.Dn(samdb, "Cn=Servers,{0!s}".format(str(m.dn)))
     m3["objectclass"] = ldb.MessageElement("serversContainer", FLAG_MOD_ADD, "objectclass")
 
     samdb.add(m3)
@@ -106,15 +106,15 @@ def delete_site(samdb, configDn, siteName):
         ret = samdb.search(base=dnsite, scope=ldb.SCOPE_BASE,
                            expression="objectClass=site")
         if len(ret) != 1:
-            raise SiteNotFoundException('Site %s does not exist' % siteName)
+            raise SiteNotFoundException('Site {0!s} does not exist'.format(siteName))
     except LdbError as (enum, estr):
         if enum == ldb.ERR_NO_SUCH_OBJECT:
-            raise SiteNotFoundException('Site %s does not exist' % siteName)
+            raise SiteNotFoundException('Site {0!s} does not exist'.format(siteName))
 
     ret = samdb.search(base=dnservers, scope=ldb.SCOPE_ONELEVEL,
                        expression='(objectclass=server)')
     if len(ret) != 0:
-        raise SiteServerNotEmptyException('Site %s still has servers in it, move them before removal' % siteName)
+        raise SiteServerNotEmptyException('Site {0!s} still has servers in it, move them before removal'.format(siteName))
 
     samdb.delete(dnsite, ["tree_delete:0"])
 

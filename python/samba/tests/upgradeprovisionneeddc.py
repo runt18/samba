@@ -40,7 +40,7 @@ import ldb
 def dummymessage(a=None, b=None):
     pass
 
-smb_conf_path = "%s/%s/%s" % (os.environ["SELFTEST_PREFIX"], "ad_dc_ntvfs", "etc/smb.conf")
+smb_conf_path = "{0!s}/{1!s}/{2!s}".format(os.environ["SELFTEST_PREFIX"], "ad_dc_ntvfs", "etc/smb.conf")
 
 class UpgradeProvisionBasicLdbHelpersTestCase(TestCaseInTempDir):
     """Some simple tests for individual functions in the provisioning code.
@@ -94,7 +94,7 @@ class UpgradeProvisionWithLdbTestCase(TestCaseInTempDir):
         self.assertFalse(hashAtt.has_key("msds-KeyVersionNumber"))
 
     def test_increment_calculated_keyversion_number(self):
-        dn = "CN=Administrator,CN=Users,%s" % self.names.rootdn
+        dn = "CN=Administrator,CN=Users,{0!s}".format(self.names.rootdn)
         # We conctruct a simple hash for the user administrator
         hash = {}
         # And we want the version to be 140
@@ -119,12 +119,12 @@ class UpgradeProvisionWithLdbTestCase(TestCaseInTempDir):
     def test_identic_rename(self):
         rootdn = "DC=samba,DC=example,DC=com"
 
-        guestDN = ldb.Dn(self.ldbs.sam, "CN=Guest,CN=Users,%s" % rootdn)
+        guestDN = ldb.Dn(self.ldbs.sam, "CN=Guest,CN=Users,{0!s}".format(rootdn))
         identic_rename(self.ldbs.sam, guestDN)
         res = self.ldbs.sam.search(expression="(name=Guest)", base=rootdn,
                                 scope=ldb.SCOPE_SUBTREE, attrs=["dn"])
         self.assertEquals(len(res), 1)
-        self.assertEquals(str(res[0]["dn"]), "CN=Guest,CN=Users,%s" % rootdn)
+        self.assertEquals(str(res[0]["dn"]), "CN=Guest,CN=Users,{0!s}".format(rootdn))
 
     def test_delta_update_basesamdb(self):
         dummysampath = self._getEmptyDbName()
@@ -154,7 +154,7 @@ class UpgradeProvisionWithLdbTestCase(TestCaseInTempDir):
 
     def test_getOEMInfo(self):
         realm = self.lp.get("realm")
-        basedn = "DC=%s" % realm.replace(".", ", DC=")
+        basedn = "DC={0!s}".format(realm.replace(".", ", DC="))
         oem = getOEMInfo(self.ldbs.sam, basedn)
         self.assertNotEquals(oem, "")
 
@@ -164,7 +164,7 @@ class UpgradeProvisionWithLdbTestCase(TestCaseInTempDir):
 
     def test_updateOEMInfo(self):
         realm = self.lp.get("realm")
-        basedn = "DC=%s" % realm.replace(".", ", DC=")
+        basedn = "DC={0!s}".format(realm.replace(".", ", DC="))
         oem = getOEMInfo(self.ldbs.sam, basedn)
         updateOEMInfo(self.ldbs.sam, basedn)
         oem2 = getOEMInfo(self.ldbs.sam, basedn)

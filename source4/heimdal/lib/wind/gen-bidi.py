@@ -42,14 +42,14 @@ import generate
 import rfc3454
 
 if len(sys.argv) != 3:
-    print "usage: %s rfc3454.txt outdir" % sys.argv[0]
+    print "usage: {0!s} rfc3454.txt outdir".format(sys.argv[0])
     sys.exit(1)
 
 tables = rfc3454.read(sys.argv[1])
 
-bidi_h = generate.Header('%s/bidi_table.h' % sys.argv[2])
+bidi_h = generate.Header('{0!s}/bidi_table.h'.format(sys.argv[2]))
 
-bidi_c = generate.Implementation('%s/bidi_table.c' % sys.argv[2])
+bidi_c = generate.Implementation('{0!s}/bidi_table.c'.format(sys.argv[2]))
 
 bidi_h.file.write(
 '''
@@ -77,23 +77,23 @@ bidi_c.file.write(
 
 def printTable(file, table, variable):
     """print table to file named as variable"""
-    file.write("const struct range_entry %s[] = {\n" % variable)
+    file.write("const struct range_entry {0!s}[] = {{\n".format(variable))
     count = 0
     for l in tables[table]:
         m = re.search('^ *([0-9A-F]+)-([0-9A-F]+) *$', l)
         if m:
             start = int(m.group(1), 0x10)
             end   = int(m.group(2), 0x10)
-            file.write("  {0x%x, 0x%x},\n" % (start, end - start + 1))
+            file.write("  {{0x{0:x}, 0x{1:x}}},\n".format(start, end - start + 1))
             count += 1
         else:
             m = re.search('^ *([0-9A-F]+) *$', l)
             if m:
                 v = int(m.group(1), 0x10)
-                file.write("  {0x%x, 1},\n" % v)
+                file.write("  {{0x{0:x}, 1}},\n".format(v))
                 count += 1
     file.write("};\n\n")
-    file.write("const size_t %s_size = %u;\n\n" % (variable, count))
+    file.write("const size_t {0!s}_size = {1:d};\n\n".format(variable, count))
 
 printTable(bidi_c.file, 'D.1', '_wind_ral_table')
 printTable(bidi_c.file, 'D.2', '_wind_l_table')

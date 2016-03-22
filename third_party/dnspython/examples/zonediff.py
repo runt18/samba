@@ -85,22 +85,22 @@ def format_changes_plain(oldf, newf, changes, ignore_ttl=False):
     Given 2 filenames and a list of changes from diff_zones, produce diff-like
     output. If ignore_ttl is True, TTL-only changes are not displayed"""
 
-    ret = "--- %s\n+++ %s\n" % (oldf, newf)
+    ret = "--- {0!s}\n+++ {1!s}\n".format(oldf, newf)
     for name, old, new in changes:
-        ret +=  "@ %s\n" % name
+        ret +=  "@ {0!s}\n".format(name)
         if not old:
             for r in new.rdatasets:
-                ret += "+ %s\n" % str(r).replace('\n','\n+ ')
+                ret += "+ {0!s}\n".format(str(r).replace('\n','\n+ '))
         elif not new:
             for r in old.rdatasets:
-                ret += "- %s\n" % str(r).replace('\n','\n+ ')
+                ret += "- {0!s}\n".format(str(r).replace('\n','\n+ '))
         else:
             for r in old.rdatasets:
                 if r not in new.rdatasets or (r.ttl != new.find_rdataset(r.rdclass, r.rdtype).ttl and not ignore_ttl):
-                    ret += "- %s\n" % str(r).replace('\n','\n+ ')
+                    ret += "- {0!s}\n".format(str(r).replace('\n','\n+ '))
             for r in new.rdatasets:
                 if r not in old.rdatasets or (r.ttl != old.find_rdataset(r.rdclass, r.rdtype).ttl and not ignore_ttl):
-                    ret += "+ %s\n" % str(r).replace('\n','\n+ ')
+                    ret += "+ {0!s}\n".format(str(r).replace('\n','\n+ '))
     return ret
 
 def format_changes_html(oldf, newf, changes, ignore_ttl=False):
@@ -112,20 +112,20 @@ def format_changes_html(oldf, newf, changes, ignore_ttl=False):
   <thead>
     <tr>
       <th>&nbsp;</th>
-      <th class="old">%s</th>
-      <th class="new">%s</th>
+      <th class="old">{0!s}</th>
+      <th class="new">{1!s}</th>
     </tr>
   </thead>
-  <tbody>\n''' % (oldf, newf)
+  <tbody>\n'''.format(oldf, newf)
 
     for name, old, new in changes:
-        ret +=  '    <tr class="rdata">\n      <td class="rdname">%s</td>\n' % name
+        ret +=  '    <tr class="rdata">\n      <td class="rdname">{0!s}</td>\n'.format(name)
         if not old:
             for r in new.rdatasets:
-                ret += '      <td class="old">&nbsp;</td>\n      <td class="new">%s</td>\n' % str(r).replace('\n','<br />')
+                ret += '      <td class="old">&nbsp;</td>\n      <td class="new">{0!s}</td>\n'.format(str(r).replace('\n','<br />'))
         elif not new:
             for r in old.rdatasets:
-                ret += '      <td class="old">%s</td>\n      <td class="new">&nbsp;</td>\n' % str(r).replace('\n','<br />')
+                ret += '      <td class="old">{0!s}</td>\n      <td class="new">&nbsp;</td>\n'.format(str(r).replace('\n','<br />'))
         else:
             ret += '      <td class="old">'
             for r in old.rdatasets:
@@ -205,12 +205,12 @@ The differences shown will be logical differences, not textual differences.
     else:
         if len(args) == 3:
             filename, oldr, newr = args
-            oldn = "%s:%s" % (oldr, filename)
-            newn = "%s:%s" % (newr, filename)
+            oldn = "{0!s}:{1!s}".format(oldr, filename)
+            newn = "{0!s}:{1!s}".format(newr, filename)
         else:
             filename, oldr = args
             newr = None
-            oldn = "%s:%s" % (oldr, filename)
+            oldn = "{0!s}:{1!s}".format(oldr, filename)
             newn = filename
 
         
@@ -218,26 +218,26 @@ The differences shown will be logical differences, not textual differences.
     oldz, newz = None, None
     if opts.use_bzr:
         old = _open(["bzr", "cat", "-r" + oldr, filename],
-                    "Unable to retrieve revision %s of %s" % (oldr, filename))
+                    "Unable to retrieve revision {0!s} of {1!s}".format(oldr, filename))
         if newr != None:
             new = _open(["bzr", "cat", "-r" + newr, filename],
-                        "Unable to retrieve revision %s of %s" % (newr, filename))
+                        "Unable to retrieve revision {0!s} of {1!s}".format(newr, filename))
     elif opts.use_git:
         old = _open(["git", "show", oldn],
-                    "Unable to retrieve revision %s of %s" % (oldr, filename))
+                    "Unable to retrieve revision {0!s} of {1!s}".format(oldr, filename))
         if newr != None:
             new = _open(["git", "show", newn],
-                        "Unable to retrieve revision %s of %s" % (newr, filename))
+                        "Unable to retrieve revision {0!s} of {1!s}".format(newr, filename))
     elif opts.use_rcs:
         old = _open(["co", "-q", "-p", "-r" + oldr, filename],
-                    "Unable to retrieve revision %s of %s" % (oldr, filename))
+                    "Unable to retrieve revision {0!s} of {1!s}".format(oldr, filename))
         if newr != None:
             new = _open(["co", "-q", "-p", "-r" + newr, filename],
-                        "Unable to retrieve revision %s of %s" % (newr, filename))
+                        "Unable to retrieve revision {0!s} of {1!s}".format(newr, filename))
     if not opts.use_vc:
-        old = _open(oldn, "Unable to open %s" % oldn)
+        old = _open(oldn, "Unable to open {0!s}".format(oldn))
     if not opts.use_vc or newr == None:
-        new = _open(newn, "Unable to open %s" % newn)
+        new = _open(newn, "Unable to open {0!s}".format(newn))
 
     if not old or not new:
         sys.exit(65)
@@ -252,7 +252,7 @@ The differences shown will be logical differences, not textual differences.
     try:
         newz = dns.zone.from_file(new, origin = '.', check_origin=False)
     except dns.exception.DNSException:
-        sys.stderr.write("Incorrect zonefile: %s\n" % new)
+        sys.stderr.write("Incorrect zonefile: {0!s}\n".format(new))
         if opts.tracebacks:
             traceback.print_exc()
     if not oldz or not newz:

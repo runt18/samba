@@ -210,7 +210,7 @@ def run_cmd(cmd, dir=".", show=None, output=False, checkfail=True):
     if show is None:
         show = options.verbose
     if show:
-        print("Running: '%s' in '%s'" % (cmd, dir))
+        print("Running: '{0!s}' in '{1!s}'".format(cmd, dir))
     if output:
         return Popen([cmd], shell=True, stdout=PIPE, cwd=dir).communicate()[0]
     elif checkfail:
@@ -229,42 +229,42 @@ class builder(object):
         self.tag = self.name.replace('/', '_')
         self.sequence = sequence
         self.next = 0
-        self.stdout_path = "%s/%s.stdout" % (gitroot, self.tag)
-        self.stderr_path = "%s/%s.stderr" % (gitroot, self.tag)
+        self.stdout_path = "{0!s}/{1!s}.stdout".format(gitroot, self.tag)
+        self.stderr_path = "{0!s}/{1!s}.stderr".format(gitroot, self.tag)
         if options.verbose:
-            print("stdout for %s in %s" % (self.name, self.stdout_path))
-            print("stderr for %s in %s" % (self.name, self.stderr_path))
-        run_cmd("rm -f %s %s" % (self.stdout_path, self.stderr_path))
+            print("stdout for {0!s} in {1!s}".format(self.name, self.stdout_path))
+            print("stderr for {0!s} in {1!s}".format(self.name, self.stderr_path))
+        run_cmd("rm -f {0!s} {1!s}".format(self.stdout_path, self.stderr_path))
         self.stdout = open(self.stdout_path, 'w')
         self.stderr = open(self.stderr_path, 'w')
         self.stdin  = open("/dev/null", 'r')
-        self.sdir = "%s/%s" % (testbase, self.tag)
-        self.prefix = "%s/prefix/%s" % (testbase, self.tag)
-        run_cmd("rm -rf %s" % self.sdir)
+        self.sdir = "{0!s}/{1!s}".format(testbase, self.tag)
+        self.prefix = "{0!s}/prefix/{1!s}".format(testbase, self.tag)
+        run_cmd("rm -rf {0!s}".format(self.sdir))
         cleanup_list.append(self.sdir)
         cleanup_list.append(self.prefix)
         os.makedirs(self.sdir)
-        run_cmd("rm -rf %s" % self.sdir)
+        run_cmd("rm -rf {0!s}".format(self.sdir))
         if cp:
-            run_cmd("cp --recursive --link --archive %s %s" % (test_master, self.sdir), dir=test_master, show=True)
+            run_cmd("cp --recursive --link --archive {0!s} {1!s}".format(test_master, self.sdir), dir=test_master, show=True)
         else:
-            run_cmd("git clone --recursive --shared %s %s" % (test_master, self.sdir), dir=test_master, show=True)
+            run_cmd("git clone --recursive --shared {0!s} {1!s}".format(test_master, self.sdir), dir=test_master, show=True)
         self.start_next()
 
     def start_next(self):
         if self.next == len(self.sequence):
-            print '%s: Completed OK' % self.name
+            print '{0!s}: Completed OK'.format(self.name)
             self.done = True
             return
         (self.stage, self.cmd, self.output_mime_type) = self.sequence[self.next]
         self.cmd = self.cmd.replace("${PYTHON_PREFIX}", get_python_lib(standard_lib=1, prefix=self.prefix))
-        self.cmd = self.cmd.replace("${PREFIX}", "--prefix=%s" % self.prefix)
-        self.cmd = self.cmd.replace("${PREFIX_DIR}", "%s" % self.prefix)
+        self.cmd = self.cmd.replace("${PREFIX}", "--prefix={0!s}".format(self.prefix))
+        self.cmd = self.cmd.replace("${PREFIX_DIR}", "{0!s}".format(self.prefix))
 #        if self.output_mime_type == "text/x-subunit":
 #            self.cmd += " | %s --immediate" % (os.path.join(os.path.dirname(__file__), "selftest/format-subunit"))
-        print '%s: [%s] Running %s' % (self.name, self.stage, self.cmd)
+        print '{0!s}: [{1!s}] Running {2!s}'.format(self.name, self.stage, self.cmd)
         cwd = os.getcwd()
-        os.chdir("%s/%s" % (self.sdir, self.dir))
+        os.chdir("{0!s}/{1!s}".format(self.sdir, self.dir))
         self.proc = Popen(self.cmd, shell=True,
                           stdout=self.stdout, stderr=self.stderr, stdin=self.stdin)
         os.chdir(cwd)
@@ -293,16 +293,16 @@ class buildlist(object):
             rebase_remote = "rebaseon"
             retry_task = [ ("retry",
                             '''set -e
-                            git remote add -t %s %s %s
-                            git fetch %s
+                            git remote add -t {0!s} {1!s} {2!s}
+                            git fetch {3!s}
                             while :; do
                               sleep 60
-                              git describe %s/%s > old_remote_branch.desc
-                              git fetch %s
-                              git describe %s/%s > remote_branch.desc
+                              git describe {4!s}/{5!s} > old_remote_branch.desc
+                              git fetch {6!s}
+                              git describe {7!s}/{8!s} > remote_branch.desc
                               diff old_remote_branch.desc remote_branch.desc
                             done
-                           ''' % (
+                           '''.format(
                                rebase_branch, rebase_remote, rebase_url,
                                rebase_remote,
                                rebase_remote, rebase_branch,
@@ -325,7 +325,7 @@ class buildlist(object):
             self.retry = None
         for b in self.tlist:
             if b.proc is not None:
-                run_cmd("killbysubdir %s > /dev/null 2>&1" % b.sdir, checkfail=False)
+                run_cmd("killbysubdir {0!s} > /dev/null 2>&1".format(b.sdir), checkfail=False)
                 b.proc.terminate()
                 b.proc.wait()
                 b.proc = None
@@ -363,7 +363,7 @@ class buildlist(object):
                 break
             if os.WIFSIGNALED(b.status) or os.WEXITSTATUS(b.status) != 0:
                 self.kill_kids()
-                return (b.status, b.name, b.stage, b.tag, "%s: [%s] failed '%s' with status %d" % (b.name, b.stage, b.cmd, b.status))
+                return (b.status, b.name, b.stage, b.tag, "{0!s}: [{1!s}] failed '{2!s}' with status {3:d}".format(b.name, b.stage, b.cmd, b.status))
             b.start_next()
         self.kill_kids()
         return (0, None, None, None, "All OK")
@@ -372,7 +372,7 @@ class buildlist(object):
         filename = 'system-info.txt'
         f = open(filename, 'w')
         for cmd in ['uname -a', 'free', 'cat /proc/cpuinfo']:
-            print >>f, '### %s' % cmd
+            print >>f, '### {0!s}'.format(cmd)
             print >>f, run_cmd(cmd, output=True, checkfail=False)
             print >>f
         f.close()
@@ -381,8 +381,8 @@ class buildlist(object):
     def tarlogs(self, fname):
         tar = tarfile.open(fname, "w:gz")
         for b in self.tlist:
-            tar.add(b.stdout_path, arcname="%s.stdout" % b.tag)
-            tar.add(b.stderr_path, arcname="%s.stderr" % b.tag)
+            tar.add(b.stdout_path, arcname="{0!s}.stdout".format(b.tag))
+            tar.add(b.stderr_path, arcname="{0!s}.stderr".format(b.tag))
         if os.path.exists("autobuild.log"):
             tar.add("autobuild.log")
         sys_info = self.write_system_info()
@@ -407,7 +407,7 @@ def cleanup():
         return
     print("Cleaning up ....")
     for d in cleanup_list:
-        run_cmd("rm -rf %s" % d)
+        run_cmd("rm -rf {0!s}".format(d))
 
 
 def find_git_root():
@@ -446,57 +446,48 @@ def daemonize(logfile):
 def write_pidfile(fname):
     '''write a pid file, cleanup on exit'''
     f = open(fname, mode='w')
-    f.write("%u\n" % os.getpid())
+    f.write("{0:d}\n".format(os.getpid()))
     f.close()
 
 
 def rebase_tree(rebase_url, rebase_branch = "master"):
     rebase_remote = "rebaseon"
-    print("Rebasing on %s" % rebase_url)
+    print("Rebasing on {0!s}".format(rebase_url))
     run_cmd("git describe HEAD", show=True, dir=test_master)
-    run_cmd("git remote add -t %s %s %s" %
-            (rebase_branch, rebase_remote, rebase_url),
+    run_cmd("git remote add -t {0!s} {1!s} {2!s}".format(rebase_branch, rebase_remote, rebase_url),
             show=True, dir=test_master)
-    run_cmd("git fetch %s" % rebase_remote, show=True, dir=test_master)
+    run_cmd("git fetch {0!s}".format(rebase_remote), show=True, dir=test_master)
     if options.fix_whitespace:
-        run_cmd("git rebase --force-rebase --whitespace=fix %s/%s" %
-                (rebase_remote, rebase_branch),
+        run_cmd("git rebase --force-rebase --whitespace=fix {0!s}/{1!s}".format(rebase_remote, rebase_branch),
                 show=True, dir=test_master)
     else:
-        run_cmd("git rebase --force-rebase %s/%s" %
-                (rebase_remote, rebase_branch),
+        run_cmd("git rebase --force-rebase {0!s}/{1!s}".format(rebase_remote, rebase_branch),
                 show=True, dir=test_master)
-    diff = run_cmd("git --no-pager diff HEAD %s/%s" %
-                   (rebase_remote, rebase_branch),
+    diff = run_cmd("git --no-pager diff HEAD {0!s}/{1!s}".format(rebase_remote, rebase_branch),
                    dir=test_master, output=True)
     if diff == '':
-        print("No differences between HEAD and %s/%s - exiting" %
-              (rebase_remote, rebase_branch))
+        print("No differences between HEAD and {0!s}/{1!s} - exiting".format(rebase_remote, rebase_branch))
         sys.exit(0)
-    run_cmd("git describe %s/%s" %
-            (rebase_remote, rebase_branch),
+    run_cmd("git describe {0!s}/{1!s}".format(rebase_remote, rebase_branch),
             show=True, dir=test_master)
     run_cmd("git describe HEAD", show=True, dir=test_master)
-    run_cmd("git --no-pager diff --stat HEAD %s/%s" %
-            (rebase_remote, rebase_branch),
+    run_cmd("git --no-pager diff --stat HEAD {0!s}/{1!s}".format(rebase_remote, rebase_branch),
             show=True, dir=test_master)
 
 def push_to(push_url, push_branch = "master"):
     push_remote = "pushto"
-    print("Pushing to %s" % push_url)
+    print("Pushing to {0!s}".format(push_url))
     if options.mark:
         run_cmd("git config --replace-all core.editor script/commit_mark.sh", dir=test_master)
         run_cmd("git commit --amend -c HEAD", dir=test_master)
         # the notes method doesn't work yet, as metze hasn't allowed refs/notes/* in master
         # run_cmd("EDITOR=script/commit_mark.sh git notes edit HEAD", dir=test_master)
-    run_cmd("git remote add -t %s %s %s" %
-            (push_branch, push_remote, push_url),
+    run_cmd("git remote add -t {0!s} {1!s} {2!s}".format(push_branch, push_remote, push_url),
             show=True, dir=test_master)
-    run_cmd("git push %s +HEAD:%s" %
-            (push_remote, push_branch),
+    run_cmd("git push {0!s} +HEAD:{1!s}".format(push_remote, push_branch),
             show=True, dir=test_master)
 
-def_testbase = os.getenv("AUTOBUILD_TESTBASE", "/memdisk/%s" % os.getenv('USER'))
+def_testbase = os.getenv("AUTOBUILD_TESTBASE", "/memdisk/{0!s}".format(os.getenv('USER')))
 
 gitroot = find_git_root()
 if gitroot is None:
@@ -506,7 +497,7 @@ parser = OptionParser()
 parser.add_option("", "--tail", help="show output while running", default=False, action="store_true")
 parser.add_option("", "--keeplogs", help="keep logs", default=False, action="store_true")
 parser.add_option("", "--nocleanup", help="don't remove test tree", default=False, action="store_true")
-parser.add_option("", "--testbase", help="base directory to run tests in (default %s)" % def_testbase,
+parser.add_option("", "--testbase", help="base directory to run tests in (default {0!s})".format(def_testbase),
                   default=def_testbase)
 parser.add_option("", "--passcmd", help="command to run on success", default=None)
 parser.add_option("", "--verbose", help="show all commands as they are run",
@@ -569,38 +560,37 @@ def email_failure(status, failed_task, failed_stage, failed_tag, errstr,
     text = '''
 Dear Developer,
 
-Your autobuild on %s failed after %.1f minutes
-when trying to test %s with the following error:
+Your autobuild on {0!s} failed after {1:.1f} minutes
+when trying to test {2!s} with the following error:
 
-   %s
+   {3!s}
 
 the autobuild has been abandoned. Please fix the error and resubmit.
 
 A summary of the autobuild process is here:
 
-  %s/autobuild.log
-''' % (platform.node(), elapsed_minutes, failed_task, errstr, log_base)
+  {4!s}/autobuild.log
+'''.format(platform.node(), elapsed_minutes, failed_task, errstr, log_base)
 
     if failed_task != 'rebase':
         text += '''
 You can see logs of the failed task here:
 
-  %s/%s.stdout
-  %s/%s.stderr
+  {0!s}/{1!s}.stdout
+  {2!s}/{3!s}.stderr
 
 or you can get full logs of all tasks in this job here:
 
-  %s/logs.tar.gz
+  {4!s}/logs.tar.gz
 
 The top commit for the tree that was built was:
 
-%s
+{5!s}
 
-''' % (log_base, failed_tag, log_base, failed_tag, log_base, top_commit_msg)
+'''.format(log_base, failed_tag, log_base, failed_tag, log_base, top_commit_msg)
 
     logs = os.path.join(gitroot, 'logs.tar.gz')
-    send_email('autobuild failure on %s for task %s during %s'
-               % (platform.node(), failed_task, failed_stage),
+    send_email('autobuild failure on {0!s} for task {1!s} during {2!s}'.format(platform.node(), failed_task, failed_stage),
                text, logs)
 
 def email_success(elapsed_time, log_base=None):
@@ -611,27 +601,27 @@ def email_success(elapsed_time, log_base=None):
     text = '''
 Dear Developer,
 
-Your autobuild on %s has succeeded after %.1f minutes.
+Your autobuild on {0!s} has succeeded after {1:.1f} minutes.
 
-''' % (platform.node(), elapsed_time / 60.)
+'''.format(platform.node(), elapsed_time / 60.)
 
     if options.keeplogs:
         text += '''
 
 you can get full logs of all tasks in this job here:
 
-  %s/logs.tar.gz
+  {0!s}/logs.tar.gz
 
-''' % log_base
+'''.format(log_base)
 
     text += '''
 The top commit for the tree that was built was:
 
-%s
-''' % top_commit_msg
+{0!s}
+'''.format(top_commit_msg)
 
     logs = os.path.join(gitroot, 'logs.tar.gz')
-    send_email('autobuild sucess on %s ' % platform.node(),
+    send_email('autobuild sucess on {0!s} '.format(platform.node()),
                text, logs)
 
 
@@ -641,8 +631,8 @@ if options.retry:
     if options.rebase is None:
         raise Exception('You can only use --retry if you also rebase')
 
-testbase = "%s/b%u" % (options.testbase, os.getpid())
-test_master = "%s/master" % testbase
+testbase = "{0!s}/b{1:d}".format(options.testbase, os.getpid())
+test_master = "{0!s}/master".format(testbase)
 
 # get the top commit message, for emails
 top_commit_msg = run_cmd("git log -1", dir=gitroot, output=True)
@@ -650,12 +640,12 @@ top_commit_msg = run_cmd("git log -1", dir=gitroot, output=True)
 try:
     os.makedirs(testbase)
 except Exception, reason:
-    raise Exception("Unable to create %s : %s" % (testbase, reason))
+    raise Exception("Unable to create {0!s} : {1!s}".format(testbase, reason))
 cleanup_list.append(testbase)
 
 if options.daemon:
     logfile = os.path.join(testbase, "log")
-    print "Forking into the background, writing progress to %s" % logfile
+    print "Forking into the background, writing progress to {0!s}".format(logfile)
     daemonize(logfile)
 
 write_pidfile(gitroot + "/autobuild.pid")
@@ -664,9 +654,9 @@ start_time = time.time()
 
 while True:
     try:
-        run_cmd("rm -rf %s" % test_master)
+        run_cmd("rm -rf {0!s}".format(test_master))
         cleanup_list.append(test_master)
-        run_cmd("git clone --recursive --shared %s %s" % (gitroot, test_master), show=True, dir=gitroot)
+        run_cmd("git clone --recursive --shared {0!s} {1!s}".format(gitroot, test_master), show=True, dir=gitroot)
     except Exception:
         cleanup()
         raise
@@ -680,7 +670,7 @@ while True:
             cleanup()
             elapsed_time = time.time() - start_time
             email_failure(-1, 'rebase', 'rebase', 'rebase',
-                          'rebase on %s failed' % options.branch,
+                          'rebase on {0!s} failed'.format(options.branch),
                           elapsed_time, log_base=options.log_base)
             sys.exit(1)
         blist = buildlist(tasks, args, options.rebase, rebase_branch=options.branch)
@@ -705,7 +695,7 @@ elapsed_time = time.time() - start_time
 if status == 0:
     print errstr
     if options.passcmd is not None:
-        print("Running passcmd: %s" % options.passcmd)
+        print("Running passcmd: {0!s}".format(options.passcmd))
         run_cmd(options.passcmd, dir=test_master)
     if options.pushto is not None:
         push_to(options.pushto, push_branch=options.branch)
@@ -733,16 +723,16 @@ else:
 
 AUTOBUILD FAILURE
 
-Your autobuild on %s failed after %.1f minutes
-when trying to test %s with the following error:
+Your autobuild on {0!s} failed after {1:.1f} minutes
+when trying to test {2!s} with the following error:
 
-   %s
+   {3!s}
 
 the autobuild has been abandoned. Please fix the error and resubmit.
 
 ####################################################################
 
-''' % (platform.node(), elapsed_minutes, failed_task, errstr)
+'''.format(platform.node(), elapsed_minutes, failed_task, errstr)
 
 cleanup()
 print(errstr)

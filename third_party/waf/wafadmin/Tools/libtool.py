@@ -33,19 +33,19 @@ def fakelibtool_build(task):
 		name3 = libname+'.'+env['vnum']
 		name2 = libname+'.'+nums[0]
 		name1 = libname
-		fu("dlname='%s'\n" % name2)
+		fu("dlname='{0!s}'\n".format(name2))
 		strn = " ".join([name3, name2, name1])
-		fu("library_names='%s'\n" % (strn) )
+		fu("library_names='{0!s}'\n".format((strn)) )
 	else:
-		fu("dlname='%s'\n" % sname)
-		fu("library_names='%s %s %s'\n" % (sname, sname, sname) )
+		fu("dlname='{0!s}'\n".format(sname))
+		fu("library_names='{0!s} {1!s} {2!s}'\n".format(sname, sname, sname) )
 	fu("old_library=''\n")
 	vars = ' '.join(env['libtoolvars']+env['LINKFLAGS'])
-	fu("dependency_libs='%s'\n" % vars)
+	fu("dependency_libs='{0!s}'\n".format(vars))
 	fu("current=0\n")
 	fu("age=0\nrevision=0\ninstalled=yes\nshouldnotlink=no\n")
 	fu("dlopen=''\ndlpreopen=''\n")
-	fu("libdir='%s/lib'\n" % env['PREFIX'])
+	fu("libdir='{0!s}/lib'\n".format(env['PREFIX']))
 	dest.close()
 	return 0
 
@@ -143,7 +143,7 @@ class libtool_la_file:
 		# Directory that this library needs to be installed in:
 		self.libdir = '/usr/lib'
 		if not self.__parse():
-			raise ValueError("file %s not found!!" %(la_filename))
+			raise ValueError("file {0!s} not found!!".format((la_filename)))
 
 	def __parse(self):
 		"Retrieve the variables from a file"
@@ -173,22 +173,22 @@ class libtool_la_file:
 		if libs == None:
 			libs = []
 		# add la lib and libdir
-		libs.insert(0, "-l%s" % self.linkname.strip())
-		libs.insert(0, "-L%s" % self.libdir.strip())
+		libs.insert(0, "-l{0!s}".format(self.linkname.strip()))
+		libs.insert(0, "-L{0!s}".format(self.libdir.strip()))
 		return libs
 
 	def __str__(self):
 		return '''\
-dlname = "%(dlname)s"
-library_names = "%(library_names)s"
-old_library = "%(old_library)s"
-dependency_libs = "%(dependency_libs)s"
-version = %(current)s.%(age)s.%(revision)s
-installed = "%(installed)s"
-shouldnotlink = "%(shouldnotlink)s"
-dlopen = "%(dlopen)s"
-dlpreopen = "%(dlpreopen)s"
-libdir = "%(libdir)s"''' % self.__dict__
+dlname = "{dlname!s}"
+library_names = "{library_names!s}"
+old_library = "{old_library!s}"
+dependency_libs = "{dependency_libs!s}"
+version = {current!s}.{age!s}.{revision!s}
+installed = "{installed!s}"
+shouldnotlink = "{shouldnotlink!s}"
+dlopen = "{dlopen!s}"
+dlpreopen = "{dlpreopen!s}"
+libdir = "{libdir!s}"'''.format(**self.__dict__)
 
 class libtool_config:
 	def __init__ (self, la_filename):
@@ -302,7 +302,7 @@ nor: %prog --libs /usr/lib/libamarok.la'''
 	if len(args) != 1 and not options.versionNumber:
 		parser.error("incorrect number of arguments")
 	if options.versionNumber:
-		print("libtool-config version %s" % REVISION)
+		print("libtool-config version {0!s}".format(REVISION))
 		return 0
 	ltf = libtool_config(args[0])
 	if options.debug:

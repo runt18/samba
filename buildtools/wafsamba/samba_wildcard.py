@@ -9,7 +9,7 @@ def run_task(t, k):
     '''run a single build task'''
     ret = t.run()
     if ret:
-        raise Utils.WafError("Failed to build %s: %u" % (k, ret))
+        raise Utils.WafError("Failed to build {0!s}: {1:d}".format(k, ret))
 
 
 def run_named_build_task(cmd):
@@ -45,7 +45,7 @@ def run_named_build_task(cmd):
 
 
     if not found:
-        raise Utils.WafError("Unable to find build target matching %s" % cmd)
+        raise Utils.WafError("Unable to find build target matching {0!s}".format(cmd))
 
 
 def rewrite_compile_targets():
@@ -111,10 +111,10 @@ def wildcard_main(missing_cmd_fn):
 
         ela = ''
         if not Options.options.progress_bar:
-            ela = ' (%s)' % Utils.get_elapsed_time(ini)
+            ela = ' ({0!s})'.format(Utils.get_elapsed_time(ini))
 
         if x != 'init' and x != 'shutdown':
-            Logs.info('%r finished successfully%s' % (x, ela))
+            Logs.info('{0!r} finished successfully{1!s}'.format(x, ela))
 
         if not Scripting.commands and x != 'shutdown':
             Scripting.commands.append('shutdown')
@@ -142,7 +142,7 @@ def fake_build_environment(info=True, flush=False):
     bld.load_envs()
 
     if info:
-        Logs.info("Waf: Entering directory `%s'" % bld.bldnode.abspath())
+        Logs.info("Waf: Entering directory `{0!s}'".format(bld.bldnode.abspath()))
     bld.add_subdirs([os.path.split(Utils.g_module.root_path)[0]])
 
     bld.pre_build()

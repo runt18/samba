@@ -35,7 +35,7 @@ def detect(conf):
 			conf.env = orig.copy()
 			conf.check_tool(compiler)
 		except Configure.ConfigurationError, e:
-			debug('compiler_cxx: %r' % e)
+			debug('compiler_cxx: {0!r}'.format(e))
 		else:
 			if conf.env['CXX']:
 				orig.table = conf.env.get_merged_dict()
@@ -53,9 +53,9 @@ def set_options(opt):
 	possible_compiler_list = __list_possible_compiler(build_platform)
 	test_for_compiler = ' '.join(possible_compiler_list)
 	cxx_compiler_opts = opt.add_option_group('C++ Compiler Options')
-	cxx_compiler_opts.add_option('--check-cxx-compiler', default="%s" % test_for_compiler,
-		help='On this platform (%s) the following C++ Compiler will be checked by default: "%s"' % (build_platform, test_for_compiler),
+	cxx_compiler_opts.add_option('--check-cxx-compiler', default="{0!s}".format(test_for_compiler),
+		help='On this platform ({0!s}) the following C++ Compiler will be checked by default: "{1!s}"'.format(build_platform, test_for_compiler),
 		dest="check_cxx_compiler")
 
 	for cxx_compiler in test_for_compiler.split():
-		opt.tool_options('%s' % cxx_compiler, option_group=cxx_compiler_opts)
+		opt.tool_options('{0!s}'.format(cxx_compiler), option_group=cxx_compiler_opts)

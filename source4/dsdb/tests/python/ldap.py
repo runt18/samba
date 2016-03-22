@@ -482,7 +482,7 @@ class BasicTests(samba.tests.TestCase):
 
         # Create secret over LSA and try to change it
 
-        lsa_conn = lsa.lsarpc("ncacn_np:%s" % args[0], lp, creds)
+        lsa_conn = lsa.lsarpc("ncacn_np:{0!s}".format(args[0]), lp, creds)
         lsa_handle = lsa_conn.OpenPolicy2(system_name="\\",
                                           attr=lsa.ObjectAttribute(),
                                           access_mask=security.SEC_FLAG_MAXIMUM_ALLOWED)
@@ -1154,26 +1154,26 @@ class BasicTests(samba.tests.TestCase):
     def DISABLED_test_largeRDN(self):
         """Testing large rDN (limit 64 characters)"""
         rdn = "CN=a012345678901234567890123456789012345678901234567890123456789012"
-        delete_force(self.ldb, "%s,%s" % (rdn, self.base_dn))
+        delete_force(self.ldb, "{0!s},{1!s}".format(rdn, self.base_dn))
         ldif = """
-dn: %s,%s""" % (rdn,self.base_dn) + """
+dn: {0!s},{1!s}""".format(rdn, self.base_dn) + """
 objectClass: container
 """
         self.ldb.add_ldif(ldif)
-        delete_force(self.ldb, "%s,%s" % (rdn, self.base_dn))
+        delete_force(self.ldb, "{0!s},{1!s}".format(rdn, self.base_dn))
 
         rdn = "CN=a0123456789012345678901234567890123456789012345678901234567890120"
-        delete_force(self.ldb, "%s,%s" % (rdn, self.base_dn))
+        delete_force(self.ldb, "{0!s},{1!s}".format(rdn, self.base_dn))
         try:
             ldif = """
-dn: %s,%s""" % (rdn,self.base_dn) + """
+dn: {0!s},{1!s}""".format(rdn, self.base_dn) + """
 objectClass: container
 """
             self.ldb.add_ldif(ldif)
             self.fail()
         except LdbError, (num, _):
             self.assertEquals(num, ERR_CONSTRAINT_VIOLATION)
-        delete_force(self.ldb, "%s,%s" % (rdn, self.base_dn))
+        delete_force(self.ldb, "{0!s},{1!s}".format(rdn, self.base_dn))
 
     def test_rename(self):
         """Tests the rename operation"""
@@ -1665,10 +1665,10 @@ delete: description
     def test_wkguid(self):
         """Test Well known GUID behaviours (including DN+Binary)"""
 
-        res = self.ldb.search(base=("<WKGUID=ab1d30f3768811d1aded00c04fd8d5cd,%s>" % self.base_dn), scope=SCOPE_BASE, attrs=[])
+        res = self.ldb.search(base=("<WKGUID=ab1d30f3768811d1aded00c04fd8d5cd,{0!s}>".format(self.base_dn)), scope=SCOPE_BASE, attrs=[])
         self.assertEquals(len(res), 1)
 
-        res2 = self.ldb.search(scope=SCOPE_BASE, attrs=["wellKnownObjects"], expression=("wellKnownObjects=B:32:ab1d30f3768811d1aded00c04fd8d5cd:%s" % res[0].dn))
+        res2 = self.ldb.search(scope=SCOPE_BASE, attrs=["wellKnownObjects"], expression=("wellKnownObjects=B:32:ab1d30f3768811d1aded00c04fd8d5cd:{0!s}".format(res[0].dn)))
         self.assertEquals(len(res2), 1)
 
         # Prove that the matching rule is over the whole DN+Binary
@@ -1743,7 +1743,7 @@ delete: description
 
         # Testing ldb.search for (&(cn=ldaptestcomputer3)(objectClass=user))
         res = ldb.search(self.base_dn, expression="(&(cn=ldaptestcomputer3)(objectClass=user))")
-        self.assertEquals(len(res), 1, "Found only %d for (&(cn=ldaptestcomputer3)(objectClass=user))" % len(res))
+        self.assertEquals(len(res), 1, "Found only {0:d} for (&(cn=ldaptestcomputer3)(objectClass=user))".format(len(res)))
 
         self.assertEquals(str(res[0].dn), ("CN=ldaptestcomputer3,CN=Computers," + self.base_dn))
         self.assertEquals(res[0]["cn"][0], "ldaptestcomputer3")
@@ -1755,7 +1755,7 @@ delete: description
         self.assertEquals(res[0]["objectClass"][4], "computer")
         self.assertTrue("objectGUID" in res[0])
         self.assertTrue("whenCreated" in res[0])
-        self.assertEquals(res[0]["objectCategory"][0], ("CN=Computer,%s" % ldb.get_schema_basedn()))
+        self.assertEquals(res[0]["objectCategory"][0], ("CN=Computer,{0!s}".format(ldb.get_schema_basedn())))
         self.assertEquals(int(res[0]["primaryGroupID"][0]), 513)
         self.assertEquals(int(res[0]["sAMAccountType"][0]), ATYPE_NORMAL_ACCOUNT)
         self.assertEquals(int(res[0]["userAccountControl"][0]), UF_NORMAL_ACCOUNT | UF_PASSWD_NOTREQD | UF_ACCOUNTDISABLE)
@@ -1891,19 +1891,19 @@ servicePrincipalName: host/ldaptest2computer29
         # Testing Ambigious Name Resolution
         # Testing ldb.search for (&(anr=ldap testy)(objectClass=user))
         res = ldb.search(expression="(&(anr=ldap testy)(objectClass=user))")
-        self.assertEquals(len(res), 3, "Found only %d of 3 for (&(anr=ldap testy)(objectClass=user))" % len(res))
+        self.assertEquals(len(res), 3, "Found only {0:d} of 3 for (&(anr=ldap testy)(objectClass=user))".format(len(res)))
 
         # Testing ldb.search for (&(anr=testy ldap)(objectClass=user))
         res = ldb.search(expression="(&(anr=testy ldap)(objectClass=user))")
-        self.assertEquals(len(res), 2, "Found only %d of 2 for (&(anr=testy ldap)(objectClass=user))" % len(res))
+        self.assertEquals(len(res), 2, "Found only {0:d} of 2 for (&(anr=testy ldap)(objectClass=user))".format(len(res)))
 
         # Testing ldb.search for (&(anr=ldap)(objectClass=user))
         res = ldb.search(expression="(&(anr=ldap)(objectClass=user))")
-        self.assertEquals(len(res), 4, "Found only %d of 4 for (&(anr=ldap)(objectClass=user))" % len(res))
+        self.assertEquals(len(res), 4, "Found only {0:d} of 4 for (&(anr=ldap)(objectClass=user))".format(len(res)))
 
         # Testing ldb.search for (&(anr==ldap)(objectClass=user))
         res = ldb.search(expression="(&(anr==ldap)(objectClass=user))")
-        self.assertEquals(len(res), 1, "Could not find (&(anr==ldap)(objectClass=user)). Found only %d for (&(anr=ldap)(objectClass=user))" % len(res))
+        self.assertEquals(len(res), 1, "Could not find (&(anr==ldap)(objectClass=user)). Found only {0:d} for (&(anr=ldap)(objectClass=user))".format(len(res)))
 
         self.assertEquals(str(res[0].dn), ("CN=ldaptestuser,CN=Users," + self.base_dn))
         self.assertEquals(res[0]["cn"][0], "ldaptestuser")
@@ -1911,11 +1911,11 @@ servicePrincipalName: host/ldaptest2computer29
 
         # Testing ldb.search for (&(anr=testy)(objectClass=user))
         res = ldb.search(expression="(&(anr=testy)(objectClass=user))")
-        self.assertEquals(len(res), 2, "Found only %d for (&(anr=testy)(objectClass=user))" % len(res))
+        self.assertEquals(len(res), 2, "Found only {0:d} for (&(anr=testy)(objectClass=user))".format(len(res)))
 
         # Testing ldb.search for (&(anr=testy ldap)(objectClass=user))
         res = ldb.search(expression="(&(anr=testy ldap)(objectClass=user))")
-        self.assertEquals(len(res), 2, "Found only %d for (&(anr=testy ldap)(objectClass=user))" % len(res))
+        self.assertEquals(len(res), 2, "Found only {0:d} for (&(anr=testy ldap)(objectClass=user))".format(len(res)))
 
         # Testing ldb.search for (&(anr==testy ldap)(objectClass=user))
 # this test disabled for the moment, as anr with == tests are not understood
@@ -2051,7 +2051,7 @@ servicePrincipalName: host/ldaptest2computer29
         except LdbError, (num, _):
             self.assertEquals(num, ERR_ENTRY_ALREADY_EXISTS)
         try:
-            ldb.rename("cn=ldaptestuser3,cn=users,%s" % self.base_dn, "cn=ldaptestuser3,%s" % ldb.get_config_basedn())
+            ldb.rename("cn=ldaptestuser3,cn=users,{0!s}".format(self.base_dn), "cn=ldaptestuser3,{0!s}".format(ldb.get_config_basedn()))
             self.fail()
         except LdbError, (num, _):
             self.assertTrue(num in (71, 64))
@@ -2182,21 +2182,21 @@ member: cn=ldaptestuser2,cn=users,""" + self.base_dn + """
         self.assertEquals(set(res[0]["objectClass"]), set(["top", "person", "organizationalPerson", "user"]))
         self.assertTrue("objectGUID" in res[0])
         self.assertTrue("whenCreated" in res[0])
-        self.assertEquals(str(res[0]["objectCategory"]), ("CN=Person,%s" % ldb.get_schema_basedn()))
+        self.assertEquals(str(res[0]["objectCategory"]), ("CN=Person,{0!s}".format(ldb.get_schema_basedn())))
         self.assertEquals(int(res[0]["sAMAccountType"][0]), ATYPE_NORMAL_ACCOUNT)
         self.assertEquals(int(res[0]["userAccountControl"][0]), UF_NORMAL_ACCOUNT | UF_PASSWD_NOTREQD | UF_ACCOUNTDISABLE)
         self.assertEquals(res[0]["memberOf"][0].upper(), ("CN=ldaptestgroup2,CN=Users," + self.base_dn).upper())
         self.assertEquals(len(res[0]["memberOf"]), 1)
 
         # Testing ldb.search for (&(cn=ldaptestuser)(objectCategory=cn=person,%s))" % ldb.get_schema_basedn()
-        res2 = ldb.search(expression="(&(cn=ldaptestuser)(objectCategory=cn=person,%s))" % ldb.get_schema_basedn())
-        self.assertEquals(len(res2), 1, "Could not find (&(cn=ldaptestuser)(objectCategory=cn=person,%s))" % ldb.get_schema_basedn())
+        res2 = ldb.search(expression="(&(cn=ldaptestuser)(objectCategory=cn=person,{0!s}))".format(ldb.get_schema_basedn()))
+        self.assertEquals(len(res2), 1, "Could not find (&(cn=ldaptestuser)(objectCategory=cn=person,{0!s}))".format(ldb.get_schema_basedn()))
 
         self.assertEquals(res[0].dn, res2[0].dn)
 
         # Testing ldb.search for (&(cn=ldaptestuser)(objectCategory=PerSon))"
         res3 = ldb.search(expression="(&(cn=ldaptestuser)(objectCategory=PerSon))")
-        self.assertEquals(len(res3), 1, "Could not find (&(cn=ldaptestuser)(objectCategory=PerSon)): matched %d" % len(res3))
+        self.assertEquals(len(res3), 1, "Could not find (&(cn=ldaptestuser)(objectCategory=PerSon)): matched {0:d}".format(len(res3)))
 
         self.assertEquals(res[0].dn, res3[0].dn)
 
@@ -2227,7 +2227,7 @@ member: cn=ldaptestuser2,cn=users,""" + self.base_dn + """
         self.assertEquals(set(res[0]["objectClass"]), set(["top", "person", "organizationalPerson", "user", "computer"]))
         self.assertTrue("objectGUID" in res[0])
         self.assertTrue("whenCreated" in res[0])
-        self.assertEquals(str(res[0]["objectCategory"]), ("CN=Computer,%s" % ldb.get_schema_basedn()))
+        self.assertEquals(str(res[0]["objectCategory"]), ("CN=Computer,{0!s}".format(ldb.get_schema_basedn())))
         self.assertEquals(int(res[0]["primaryGroupID"][0]), 513)
         self.assertEquals(int(res[0]["sAMAccountType"][0]), ATYPE_NORMAL_ACCOUNT)
         self.assertEquals(int(res[0]["userAccountControl"][0]), UF_NORMAL_ACCOUNT | UF_PASSWD_NOTREQD | UF_ACCOUNTDISABLE)
@@ -2235,15 +2235,15 @@ member: cn=ldaptestuser2,cn=users,""" + self.base_dn + """
         self.assertEquals(len(res[0]["memberOf"]), 1)
 
         # Testing ldb.search for (&(cn=ldaptestcomputer)(objectCategory=cn=computer,%s))" % ldb.get_schema_basedn()
-        res2 = ldb.search(expression="(&(cn=ldaptestcomputer)(objectCategory=cn=computer,%s))" % ldb.get_schema_basedn())
-        self.assertEquals(len(res2), 1, "Could not find (&(cn=ldaptestcomputer)(objectCategory=cn=computer,%s))" % ldb.get_schema_basedn())
+        res2 = ldb.search(expression="(&(cn=ldaptestcomputer)(objectCategory=cn=computer,{0!s}))".format(ldb.get_schema_basedn()))
+        self.assertEquals(len(res2), 1, "Could not find (&(cn=ldaptestcomputer)(objectCategory=cn=computer,{0!s}))".format(ldb.get_schema_basedn()))
 
         self.assertEquals(res[0].dn, res2[0].dn)
 
         if gc_ldb is not None:
             # Testing ldb.search for (&(cn=ldaptestcomputer)(objectCategory=cn=computer,%s)) in Global Catalog" % gc_ldb.get_schema_basedn()
-            res2gc = gc_ldb.search(expression="(&(cn=ldaptestcomputer)(objectCategory=cn=computer,%s))" % gc_ldb.get_schema_basedn())
-            self.assertEquals(len(res2gc), 1, "Could not find (&(cn=ldaptestcomputer)(objectCategory=cn=computer,%s)) In Global Catalog" % gc_ldb.get_schema_basedn())
+            res2gc = gc_ldb.search(expression="(&(cn=ldaptestcomputer)(objectCategory=cn=computer,{0!s}))".format(gc_ldb.get_schema_basedn()))
+            self.assertEquals(len(res2gc), 1, "Could not find (&(cn=ldaptestcomputer)(objectCategory=cn=computer,{0!s})) In Global Catalog".format(gc_ldb.get_schema_basedn()))
 
             self.assertEquals(res[0].dn, res2gc[0].dn)
 
@@ -2290,7 +2290,7 @@ member: cn=ldaptestuser2,cn=users,""" + self.base_dn + """
         self.assertEquals(list(res[0]["objectClass"]), ["top", "person", "organizationalPerson", "user", "computer"])
         self.assertTrue("objectGUID" in res[0])
         self.assertTrue("whenCreated" in res[0])
-        self.assertEquals(res[0]["objectCategory"][0], "CN=Computer,%s" % ldb.get_schema_basedn())
+        self.assertEquals(res[0]["objectCategory"][0], "CN=Computer,{0!s}".format(ldb.get_schema_basedn()))
         self.assertEquals(int(res[0]["sAMAccountType"][0]), ATYPE_WORKSTATION_TRUST)
         self.assertEquals(int(res[0]["userAccountControl"][0]), UF_WORKSTATION_TRUST_ACCOUNT)
 
@@ -2519,7 +2519,7 @@ member: CN=ldaptestutf8user èùéìòà,CN=Users,""" + self.base_dn + """
         self.assertTrue(len(res) > 0)
 
         # Testing creating a user with the posixAccount objectClass"
-        self.ldb.add_ldif("""dn: cn=posixuser,CN=Users,%s
+        self.ldb.add_ldif("""dn: cn=posixuser,CN=Users,{0!s}
 objectClass: top
 objectClass: person
 objectClass: posixAccount
@@ -2533,19 +2533,19 @@ gidNumber: 10126
 homeDirectory: /home/posixuser
 loginShell: /bin/bash
 gecos: Posix User;;;
-description: A POSIX user"""% (self.base_dn))
+description: A POSIX user""".format((self.base_dn)))
 
         # Testing removing the posixAccount objectClass from an existing user"
-        self.ldb.modify_ldif("""dn: cn=posixuser,CN=Users,%s
+        self.ldb.modify_ldif("""dn: cn=posixuser,CN=Users,{0!s}
 changetype: modify
 delete: objectClass
-objectClass: posixAccount"""% (self.base_dn))
+objectClass: posixAccount""".format((self.base_dn)))
 
         # Testing adding the posixAccount objectClass to an existing user"
-        self.ldb.modify_ldif("""dn: cn=posixuser,CN=Users,%s
+        self.ldb.modify_ldif("""dn: cn=posixuser,CN=Users,{0!s}
 changetype: modify
 add: objectClass
-objectClass: posixAccount"""% (self.base_dn))
+objectClass: posixAccount""".format((self.base_dn)))
 
         delete_force(self.ldb, "cn=posixuser,cn=users," + self.base_dn)
         delete_force(self.ldb, "cn=ldaptestuser,cn=users," + self.base_dn)
@@ -2567,7 +2567,7 @@ objectClass: posixAccount"""% (self.base_dn))
     def test_security_descriptor_add(self):
         """ Testing ldb.add_ldif() for nTSecurityDescriptor """
         user_name = "testdescriptoruser1"
-        user_dn = "CN=%s,CN=Users,%s" % (user_name, self.base_dn)
+        user_dn = "CN={0!s},CN=Users,{1!s}".format(user_name, self.base_dn)
         #
         # Test an empty security descriptor (naturally this shouldn't work)
         #
@@ -2625,7 +2625,7 @@ nTSecurityDescriptor:: """ + desc_base64)
             Negative test
         """
         user_name = "testdescriptoruser1"
-        user_dn = "CN=%s,CN=Users,%s" % (user_name, self.base_dn)
+        user_dn = "CN={0!s},CN=Users,{1!s}".format(user_name, self.base_dn)
         delete_force(self.ldb, user_dn)
         try:
             sddl = "O:DUG:DUD:AI(A;;RPWP;;;AU)S:PAI"
@@ -2648,7 +2648,7 @@ nTSecurityDescriptor:: """ + desc_base64)
     def test_security_descriptor_modify(self):
         """ Testing ldb.modify_ldif() for nTSecurityDescriptor """
         user_name = "testdescriptoruser2"
-        user_dn = "CN=%s,CN=Users,%s" % (user_name, self.base_dn)
+        user_dn = "CN={0!s},CN=Users,{1!s}".format(user_name, self.base_dn)
         #
         # Test an empty security descriptor (naturally this shouldn't work)
         #
@@ -2864,7 +2864,7 @@ nTSecurityDescriptor:: """ + desc_base64
         """Tests possible syntax of time attributes"""
 
         user_name = "testtimevaluesuser1"
-        user_dn = "CN=%s,CN=Users,%s" % (user_name, self.base_dn)
+        user_dn = "CN={0!s},CN=Users,{1!s}".format(user_name, self.base_dn)
 
         delete_force(self.ldb, user_dn)
         self.ldb.add({ "dn": user_dn,
@@ -2879,7 +2879,7 @@ nTSecurityDescriptor:: """ + desc_base64
         #
         ext = [ "Z", ".0Z", ".Z", ".000Z", ".RandomIgnoredCharacters...987654321Z" ]
         for i in range(0, len(ext)):
-            v_raw = "203701%02d000000" % (i + 1)
+            v_raw = "203701{0:02d}000000".format((i + 1))
             if ext[i] == "Z":
                 v_set = v_raw[2:] + ext[i]
             else:
@@ -2982,7 +2982,7 @@ class BaseDnTests(samba.tests.TestCase):
         self.assertEquals(len(res4[0]["msDS-Behavior-Version"]), 1)
         self.assertEquals(int(res[0]["domainFunctionality"][0]), int(res4[0]["msDS-Behavior-Version"][0]))
 
-        res5 = self.ldb.search("cn=partitions,%s" % ldb.get_config_basedn(), scope=SCOPE_BASE, attrs=["msDS-Behavior-Version"])
+        res5 = self.ldb.search("cn=partitions,{0!s}".format(ldb.get_config_basedn()), scope=SCOPE_BASE, attrs=["msDS-Behavior-Version"])
         self.assertEquals(len(res5), 1)
         self.assertEquals(len(res5[0]["msDS-Behavior-Version"]), 1)
         self.assertEquals(int(res[0]["forestFunctionality"][0]), int(res5[0]["msDS-Behavior-Version"][0]))
@@ -3010,18 +3010,18 @@ class BaseDnTests(samba.tests.TestCase):
         (hostname, _, dns_domainname) = res[0]["dnsHostName"][0].partition(".")
 
         given = res[0]["ldapServiceName"][0]
-        expected = "%s:%s$@%s" % (dns_domainname.lower(), hostname.lower(), dns_domainname.upper())
+        expected = "{0!s}:{1!s}$@{2!s}".format(dns_domainname.lower(), hostname.lower(), dns_domainname.upper())
         self.assertEquals(given, expected)
 
 if not "://" in host:
     if os.path.isfile(host):
-        host = "tdb://%s" % host
+        host = "tdb://{0!s}".format(host)
     else:
-        host = "ldap://%s" % host
+        host = "ldap://{0!s}".format(host)
 
 ldb = SamDB(host, credentials=creds, session_info=system_session(lp), lp=lp)
 if not "tdb://" in host:
-    gc_ldb = Ldb("%s:3268" % host, credentials=creds,
+    gc_ldb = Ldb("{0!s}:3268".format(host), credentials=creds,
                  session_info=system_session(lp), lp=lp)
 else:
     gc_ldb = None

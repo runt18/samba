@@ -117,20 +117,20 @@ class SamDB(samba.Ldb):
         res = self.search(base=self.domain_dn(), scope=ldb.SCOPE_SUBTREE,
                           expression=search_filter, attrs=["userAccountControl"])
         if len(res) == 0:
-                raise Exception("Unable to find account where '%s'" % search_filter)
+                raise Exception("Unable to find account where '{0!s}'".format(search_filter))
         assert(len(res) == 1)
         account_dn = res[0].dn
 
         old_uac = int(res[0]["userAccountControl"][0])
         if on:
             if strict and (old_uac & flags):
-                error = "Account flag(s) '%s' already set" % flags_str
+                error = "Account flag(s) '{0!s}' already set".format(flags_str)
                 raise Exception(error)
 
             new_uac = old_uac | flags
         else:
             if strict and not (old_uac & flags):
-                error = "Account flag(s) '%s' already unset" % flags_str
+                error = "Account flag(s) '{0!s}' already unset".format(flags_str)
                 raise Exception(error)
 
             new_uac = old_uac & ~flags
@@ -139,13 +139,13 @@ class SamDB(samba.Ldb):
             return
 
         mod = """
-dn: %s
+dn: {0!s}
 changetype: modify
 delete: userAccountControl
-userAccountControl: %u
+userAccountControl: {1:d}
 add: userAccountControl
-userAccountControl: %u
-""" % (account_dn, old_uac, new_uac)
+userAccountControl: {2:d}
+""".format(account_dn, old_uac, new_uac)
         self.modify_ldif(mod)
 
     def force_password_change_at_next_login(self, search_filter):
@@ -157,16 +157,16 @@ userAccountControl: %u
         res = self.search(base=self.domain_dn(), scope=ldb.SCOPE_SUBTREE,
                           expression=search_filter, attrs=[])
         if len(res) == 0:
-                raise Exception('Unable to find user "%s"' % search_filter)
+                raise Exception('Unable to find user "{0!s}"'.format(search_filter))
         assert(len(res) == 1)
         user_dn = res[0].dn
 
         mod = """
-dn: %s
+dn: {0!s}
 changetype: modify
 replace: pwdLastSet
 pwdLastSet: 0
-""" % (user_dn)
+""".format((user_dn))
         self.modify_ldif(mod)
 
     def newgroup(self, groupname, groupou=None, grouptype=None,
@@ -184,7 +184,7 @@ pwdLastSet: 0
         :param sd: security descriptor of the object
         """
 
-        group_dn = "CN=%s,%s,%s" % (groupname, (groupou or "CN=Users"), self.domain_dn())
+        group_dn = "CN={0!s},{1!s},{2!s}".format(groupname, (groupou or "CN=Users"), self.domain_dn())
 
         # The new user record. Note the reliance on the SAMLDB module which
         # fills in the default informations
@@ -222,13 +222,13 @@ pwdLastSet: 0
         :param groupname: Name of the target group
         """
 
-        groupfilter = "(&(sAMAccountName=%s)(objectCategory=%s,%s))" % (ldb.binary_encode(groupname), "CN=Group,CN=Schema,CN=Configuration", self.domain_dn())
+        groupfilter = "(&(sAMAccountName={0!s})(objectCategory={1!s},{2!s}))".format(ldb.binary_encode(groupname), "CN=Group,CN=Schema,CN=Configuration", self.domain_dn())
         self.transaction_start()
         try:
             targetgroup = self.search(base=self.domain_dn(), scope=ldb.SCOPE_SUBTREE,
                                expression=groupfilter, attrs=[])
             if len(targetgroup) == 0:
-                raise Exception('Unable to find group "%s"' % groupname)
+                raise Exception('Unable to find group "{0!s}"'.format(groupname))
             assert(len(targetgroup) == 1)
             self.delete(targetgroup[0].dn)
         except:
@@ -247,7 +247,7 @@ pwdLastSet: 0
             operation
         """
 
-        groupfilter = "(&(sAMAccountName=%s)(objectCategory=%s,%s))" % (
+        groupfilter = "(&(sAMAccountName={0!s})(objectCategory={1!s},{2!s}))".format(
             ldb.binary_encode(groupname), "CN=Group,CN=Schema,CN=Configuration", self.domain_dn())
 
         self.transaction_start()
@@ -255,35 +255,35 @@ pwdLastSet: 0
             targetgroup = self.search(base=self.domain_dn(), scope=ldb.SCOPE_SUBTREE,
                                expression=groupfilter, attrs=['member'])
             if len(targetgroup) == 0:
-                raise Exception('Unable to find group "%s"' % groupname)
+                raise Exception('Unable to find group "{0!s}"'.format(groupname))
             assert(len(targetgroup) == 1)
 
             modified = False
 
             addtargettogroup = """
-dn: %s
+dn: {0!s}
 changetype: modify
-""" % (str(targetgroup[0].dn))
+""".format((str(targetgroup[0].dn)))
 
             for member in members:
                 targetmember = self.search(base=self.domain_dn(), scope=ldb.SCOPE_SUBTREE,
-                                    expression="(|(sAMAccountName=%s)(CN=%s))" % (
+                                    expression="(|(sAMAccountName={0!s})(CN={1!s}))".format(
                     ldb.binary_encode(member), ldb.binary_encode(member)), attrs=[])
 
                 if len(targetmember) != 1:
-                    raise Exception('Unable to find "%s". Operation cancelled.' % member)
+                    raise Exception('Unable to find "{0!s}". Operation cancelled.'.format(member))
 
                 if add_members_operation is True and (targetgroup[0].get('member') is None or str(targetmember[0].dn) not in targetgroup[0]['member']):
                     modified = True
                     addtargettogroup += """add: member
-member: %s
-""" % (str(targetmember[0].dn))
+member: {0!s}
+""".format((str(targetmember[0].dn)))
 
                 elif add_members_operation is False and (targetgroup[0].get('member') is not None and str(targetmember[0].dn) in targetgroup[0]['member']):
                     modified = True
                     addtargettogroup += """delete: member
-member: %s
-""" % (str(targetmember[0].dn))
+member: {0!s}
+""".format((str(targetmember[0].dn)))
 
             if modified is True:
                 self.modify_ldif(addtargettogroup)
@@ -342,19 +342,19 @@ member: %s
             displayname += givenname
 
         if initials is not None:
-            displayname += ' %s.' % initials
+            displayname += ' {0!s}.'.format(initials)
 
         if surname is not None:
-            displayname += ' %s' % surname
+            displayname += ' {0!s}'.format(surname)
 
         cn = username
         if useusernameascn is None and displayname is not "":
             cn = displayname
 
-        user_dn = "CN=%s,%s,%s" % (cn, (userou or "CN=Users"), self.domain_dn())
+        user_dn = "CN={0!s},{1!s},{2!s}".format(cn, (userou or "CN=Users"), self.domain_dn())
 
         dnsdomain = ldb.Dn(self, self.domain_dn()).canonical_str().replace("/", "")
-        user_principal_name = "%s@%s" % (username, dnsdomain)
+        user_principal_name = "{0!s}@{1!s}".format(username, dnsdomain)
         # The new user record. Note the reliance on the SAMLDB module which
         # fills in the default informations
         ldbmessage = {"dn": user_dn,
@@ -373,7 +373,7 @@ member: %s
             ldbmessage["name"] = displayname
 
         if initials is not None:
-            ldbmessage["initials"] = '%s.' % initials
+            ldbmessage["initials"] = '{0!s}.'.format(initials)
 
         if profilepath is not None:
             ldbmessage["profilePath"] = profilepath
@@ -450,7 +450,7 @@ member: %s
 
             # Sets the password for it
             if setpassword:
-                self.setpassword("(samAccountName=%s)" % ldb.binary_encode(username), password,
+                self.setpassword("(samAccountName={0!s})".format(ldb.binary_encode(username)), password,
                                  force_password_change_at_next_login_req)
         except:
             self.transaction_cancel()
@@ -465,13 +465,13 @@ member: %s
         :param username: Name of the target user
         """
 
-        filter = "(&(sAMAccountName=%s)(objectCategory=%s,%s))" % (ldb.binary_encode(username), "CN=Person,CN=Schema,CN=Configuration", self.domain_dn())
+        filter = "(&(sAMAccountName={0!s})(objectCategory={1!s},{2!s}))".format(ldb.binary_encode(username), "CN=Person,CN=Schema,CN=Configuration", self.domain_dn())
         self.transaction_start()
         try:
             target = self.search(base=self.domain_dn(), scope=ldb.SCOPE_SUBTREE,
                                  expression=filter, attrs=[])
             if len(target) == 0:
-                raise Exception('Unable to find user "%s"' % username)
+                raise Exception('Unable to find user "{0!s}"'.format(username))
             assert(len(target) == 1)
             self.delete(target[0].dn)
         except:
@@ -494,17 +494,17 @@ member: %s
             res = self.search(base=self.domain_dn(), scope=ldb.SCOPE_SUBTREE,
                               expression=search_filter, attrs=[])
             if len(res) == 0:
-                raise Exception('Unable to find user "%s"' % (username or search_filter))
+                raise Exception('Unable to find user "{0!s}"'.format((username or search_filter)))
             if len(res) > 1:
-                raise Exception('Matched %u multiple users with filter "%s"' % (len(res), search_filter))
+                raise Exception('Matched {0:d} multiple users with filter "{1!s}"'.format(len(res), search_filter))
             user_dn = res[0].dn
             pw = unicode('"' + password + '"', 'utf-8').encode('utf-16-le')
             setpw = """
-dn: %s
+dn: {0!s}
 changetype: modify
 replace: unicodePwd
-unicodePwd:: %s
-""" % (user_dn, base64.b64encode(pw))
+unicodePwd:: {1!s}
+""".format(user_dn, base64.b64encode(pw))
 
             self.modify_ldif(setpw)
 
@@ -534,7 +534,7 @@ unicodePwd:: %s
                           expression=search_filter,
                           attrs=["userAccountControl", "accountExpires"])
             if len(res) == 0:
-                raise Exception('Unable to find user "%s"' % search_filter)
+                raise Exception('Unable to find user "{0!s}"'.format(search_filter))
             assert(len(res) == 1)
             user_dn = res[0].dn
 
@@ -548,13 +548,13 @@ unicodePwd:: %s
                 accountExpires = samba.unix2nttime(expiry_seconds + int(time.time()))
 
             setexp = """
-dn: %s
+dn: {0!s}
 changetype: modify
 replace: userAccountControl
-userAccountControl: %u
+userAccountControl: {1:d}
 replace: accountExpires
-accountExpires: %u
-""" % (user_dn, userAccountControl, accountExpires)
+accountExpires: {2:d}
+""".format(user_dn, userAccountControl, accountExpires)
 
             self.modify_ldif(setexp)
         except:
@@ -710,7 +710,7 @@ accountExpires: %u
             for the given attribute. None if the attribute is not replicated
         """
 
-        res = self.search(expression="distinguishedName=%s" % dn,
+        res = self.search(expression="distinguishedName={0!s}".format(dn),
                             scope=ldb.SCOPE_SUBTREE,
                             controls=["search_options:1:2"],
                             attrs=["replPropertyMetaData"])
@@ -732,7 +732,7 @@ accountExpires: %u
 
     def set_attribute_replmetadata_version(self, dn, att, value,
             addifnotexist=False):
-        res = self.search(expression="distinguishedName=%s" % dn,
+        res = self.search(expression="distinguishedName={0!s}".format(dn),
                             scope=ldb.SCOPE_SUBTREE,
                             controls=["search_options:1:2"],
                             attrs=["replPropertyMetaData"])
@@ -855,8 +855,7 @@ accountExpires: %u
 
     def set_dsheuristics(self, dsheuristics):
         m = ldb.Message()
-        m.dn = ldb.Dn(self, "CN=Directory Service,CN=Windows NT,CN=Services,%s"
-                      % self.get_config_basedn().get_linearized())
+        m.dn = ldb.Dn(self, "CN=Directory Service,CN=Windows NT,CN=Services,{0!s}".format(self.get_config_basedn().get_linearized()))
         if dsheuristics is not None:
             m["dSHeuristics"] = ldb.MessageElement(dsheuristics,
                 ldb.FLAG_MOD_REPLACE, "dSHeuristics")
@@ -866,8 +865,7 @@ accountExpires: %u
         self.modify(m)
 
     def get_dsheuristics(self):
-        res = self.search("CN=Directory Service,CN=Windows NT,CN=Services,%s"
-                          % self.get_config_basedn().get_linearized(),
+        res = self.search("CN=Directory Service,CN=Windows NT,CN=Services,{0!s}".format(self.get_config_basedn().get_linearized()),
                           scope=ldb.SCOPE_BASE, attrs=["dSHeuristics"])
         if len(res) == 0:
             dsheuristics = None

@@ -166,7 +166,7 @@ def validate(wire, keyname, secret, now, request_mac, tsig_start, tsig_rdata,
         elif error == BADTRUNC:
             raise PeerBadTruncation
         else:
-            raise PeerError('unknown TSIG error code %d' % error)
+            raise PeerError('unknown TSIG error code {0:d}'.format(error))
     time_low = time - fudge
     time_high = time + fudge
     if now < time_low or now > time_high:

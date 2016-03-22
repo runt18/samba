@@ -60,6 +60,6 @@ class TestProgram(BaseTestProgram):
         if getattr(opts, "listtests", False):
             args.insert(0, "--list")
         if getattr(opts, 'load_list', None):
-            args.insert(0, "--load-list=%s" % opts.load_list)
+            args.insert(0, "--load-list={0!s}".format(opts.load_list))
         argv = [sys.argv[0]] + args
         super(TestProgram, self).__init__(module=module, argv=argv)
