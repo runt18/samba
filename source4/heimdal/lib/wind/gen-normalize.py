@@ -55,8 +55,8 @@ def sortedKeys(d):
     keys.sort()
     return keys
 
-trans = dict([(k, [re.sub('<[a-zA-Z]+>', '', v[4]), v[0]])
-              for k,v in ud.items() if v[4]])
+trans = {k: [re.sub('<[a-zA-Z]+>', '', v[4]), v[0]]
+              for k,v in ud.items() if v[4]}
 
 maxLength = 0
 for v in trans.values():
@@ -133,10 +133,10 @@ normalize_c.file.write("};\n\n");
 
 exclusions = UnicodeData.read(sys.argv[2])
 
-inv = dict([(''.join(["%05x" % int(x, 0x10) for x in v[4].split(' ')]),
-             [k, v[0]])
+inv = {''.join(["%05x" % int(x, 0x10) for x in v[4].split(' ')]):
+             [k, v[0]]
             for k,v in ud.items()
-            if v[4] and not re.search('<[a-zA-Z]+> *', v[4]) and not exclusions.has_key(k)])
+            if v[4] and not re.search('<[a-zA-Z]+> *', v[4]) and not exclusions.has_key(k)}
 
 table = 0
 
