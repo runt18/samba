@@ -26,7 +26,9 @@ bld = None
 "singleton - safe to use when Waf is not used as a library"
 
 class BuildError(Utils.WafError):
-	def __init__(self, b=None, t=[]):
+	def __init__(self, b=None, t=None):
+		if t is None:
+			t = []
 		self.bld = b
 		self.tasks = t
 		self.ret = 1

@@ -127,8 +127,12 @@ class dbcheck(object):
         except IndexError:
             pass
 
-    def check_database(self, DN=None, scope=ldb.SCOPE_SUBTREE, controls=[], attrs=['*']):
+    def check_database(self, DN=None, scope=ldb.SCOPE_SUBTREE, controls=None, attrs=None):
         '''perform a database check, returning the number of errors found'''
+        if controls is None:
+            controls = []
+        if attrs is None:
+            attrs = ['*']
         res = self.samdb.search(base=DN, scope=scope, attrs=['dn'], controls=controls)
         self.report('Checking %u objects' % len(res))
         error_count = 0
@@ -1129,8 +1133,10 @@ newSuperior: %s""" % (str(from_dn), str(to_rdn), str(to_base)))
 
         raise KeyError
 
-    def check_object(self, dn, attrs=['*']):
+    def check_object(self, dn, attrs=None):
         '''check one object'''
+        if attrs is None:
+            attrs = ['*']
         if self.verbose:
             self.report("Checking object %s" % dn)
         if "dn" in map(str.lower, attrs):

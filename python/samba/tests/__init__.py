@@ -175,8 +175,10 @@ class LdbTestCase(TestCase):
         self.filename = os.tempnam()
         self.ldb = samba.Ldb(self.filename)
 
-    def set_modules(self, modules=[]):
+    def set_modules(self, modules=None):
         """Change the modules for this Ldb."""
+        if modules is None:
+            modules = []
         m = ldb.Message()
         m.dn = ldb.Dn(self.ldb, "@MODULES")
         m["@LIST"] = ",".join(modules)

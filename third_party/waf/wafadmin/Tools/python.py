@@ -112,8 +112,10 @@ class py_taskgen(TaskGen.task_gen):
 def init_py(self):
 	self.default_install_path = '${PYTHONDIR}'
 
-def _get_python_variables(python_exe, variables, imports=['import sys']):
+def _get_python_variables(python_exe, variables, imports=None):
 	"""Run a python interpreter and print some variables"""
+	if imports is None:
+		imports = ['import sys']
 	program = list(imports)
 	program.append('')
 	for v in variables:
