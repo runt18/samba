@@ -63,8 +63,7 @@ class SambaOptions(optparse.OptionGroup):
 
     def _set_debuglevel(self, option, opt_str, arg, parser):
         if arg < 0:
-            raise optparse.OptionValueError("invalid %s option value: %s" %
-                                            (opt_str, arg))
+            raise optparse.OptionValueError("invalid {0!s} option value: {1!s}".format(opt_str, arg))
         self._lp.set('debug level', str(arg))
 
     def _set_realm(self, option, opt_str, arg, parser):
@@ -80,7 +79,7 @@ class SambaOptions(optparse.OptionGroup):
             self._lp.set(a[0], a[1])
         except Exception, e:
             raise optparse.OptionValueError(
-                "invalid --option option value %r: %s" % (arg, e))
+                "invalid --option option value {0!r}: {1!s}".format(arg, e))
 
     def get_loadparm(self):
         """Return loadparm object with data specified on the command line."""
@@ -118,8 +117,7 @@ def parse_kerberos_arg(arg, opt_str):
     elif arg.lower() in ["auto"]:
         return AUTO_USE_KERBEROS
     else:
-        raise optparse.OptionValueError("invalid %s option value: %s" %
-                                        (opt_str, arg))
+        raise optparse.OptionValueError("invalid {0!s} option value: {1!s}".format(opt_str, arg))
 
 
 class CredentialsOptions(optparse.OptionGroup):
@@ -128,7 +126,7 @@ class CredentialsOptions(optparse.OptionGroup):
     def __init__(self, parser, special_name=None):
         self.special_name = special_name
         if special_name is not None:
-            self.section = "Credentials Options (%s)" % special_name
+            self.section = "Credentials Options ({0!s})".format(special_name)
         else:
             self.section = "Credentials Options"
 
@@ -171,7 +169,7 @@ class CredentialsOptions(optparse.OptionGroup):
         for a in args1:
             if not a.startswith("--"):
                 continue
-            args2 += (a.replace("--", "--%s-" % self.special_name),)
+            args2 += (a.replace("--", "--{0!s}-".format(self.special_name)),)
         self.add_option(*args2, **kwargs)
 
     def _parse_username(self, option, opt_str, arg, parser):

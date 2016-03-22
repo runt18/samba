@@ -58,8 +58,7 @@ class NAPTR(dns.rdata.Rdata):
 
     def to_text(self, origin=None, relativize=True, **kw):
         replacement = self.replacement.choose_relativity(origin, relativize)
-        return '%d %d "%s" "%s" "%s" %s' % \
-               (self.order, self.preference,
+        return '{0:d} {1:d} "{2!s}" "{3!s}" "{4!s}" {5!s}'.format(self.order, self.preference,
                 dns.rdata._escapify(self.flags),
                 dns.rdata._escapify(self.service),
                 dns.rdata._escapify(self.regexp),

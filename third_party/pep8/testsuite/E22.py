@@ -16,7 +16,7 @@ z = x[0]          + 3
 #: E221:3:14
 text = """
     bar
-    foo %s"""  % rofl
+    foo {0!s}""".format(rofl)
 #: Okay
 x = 1
 y = 2
@@ -120,7 +120,7 @@ a = b%c
 #: E228
 msg = fmt%(errno, errmsg)
 #: E228
-msg = "Error %d occurred"%errno
+msg = "Error {0:d} occurred".format(errno)
 #:
 
 #: Okay

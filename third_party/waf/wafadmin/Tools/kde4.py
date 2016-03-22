@@ -33,18 +33,18 @@ def detect(conf):
 	kdeconfig = conf.find_program('kde4-config')
 	if not kdeconfig:
 		conf.fatal('we need kde4-config')
-	prefix = Utils.cmd_output('%s --prefix' % kdeconfig, silent=True).strip()
-	file = '%s/share/apps/cmake/modules/KDELibsDependencies.cmake' % prefix
+	prefix = Utils.cmd_output('{0!s} --prefix'.format(kdeconfig), silent=True).strip()
+	file = '{0!s}/share/apps/cmake/modules/KDELibsDependencies.cmake'.format(prefix)
 	try: os.stat(file)
 	except OSError:
-		file = '%s/share/kde4/apps/cmake/modules/KDELibsDependencies.cmake' % prefix
+		file = '{0!s}/share/kde4/apps/cmake/modules/KDELibsDependencies.cmake'.format(prefix)
 		try: os.stat(file)
-		except OSError: conf.fatal('could not open %s' % file)
+		except OSError: conf.fatal('could not open {0!s}'.format(file))
 
 	try:
 		txt = Utils.readf(file)
 	except (OSError, IOError):
-		conf.fatal('could not read %s' % file)
+		conf.fatal('could not read {0!s}'.format(file))
 
 	txt = txt.replace('\\\n', '\n')
 	fu = re.compile('#(.*)\n')

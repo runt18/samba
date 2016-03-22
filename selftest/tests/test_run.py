@@ -81,7 +81,7 @@ class ExpandCommandRunTests(TestCase):
             self.assertEquals(f.read(), "foo\nbar\n")
         finally:
             f.close()
-        self.assertEquals("test --load-list=%s" % tmpf, cmd)
+        self.assertEquals("test --load-list={0!s}".format(tmpf), cmd)
 
     def test_loadlist_all(self):
         self.assertEquals(("test ", None),

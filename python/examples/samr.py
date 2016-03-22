@@ -65,17 +65,17 @@ def test_EnumDomainUsers(samr, dom_handle):
     """test the samr_EnumDomainUsers interface"""
     print "Testing samr_EnumDomainUsers"
     users = toArray(samr.EnumDomainUsers(dom_handle, 0, 0, -1))
-    print "Found %d users" % len(users)
+    print "Found {0:d} users".format(len(users))
     for idx, user in users:
-        print "\t%s\t(%d)" % (user.string, idx)
+        print "\t{0!s}\t({1:d})".format(user.string, idx)
 
 def test_EnumDomainGroups(samr, dom_handle):
     """test the samr_EnumDomainGroups interface"""
     print "Testing samr_EnumDomainGroups"
     groups = toArray(samr.EnumDomainGroups(dom_handle, 0, 0))
-    print "Found %d groups" % len(groups)
+    print "Found {0:d} groups".format(len(groups))
     for idx, group in groups:
-        print "\t%s\t(%d)" % (group.string, idx)
+        print "\t{0!s}\t({1:d})".format(group.string, idx)
 
 def test_domain_ops(samr, dom_handle):
     """test domain specific ops"""
@@ -87,11 +87,11 @@ def test_EnumDomains(samr, handle):
     print "Testing samr_EnumDomains"
 
     domains = toArray(samr.EnumDomains(handle, 0, -1))
-    print "Found %d domains" % len(domains)
+    print "Found {0:d} domains".format(len(domains))
     for idx, domain in domains:
-        print "\t%s (%d)" % (display_lsa_string(domain), idx)
+        print "\t{0!s} ({1:d})".format(display_lsa_string(domain), idx)
     for idx, domain in domains:
-        print "Testing domain %s" % display_lsa_string(domain)
+        print "Testing domain {0!s}".format(display_lsa_string(domain))
         sid = samr.LookupDomain(handle, domain)
         dom_handle = test_OpenDomain(samr, handle, sid)
         test_domain_ops(samr, dom_handle)
@@ -103,11 +103,11 @@ if len(sys.argv) != 2:
 
 binding = sys.argv[1]
 
-print "Connecting to %s" % binding
+print "Connecting to {0!s}".format(binding)
 try:
     samr = samr.samr(binding)
 except Exception, e:
-    print "Failed to connect to %s: %s" % (binding, e.message)
+    print "Failed to connect to {0!s}: {1!s}".format(binding, e.message)
     sys.exit(1)
 
 handle = test_Connect(samr)

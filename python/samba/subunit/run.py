@@ -129,7 +129,7 @@ class TestProtocolClient(unittest.TestResult):
         :param error_permitted: If True then error must be supplied.
             If False then error must not be supplied.
         """
-        self._stream.write(("%s: " % outcome) + self._test_id(test))
+        self._stream.write(("{0!s}: ".format(outcome)) + self._test_id(test))
         if error_permitted:
             if error is None:
                 raise ValueError
@@ -149,8 +149,8 @@ class TestProtocolClient(unittest.TestResult):
         if reason is None:
             self._addOutcome("skip", test, error=None)
         else:
-            self._stream.write("skip: %s [\n" % test.id())
-            self._stream.write("%s\n" % reason)
+            self._stream.write("skip: {0!s} [\n".format(test.id()))
+            self._stream.write("{0!s}\n".format(reason))
             self._stream.write("]\n")
 
     def addSuccess(self, test):
@@ -184,7 +184,7 @@ class TestProtocolClient(unittest.TestResult):
         ":param datetime: A datetime.datetime object.
         """
         time = a_datetime.astimezone(Utc())
-        self._stream.write("time: %04d-%02d-%02d %02d:%02d:%02d.%06dZ\n" % (
+        self._stream.write("time: {0:04d}-{1:02d}-{2:02d} {3:02d}:{4:02d}:{5:02d}.{6:06d}Z\n".format(
             time.year, time.month, time.day, time.hour, time.minute,
             time.second, time.microsecond))
 
@@ -532,9 +532,9 @@ class TestProgram(object):
         self.testRunner = testRunner
         self.testLoader = testLoader
         progName = argv[0]
-        if progName.endswith('%srun.py' % os.path.sep):
+        if progName.endswith('{0!s}run.py'.format(os.path.sep)):
             elements = progName.split(os.path.sep)
-            progName = '%s.run' % elements[-2]
+            progName = '{0!s}.run'.format(elements[-2])
         else:
             progName = os.path.basename(argv[0])
         self.progName = progName
@@ -559,7 +559,7 @@ class TestProgram(object):
             self.runTests()
         else:
             for test in iterate_tests(self.test):
-                stdout.write('%s\n' % test.id())
+                stdout.write('{0!s}\n'.format(test.id()))
 
     def parseArgs(self, argv):
         if len(argv) > 1 and argv[1].lower() == 'discover':
@@ -613,7 +613,7 @@ class TestProgram(object):
         if not have_discover:
             raise AssertionError("Unable to use discovery, must use python 2.7 "
                     "or greater, or install the discover package.")
-        self.progName = '%s discover' % self.progName
+        self.progName = '{0!s} discover'.format(self.progName)
         import optparse
         parser = optparse.OptionParser()
         parser.prog = self.progName

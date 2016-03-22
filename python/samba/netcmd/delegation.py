@@ -67,26 +67,25 @@ class cmd_delegation_show(Command):
         # to the correct domain
         (cleanedaccount, realm, domain) = _get_user_realm_domain(accountname)
 
-        res = sam.search(expression="sAMAccountName=%s" %
-                    ldb.binary_encode(cleanedaccount),
+        res = sam.search(expression="sAMAccountName={0!s}".format(
+                    ldb.binary_encode(cleanedaccount)),
                     scope=ldb.SCOPE_SUBTREE,
                     attrs=["userAccountControl", "msDS-AllowedToDelegateTo"])
         if len(res) == 0:
-            raise CommandError("Unable to find account name '%s'" % accountname)
+            raise CommandError("Unable to find account name '{0!s}'".format(accountname))
         assert(len(res) == 1)
 
         uac = int(res[0].get("userAccountControl")[0])
         allowed = res[0].get("msDS-AllowedToDelegateTo")
 
-        self.outf.write("Account-DN: %s\n" %  str(res[0].dn))
-        self.outf.write("UF_TRUSTED_FOR_DELEGATION: %s\n"
-            % bool(uac & dsdb.UF_TRUSTED_FOR_DELEGATION))
-        self.outf.write("UF_TRUSTED_TO_AUTHENTICATE_FOR_DELEGATION: %s\n" %
-              bool(uac & dsdb.UF_TRUSTED_TO_AUTHENTICATE_FOR_DELEGATION))
+        self.outf.write("Account-DN: {0!s}\n".format(str(res[0].dn)))
+        self.outf.write("UF_TRUSTED_FOR_DELEGATION: {0!s}\n".format(bool(uac & dsdb.UF_TRUSTED_FOR_DELEGATION)))
+        self.outf.write("UF_TRUSTED_TO_AUTHENTICATE_FOR_DELEGATION: {0!s}\n".format(
+              bool(uac & dsdb.UF_TRUSTED_TO_AUTHENTICATE_FOR_DELEGATION)))
 
         if allowed is not None:
             for a in allowed:
-                self.outf.write("msDS-AllowedToDelegateTo: %s\n" % a)
+                self.outf.write("msDS-AllowedToDelegateTo: {0!s}\n".format(a))
 
 
 class cmd_delegation_for_any_service(Command):
@@ -116,7 +115,7 @@ class cmd_delegation_for_any_service(Command):
         elif onoff == "off":
             on = False
         else:
-            raise CommandError("invalid argument: '%s' (choose from 'on', 'off')" % onoff)
+            raise CommandError("invalid argument: '{0!s}' (choose from 'on', 'off')".format(onoff))
 
         lp = sambaopts.get_loadparm()
         creds = credopts.get_credentials(lp)
@@ -132,7 +131,7 @@ class cmd_delegation_for_any_service(Command):
         # to the correct domain
         (cleanedaccount, realm, domain) = _get_user_realm_domain(accountname)
 
-        search_filter = "sAMAccountName=%s" % ldb.binary_encode(cleanedaccount)
+        search_filter = "sAMAccountName={0!s}".format(ldb.binary_encode(cleanedaccount))
         flag = dsdb.UF_TRUSTED_FOR_DELEGATION
         try:
             sam.toggle_userAccountFlags(search_filter, flag,
@@ -170,7 +169,7 @@ class cmd_delegation_for_any_protocol(Command):
         elif onoff == "off":
             on = False
         else:
-            raise CommandError("invalid argument: '%s' (choose from 'on', 'off')" % onoff)
+            raise CommandError("invalid argument: '{0!s}' (choose from 'on', 'off')".format(onoff))
 
         lp = sambaopts.get_loadparm()
         creds = credopts.get_credentials(lp, fallback_machine=True)
@@ -186,7 +185,7 @@ class cmd_delegation_for_any_protocol(Command):
         # to the correct domain
         (cleanedaccount, realm, domain) = _get_user_realm_domain(accountname)
 
-        search_filter = "sAMAccountName=%s" % ldb.binary_encode(cleanedaccount)
+        search_filter = "sAMAccountName={0!s}".format(ldb.binary_encode(cleanedaccount))
         flag = dsdb.UF_TRUSTED_TO_AUTHENTICATE_FOR_DELEGATION
         try:
             sam.toggle_userAccountFlags(search_filter, flag,
@@ -231,12 +230,12 @@ class cmd_delegation_add_service(Command):
         # to the correct domain
         (cleanedaccount, realm, domain) = _get_user_realm_domain(accountname)
 
-        res = sam.search(expression="sAMAccountName=%s" %
-                         ldb.binary_encode(cleanedaccount),
+        res = sam.search(expression="sAMAccountName={0!s}".format(
+                         ldb.binary_encode(cleanedaccount)),
                          scope=ldb.SCOPE_SUBTREE,
                          attrs=["msDS-AllowedToDelegateTo"])
         if len(res) == 0:
-            raise CommandError("Unable to find account name '%s'" % accountname)
+            raise CommandError("Unable to find account name '{0!s}'".format(accountname))
         assert(len(res) == 1)
 
         msg = ldb.Message()
@@ -285,12 +284,12 @@ class cmd_delegation_del_service(Command):
         # to the correct domain
         (cleanedaccount, realm, domain) = _get_user_realm_domain(accountname)
 
-        res = sam.search(expression="sAMAccountName=%s" %
-                         ldb.binary_encode(cleanedaccount),
+        res = sam.search(expression="sAMAccountName={0!s}".format(
+                         ldb.binary_encode(cleanedaccount)),
                          scope=ldb.SCOPE_SUBTREE,
                          attrs=["msDS-AllowedToDelegateTo"])
         if len(res) == 0:
-            raise CommandError("Unable to find account name '%s'" % accountname)
+            raise CommandError("Unable to find account name '{0!s}'".format(accountname))
         assert(len(res) == 1)
 
         msg = ldb.Message()

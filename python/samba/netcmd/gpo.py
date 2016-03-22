@@ -53,7 +53,7 @@ def samdb_connect(ctx):
                           session_info=system_session(),
                           credentials=ctx.creds, lp=ctx.lp)
     except Exception, e:
-        raise CommandError("LDAP connection to %s failed " % ctx.url, e)
+        raise CommandError("LDAP connection to {0!s} failed ".format(ctx.url), e)
 
 
 def attr_default(msg, attrname, default):
@@ -92,7 +92,7 @@ def parse_gplink(gplink):
             continue
         d = g.split(';')
         if len(d) != 2 or not d[0].startswith("[LDAP://"):
-            raise RuntimeError("Badly formed gPLink '%s'" % g)
+            raise RuntimeError("Badly formed gPLink '{0!s}'".format(g))
         ret.append({ 'dn' : d[0][8:], 'options' : int(d[1])})
     return ret
 
@@ -101,7 +101,7 @@ def encode_gplink(gplist):
     '''Encode an array of dn and options into gPLink string'''
     ret = ''
     for g in gplist:
-        ret += "[LDAP://%s;%d]" % (g['dn'], g['options'])
+        ret += "[LDAP://{0!s};{1:d}]".format(g['dn'], g['options'])
     return ret
 
 
@@ -124,7 +124,7 @@ def get_gpo_dn(samdb, gpo):
 
     dn = samdb.get_default_basedn()
     dn.add_child(ldb.Dn(samdb, "CN=Policies,CN=System"))
-    dn.add_child(ldb.Dn(samdb, "CN=%s" % gpo))
+    dn.add_child(ldb.Dn(samdb, "CN={0!s}".format(gpo)))
     return dn
 
 
@@ -140,10 +140,10 @@ def get_gpo_info(samdb, gpo=None, displayname=None, dn=None,
     search_scope = ldb.SCOPE_ONELEVEL
 
     if gpo is not None:
-        search_expr = "(&(objectClass=groupPolicyContainer)(name=%s))" % ldb.binary_encode(gpo)
+        search_expr = "(&(objectClass=groupPolicyContainer)(name={0!s}))".format(ldb.binary_encode(gpo))
 
     if displayname is not None:
-        search_expr = "(&(objectClass=groupPolicyContainer)(displayname=%s))" % ldb.binary_encode(displayname)
+        search_expr = "(&(objectClass=groupPolicyContainer)(displayname={0!s}))".format(ldb.binary_encode(displayname))
 
     if dn is not None:
         base_dn = dn
@@ -158,10 +158,10 @@ def get_gpo_info(samdb, gpo=None, displayname=None, dn=None,
                                     'name',
                                     'displayName',
                                     'gPCFileSysPath'],
-                            controls=['sd_flags:1:%d' % sd_flags])
+                            controls=['sd_flags:1:{0:d}'.format(sd_flags)])
     except Exception, e:
         if gpo is not None:
-            mesg = "Cannot get information for GPO %s" % gpo
+            mesg = "Cannot get information for GPO {0!s}".format(gpo)
         else:
             mesg = "Cannot get information for GPOs"
         raise CommandError(mesg, e)
@@ -172,11 +172,11 @@ def get_gpo_info(samdb, gpo=None, displayname=None, dn=None,
 def get_gpo_containers(samdb, gpo):
     '''lists dn of containers for a GPO'''
 
-    search_expr = "(&(objectClass=*)(gPLink=*%s*))" % gpo
+    search_expr = "(&(objectClass=*)(gPLink=*{0!s}*))".format(gpo)
     try:
         msg = samdb.search(expression=search_expr, attrs=['gPLink'])
     except Exception, e:
-        raise CommandError("Could not find container(s) with GPO %s" % gpo, e)
+        raise CommandError("Could not find container(s) with GPO {0!s}".format(gpo), e)
 
     return msg
 
@@ -189,7 +189,7 @@ def del_gpo_link(samdb, container_dn, gpo):
                             expression="(objectClass=*)",
                             attrs=['gPLink'])[0]
     except Exception, e:
-        raise CommandError("Container '%s' does not exist" % container_dn, e)
+        raise CommandError("Container '{0!s}' does not exist".format(container_dn), e)
 
     found = False
     gpo_dn = str(get_gpo_dn(samdb, gpo))
@@ -204,7 +204,7 @@ def del_gpo_link(samdb, container_dn, gpo):
         raise CommandError("No GPO(s) linked to this container")
 
     if not found:
-        raise CommandError("GPO '%s' not linked to this container" % gpo)
+        raise CommandError("GPO '{0!s}' not linked to this container".format(gpo))
 
     m = ldb.Message()
     m.dn = container_dn
@@ -229,7 +229,7 @@ def parse_unc(unc):
     tmp = unc[2:].split('\\', 2)
     if len(tmp) == 3:
         return tmp
-    raise ValueError("Invalid UNC string: %s" % unc)
+    raise ValueError("Invalid UNC string: {0!s}".format(unc))
 
 
 def copy_directory_remote_to_local(conn, remotedir, localdir):
@@ -315,12 +315,12 @@ class cmd_listall(Command):
         msg = get_gpo_info(self.samdb, None)
 
         for m in msg:
-            self.outf.write("GPO          : %s\n" % m['name'][0])
-            self.outf.write("display name : %s\n" % m['displayName'][0])
-            self.outf.write("path         : %s\n" % m['gPCFileSysPath'][0])
-            self.outf.write("dn           : %s\n" % m.dn)
-            self.outf.write("version      : %s\n" % attr_default(m, 'versionNumber', '0'))
-            self.outf.write("flags        : %s\n" % gpo_flags_string(int(attr_default(m, 'flags', 0))))
+            self.outf.write("GPO          : {0!s}\n".format(m['name'][0]))
+            self.outf.write("display name : {0!s}\n".format(m['displayName'][0]))
+            self.outf.write("path         : {0!s}\n".format(m['gPCFileSysPath'][0]))
+            self.outf.write("dn           : {0!s}\n".format(m.dn))
+            self.outf.write("version      : {0!s}\n".format(attr_default(m, 'versionNumber', '0')))
+            self.outf.write("flags        : {0!s}\n".format(gpo_flags_string(int(attr_default(m, 'flags', 0)))))
             self.outf.write("\n")
 
 
@@ -351,18 +351,17 @@ class cmd_list(Command):
         samdb_connect(self)
 
         try:
-            msg = self.samdb.search(expression='(&(|(samAccountName=%s)(samAccountName=%s$))(objectClass=User))' %
-                                                (ldb.binary_encode(username),ldb.binary_encode(username)))
+            msg = self.samdb.search(expression='(&(|(samAccountName={0!s})(samAccountName={1!s}$))(objectClass=User))'.format(ldb.binary_encode(username), ldb.binary_encode(username)))
             user_dn = msg[0].dn
         except Exception:
-            raise CommandError("Failed to find account %s" % username)
+            raise CommandError("Failed to find account {0!s}".format(username))
 
         # check if its a computer account
         try:
             msg = self.samdb.search(base=user_dn, scope=ldb.SCOPE_BASE, attrs=['objectClass'])[0]
             is_computer = 'computer' in msg['objectClass']
         except Exception:
-            raise CommandError("Failed to find objectClass for user %s" % username)
+            raise CommandError("Failed to find objectClass for user {0!s}".format(username))
 
         session_info_flags = ( AUTH_SESSION_INFO_DEFAULT_GROUPS |
                                AUTH_SESSION_INFO_AUTHENTICATED )
@@ -395,12 +394,12 @@ class cmd_list(Command):
                         gmsg = self.samdb.search(base=g['dn'], scope=ldb.SCOPE_BASE,
                                                  attrs=['name', 'displayName', 'flags',
                                                         'nTSecurityDescriptor'],
-                                                 controls=['sd_flags:1:%d' % sd_flags])
+                                                 controls=['sd_flags:1:{0:d}'.format(sd_flags)])
                         secdesc_ndr = gmsg[0]['nTSecurityDescriptor'][0]
                         secdesc = ndr_unpack(security.descriptor, secdesc_ndr)
                     except Exception:
-                        self.outf.write("Failed to fetch gpo object with nTSecurityDescriptor %s\n" %
-                            g['dn'])
+                        self.outf.write("Failed to fetch gpo object with nTSecurityDescriptor {0!s}\n".format(
+                            g['dn']))
                         continue
 
                     try:
@@ -409,7 +408,7 @@ class cmd_list(Command):
                                                     security.SEC_ADS_LIST |
                                                     security.SEC_ADS_READ_PROP)
                     except RuntimeError:
-                        self.outf.write("Failed access check on %s\n" % msg.dn)
+                        self.outf.write("Failed access check on {0!s}\n".format(msg.dn))
                         continue
 
                     # check the flags on the GPO
@@ -434,9 +433,9 @@ class cmd_list(Command):
         else:
             msg_str = 'user'
 
-        self.outf.write("GPOs for %s %s\n" % (msg_str, username))
+        self.outf.write("GPOs for {0!s} {1!s}\n".format(msg_str, username))
         for g in gpos:
-            self.outf.write("    %s %s\n" % (g[0], g[1]))
+            self.outf.write("    {0!s} {1!s}\n".format(g[0], g[1]))
 
 
 class cmd_show(Command):
@@ -468,7 +467,7 @@ class cmd_show(Command):
         try:
             msg = get_gpo_info(self.samdb, gpo)[0]
         except Exception:
-            raise CommandError("GPO '%s' does not exist" % gpo)
+            raise CommandError("GPO '{0!s}' does not exist".format(gpo))
 
         try:
             secdesc_ndr = msg['nTSecurityDescriptor'][0]
@@ -477,13 +476,13 @@ class cmd_show(Command):
         except Exception:
             secdesc_sddl = "<hidden>"
 
-        self.outf.write("GPO          : %s\n" % msg['name'][0])
-        self.outf.write("display name : %s\n" % msg['displayName'][0])
-        self.outf.write("path         : %s\n" % msg['gPCFileSysPath'][0])
-        self.outf.write("dn           : %s\n" % msg.dn)
-        self.outf.write("version      : %s\n" % attr_default(msg, 'versionNumber', '0'))
-        self.outf.write("flags        : %s\n" % gpo_flags_string(int(attr_default(msg, 'flags', 0))))
-        self.outf.write("ACL          : %s\n" % secdesc_sddl)
+        self.outf.write("GPO          : {0!s}\n".format(msg['name'][0]))
+        self.outf.write("display name : {0!s}\n".format(msg['displayName'][0]))
+        self.outf.write("path         : {0!s}\n".format(msg['gPCFileSysPath'][0]))
+        self.outf.write("dn           : {0!s}\n".format(msg.dn))
+        self.outf.write("version      : {0!s}\n".format(attr_default(msg, 'versionNumber', '0')))
+        self.outf.write("flags        : {0!s}\n".format(gpo_flags_string(int(attr_default(msg, 'flags', 0)))))
+        self.outf.write("ACL          : {0!s}\n".format(secdesc_sddl))
         self.outf.write("\n")
 
 
@@ -519,19 +518,19 @@ class cmd_getlink(Command):
                                     expression="(objectClass=*)",
                                     attrs=['gPLink'])[0]
         except Exception:
-            raise CommandError("Container '%s' does not exist" % container_dn)
+            raise CommandError("Container '{0!s}' does not exist".format(container_dn))
 
         if msg['gPLink']:
-            self.outf.write("GPO(s) linked to DN %s\n" % container_dn)
+            self.outf.write("GPO(s) linked to DN {0!s}\n".format(container_dn))
             gplist = parse_gplink(msg['gPLink'][0])
             for g in gplist:
                 msg = get_gpo_info(self.samdb, dn=g['dn'])
-                self.outf.write("    GPO     : %s\n" % msg[0]['name'][0])
-                self.outf.write("    Name    : %s\n" % msg[0]['displayName'][0])
-                self.outf.write("    Options : %s\n" % gplink_options_string(g['options']))
+                self.outf.write("    GPO     : {0!s}\n".format(msg[0]['name'][0]))
+                self.outf.write("    Name    : {0!s}\n".format(msg[0]['displayName'][0]))
+                self.outf.write("    Options : {0!s}\n".format(gplink_options_string(g['options'])))
                 self.outf.write("\n")
         else:
-            self.outf.write("No GPO(s) linked to DN=%s\n" % container_dn)
+            self.outf.write("No GPO(s) linked to DN={0!s}\n".format(container_dn))
 
 
 class cmd_setlink(Command):
@@ -575,7 +574,7 @@ class cmd_setlink(Command):
         try:
             msg = get_gpo_info(self.samdb, gpo=gpo)[0]
         except Exception:
-            raise CommandError("GPO '%s' does not exist" % gpo)
+            raise CommandError("GPO '{0!s}' does not exist".format(gpo))
         gpo_dn = str(get_gpo_dn(self.samdb, gpo))
 
         # Check if valid Container DN
@@ -584,7 +583,7 @@ class cmd_setlink(Command):
                                     expression="(objectClass=*)",
                                     attrs=['gPLink'])[0]
         except Exception:
-            raise CommandError("Container '%s' does not exist" % container_dn)
+            raise CommandError("Container '{0!s}' does not exist".format(container_dn))
 
         # Update existing GPlinks or Add new one
         existing_gplink = False
@@ -598,7 +597,7 @@ class cmd_setlink(Command):
                     found = True
                     break
             if found:
-                raise CommandError("GPO '%s' already linked to this container" % gpo)
+                raise CommandError("GPO '{0!s}' already linked to this container".format(gpo))
             else:
                 gplist.insert(0, { 'dn' : gpo_dn, 'options' : gplink_options })
         else:
@@ -655,7 +654,7 @@ class cmd_dellink(Command):
         try:
             get_gpo_info(self.samdb, gpo=gpo)[0]
         except Exception:
-            raise CommandError("GPO '%s' does not exist" % gpo)
+            raise CommandError("GPO '{0!s}' does not exist".format(gpo))
 
         container_dn = ldb.Dn(self.samdb, container)
         del_gpo_link(self.samdb, container_dn, gpo)
@@ -692,11 +691,11 @@ class cmd_listcontainers(Command):
 
         msg = get_gpo_containers(self.samdb, gpo)
         if len(msg):
-            self.outf.write("Container(s) using GPO %s\n" % gpo)
+            self.outf.write("Container(s) using GPO {0!s}\n".format(gpo))
             for m in msg:
-                self.outf.write("    DN: %s\n" % m['dn'])
+                self.outf.write("    DN: {0!s}\n".format(m['dn']))
         else:
-            self.outf.write("No Containers using GPO %s\n" % gpo)
+            self.outf.write("No Containers using GPO {0!s}\n".format(gpo))
 
 
 class cmd_getinheritance(Command):
@@ -731,7 +730,7 @@ class cmd_getinheritance(Command):
                                     expression="(objectClass=*)",
                                     attrs=['gPOptions'])[0]
         except Exception:
-            raise CommandError("Container '%s' does not exist" % container_dn)
+            raise CommandError("Container '{0!s}' does not exist".format(container_dn))
 
         inheritance = 0
         if 'gPOptions' in msg:
@@ -768,7 +767,7 @@ class cmd_setinheritance(Command):
         elif inherit_state.lower() == 'inherit':
             inheritance = dsdb.GPO_INHERIT
         else:
-            raise CommandError("Unknown inheritance state (%s)" % inherit_state)
+            raise CommandError("Unknown inheritance state ({0!s})".format(inherit_state))
 
         self.lp = sambaopts.get_loadparm()
         self.creds = credopts.get_credentials(self.lp, fallback_machine=True)
@@ -781,7 +780,7 @@ class cmd_setinheritance(Command):
                                     expression="(objectClass=*)",
                                     attrs=['gPOptions'])[0]
         except Exception:
-            raise CommandError("Container '%s' does not exist" % container_dn)
+            raise CommandError("Container '{0!s}' does not exist".format(container_dn))
 
         m = ldb.Message()
         m.dn = ldb.Dn(self.samdb, container_dn)
@@ -794,7 +793,7 @@ class cmd_setinheritance(Command):
         try:
             self.samdb.modify(m)
         except Exception, e:
-            raise CommandError("Error setting inheritance state %s" % inherit_state, e)
+            raise CommandError("Error setting inheritance state {0!s}".format(inherit_state), e)
 
 
 class cmd_fetch(Command):
@@ -832,26 +831,26 @@ class cmd_fetch(Command):
         try:
             msg = get_gpo_info(self.samdb, gpo)[0]
         except Exception:
-            raise CommandError("GPO '%s' does not exist" % gpo)
+            raise CommandError("GPO '{0!s}' does not exist".format(gpo))
 
         # verify UNC path
         unc = msg['gPCFileSysPath'][0]
         try:
             [dom_name, service, sharepath] = parse_unc(unc)
         except ValueError:
-            raise CommandError("Invalid GPO path (%s)" % unc)
+            raise CommandError("Invalid GPO path ({0!s})".format(unc))
 
         # SMB connect to DC
         try:
             conn = smb.SMB(dc_hostname, service, lp=self.lp, creds=self.creds)
         except Exception:
-            raise CommandError("Error connecting to '%s' using SMB" % dc_hostname)
+            raise CommandError("Error connecting to '{0!s}' using SMB".format(dc_hostname))
 
         # Copy GPT
         if tmpdir is None:
             tmpdir = "/tmp"
         if not os.path.isdir(tmpdir):
-            raise CommandError("Temoprary directory '%s' does not exist" % tmpdir)
+            raise CommandError("Temoprary directory '{0!s}' does not exist".format(tmpdir))
 
         localdir = os.path.join(tmpdir, "policy")
         if not os.path.isdir(localdir):
@@ -859,7 +858,7 @@ class cmd_fetch(Command):
 
         gpodir = os.path.join(localdir, gpo)
         if os.path.isdir(gpodir):
-            raise CommandError("GPO directory '%s' already exists, refusing to overwrite" % gpodir)
+            raise CommandError("GPO directory '{0!s}' already exists, refusing to overwrite".format(gpodir))
 
         try:
             os.mkdir(gpodir)
@@ -867,7 +866,7 @@ class cmd_fetch(Command):
         except Exception, e:
             # FIXME: Catch more specific exception
             raise CommandError("Error copying GPO from DC", e)
-        self.outf.write('GPO copied to %s\n' % gpodir)
+        self.outf.write('GPO copied to {0!s}\n'.format(gpodir))
 
 
 class cmd_create(Command):
@@ -916,19 +915,19 @@ class cmd_create(Command):
 
         msg = get_gpo_info(self.samdb, displayname=displayname)
         if msg.count > 0:
-            raise CommandError("A GPO already existing with name '%s'" % displayname)
+            raise CommandError("A GPO already existing with name '{0!s}'".format(displayname))
 
         # Create new GUID
         guid  = str(uuid.uuid4())
-        gpo = "{%s}" % guid.upper()
+        gpo = "{{{0!s}}}".format(guid.upper())
         realm = cldap_ret.dns_domain
-        unc_path = "\\\\%s\\sysvol\\%s\\Policies\\%s" % (realm, realm, gpo)
+        unc_path = "\\\\{0!s}\\sysvol\\{1!s}\\Policies\\{2!s}".format(realm, realm, gpo)
 
         # Create GPT
         if tmpdir is None:
             tmpdir = "/tmp"
         if not os.path.isdir(tmpdir):
-            raise CommandError("Temporary directory '%s' does not exist" % tmpdir)
+            raise CommandError("Temporary directory '{0!s}' does not exist".format(tmpdir))
 
         localdir = os.path.join(tmpdir, "policy")
         if not os.path.isdir(localdir):
@@ -936,7 +935,7 @@ class cmd_create(Command):
 
         gpodir = os.path.join(localdir, gpo)
         if os.path.isdir(gpodir):
-            raise CommandError("GPO directory '%s' already exists, refusing to overwrite" % gpodir)
+            raise CommandError("GPO directory '{0!s}' already exists, refusing to overwrite".format(gpodir))
 
         try:
             os.mkdir(gpodir)
@@ -952,7 +951,7 @@ class cmd_create(Command):
         try:
             conn = smb.SMB(dc_hostname, service, lp=self.lp, creds=self.creds)
         except Exception, e:
-            raise CommandError("Error connecting to '%s' using SMB" % dc_hostname, e)
+            raise CommandError("Error connecting to '{0!s}' using SMB".format(dc_hostname), e)
 
         self.samdb.transaction_start()
         try:
@@ -966,13 +965,13 @@ class cmd_create(Command):
 
             # Add cn=User,cn=<guid>
             m = ldb.Message()
-            m.dn = ldb.Dn(self.samdb, "CN=User,%s" % str(gpo_dn))
+            m.dn = ldb.Dn(self.samdb, "CN=User,{0!s}".format(str(gpo_dn)))
             m['a01'] = ldb.MessageElement("container", ldb.FLAG_MOD_ADD, "objectClass")
             self.samdb.add(m)
 
             # Add cn=Machine,cn=<guid>
             m = ldb.Message()
-            m.dn = ldb.Dn(self.samdb, "CN=Machine,%s" % str(gpo_dn))
+            m.dn = ldb.Dn(self.samdb, "CN=Machine,{0!s}".format(str(gpo_dn)))
             m['a01'] = ldb.MessageElement("container", ldb.FLAG_MOD_ADD, "objectClass")
             self.samdb.add(m)
 
@@ -1017,7 +1016,7 @@ class cmd_create(Command):
         else:
             self.samdb.transaction_commit()
 
-        self.outf.write("GPO '%s' created as %s\n" % (displayname, gpo))
+        self.outf.write("GPO '{0!s}' created as {1!s}\n".format(displayname, gpo))
 
 
 class cmd_del(Command):
@@ -1058,14 +1057,14 @@ class cmd_del(Command):
             msg = get_gpo_info(self.samdb, gpo=gpo)[0]
             unc_path = msg['gPCFileSysPath'][0]
         except Exception:
-            raise CommandError("GPO '%s' does not exist" % gpo)
+            raise CommandError("GPO '{0!s}' does not exist".format(gpo))
 
         # Connect to DC over SMB
         [dom_name, service, sharepath] = parse_unc(unc_path)
         try:
             conn = smb.SMB(dc_hostname, service, lp=self.lp, creds=self.creds)
         except Exception, e:
-            raise CommandError("Error connecting to '%s' using SMB" % dc_hostname, e)
+            raise CommandError("Error connecting to '{0!s}' using SMB".format(dc_hostname), e)
 
         self.samdb.transaction_start()
         try:
@@ -1073,15 +1072,15 @@ class cmd_del(Command):
             msg = get_gpo_containers(self.samdb, gpo)
 
             if len(msg):
-                self.outf.write("GPO %s is linked to containers\n" % gpo)
+                self.outf.write("GPO {0!s} is linked to containers\n".format(gpo))
                 for m in msg:
                     del_gpo_link(self.samdb, m['dn'], gpo)
-                    self.outf.write("    Removed link from %s.\n" % m['dn'])
+                    self.outf.write("    Removed link from {0!s}.\n".format(m['dn']))
 
             # Remove LDAP entries
             gpo_dn = get_gpo_dn(self.samdb, gpo)
-            self.samdb.delete(ldb.Dn(self.samdb, "CN=User,%s" % str(gpo_dn)))
-            self.samdb.delete(ldb.Dn(self.samdb, "CN=Machine,%s" % str(gpo_dn)))
+            self.samdb.delete(ldb.Dn(self.samdb, "CN=User,{0!s}".format(str(gpo_dn))))
+            self.samdb.delete(ldb.Dn(self.samdb, "CN=Machine,{0!s}".format(str(gpo_dn))))
             self.samdb.delete(gpo_dn)
 
             # Remove GPO files
@@ -1093,7 +1092,7 @@ class cmd_del(Command):
         else:
             self.samdb.transaction_commit()
 
-        self.outf.write("GPO %s deleted.\n" % gpo)
+        self.outf.write("GPO {0!s} deleted.\n".format(gpo))
 
 
 class cmd_aclcheck(Command):
@@ -1137,13 +1136,13 @@ class cmd_aclcheck(Command):
             try:
                 [dom_name, service, sharepath] = parse_unc(unc)
             except ValueError:
-                raise CommandError("Invalid GPO path (%s)" % unc)
+                raise CommandError("Invalid GPO path ({0!s})".format(unc))
 
             # SMB connect to DC
             try:
                 conn = smb.SMB(dc_hostname, service, lp=self.lp, creds=self.creds)
             except Exception:
-                raise CommandError("Error connecting to '%s' using SMB" % dc_hostname)
+                raise CommandError("Error connecting to '{0!s}' using SMB".format(dc_hostname))
 
             fs_sd = conn.get_acl(sharepath, security.SECINFO_OWNER | security.SECINFO_GROUP | security.SECINFO_DACL, security.SEC_FLAG_MAXIMUM_ALLOWED)
 
@@ -1155,7 +1154,7 @@ class cmd_aclcheck(Command):
             expected_fs_sddl = dsacl2fsacl(ds_sd, domain_sid)
 
             if (fs_sd.as_sddl(domain_sid) != expected_fs_sddl):
-                raise CommandError("Invalid GPO ACL %s on path (%s), should be %s" % (fs_sd.as_sddl(domain_sid), sharepath, expected_fs_sddl))
+                raise CommandError("Invalid GPO ACL {0!s} on path ({1!s}), should be {2!s}".format(fs_sd.as_sddl(domain_sid), sharepath, expected_fs_sddl))
 
 
 class cmd_gpo(SuperCommand):

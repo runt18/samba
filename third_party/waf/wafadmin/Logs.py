@@ -89,7 +89,7 @@ class formatter(logging.Formatter):
 	def format(self, rec):
 		if rec.levelno >= logging.WARNING or rec.levelno == logging.INFO:
 			try:
-				return '%s%s%s' % (rec.c1, rec.msg.decode('utf-8'), rec.c2)
+				return '{0!s}{1!s}{2!s}'.format(rec.c1, rec.msg.decode('utf-8'), rec.c2)
 			except:
 				return rec.c1+rec.msg+rec.c2
 		return logging.Formatter.format(self, rec)
@@ -111,9 +111,9 @@ def error(*k, **kw):
 			st = st[:-1]
 			buf = []
 			for filename, lineno, name, line in st:
-				buf.append('  File "%s", line %d, in %s' % (filename, lineno, name))
+				buf.append('  File "{0!s}", line {1:d}, in {2!s}'.format(filename, lineno, name))
 				if line:
-					buf.append('	%s' % line.strip())
+					buf.append('	{0!s}'.format(line.strip()))
 			if buf: logging.error("\n".join(buf))
 
 warn = logging.warn

@@ -19,7 +19,7 @@ def get_server_list_from_string(s):
 
         m = re.match("(.*):(.*)(\\\\|/)(.*)%(.*)", entry)
         if not m:
-            raise "badly formed server list entry '%s'" % entry
+            raise "badly formed server list entry '{0!s}'".format(entry)
 
         server = m.group(1)
         domain = m.group(2)
@@ -80,7 +80,7 @@ def dict_check(sample_dict, real_dict):
     for key in sample_dict.keys():
         # Check existing key and type
         if not real_dict.has_key(key):
-            raise ValueError, "dict does not contain key '%s'" % key
+            raise ValueError, "dict does not contain key '{0!s}'".format(key)
         if type(sample_dict[key]) != type(real_dict[key]):
             raise ValueError, "dict has differing types (%s vs %s) for key " \
                   "'%s'" % (type(sample_dict[key]), type(real_dict[key]), key)

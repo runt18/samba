@@ -99,7 +99,7 @@ def apply_java(self):
 
 	srcdir_node = self.path.find_dir(self.srcdir)
 	if not srcdir_node:
-		raise Utils.WafError('could not find srcdir %r' % self.srcdir)
+		raise Utils.WafError('could not find srcdir {0!r}'.format(self.srcdir))
 
 	src_nodes = [x for x in srcdir_node.ant_glob(self.source_re, flat=False)]
 	bld_nodes = [x.change_ext('.class') for x in src_nodes]
@@ -210,10 +210,10 @@ def check_java_class(self, classname, with_classpath=None):
 
 	# Try to run the app
 	cmd = self.env['JAVA'] + ['-cp', classpath, 'Test', classname]
-	self.log.write("%s\n" % str(cmd))
+	self.log.write("{0!s}\n".format(str(cmd)))
 	found = Utils.exec_command(cmd, shell=False, log=self.log)
 
-	self.check_message('Java class %s' % classname, "", not found)
+	self.check_message('Java class {0!s}'.format(classname), "", not found)
 
 	shutil.rmtree(javatestdir, True)
 
@@ -251,4 +251,4 @@ def check_jni_headers(conf):
 				libpath=d, includes=incDirs, uselib_store='JAVA', uselib='JAVA'):
 			break
 	else:
-		conf.fatal('could not find lib jvm in %r (see config.log)' % libDirs)
+		conf.fatal('could not find lib jvm in {0!r} (see config.log)'.format(libDirs))

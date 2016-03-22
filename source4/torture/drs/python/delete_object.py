@@ -59,7 +59,7 @@ class DrsDeleteObjectTestCase(drs_base.DrsBaseTestCase):
     def _check_obj(self, sam_ldb, obj_orig, is_deleted):
         # search the user by guid as it may be deleted
         guid_str = self._GUID_string(obj_orig["objectGUID"][0])
-        expression = "(objectGUID=%s)" % guid_str
+        expression = "(objectGUID={0!s})".format(guid_str)
         res = sam_ldb.search(base=self.domain_dn,
                              expression=expression,
                              controls=["show_deleted:1"])
@@ -78,7 +78,7 @@ class DrsDeleteObjectTestCase(drs_base.DrsBaseTestCase):
             self.assertFalse("memberOf" in user_cur)
             self.assertFalse("member" in user_cur)
             self.assertTrue(dodn in str(user_cur["dn"]),
-                            "User %s is deleted but it is not located under %s (found at %s)!" % (name_orig, dodn, user_cur["dn"]))
+                            "User {0!s} is deleted but it is not located under {1!s} (found at {2!s})!".format(name_orig, dodn, user_cur["dn"]))
             self.assertEquals(name_cur, name_orig + "\nDEL:" + guid_str)
         else:
             self.assertFalse("isDeleted" in user_cur)
@@ -107,13 +107,13 @@ class DrsDeleteObjectTestCase(drs_base.DrsBaseTestCase):
         self.ldb_dc1.newuser(username=username, password="P@sswOrd!")
         ldb_res = self.ldb_dc1.search(base=self.domain_dn,
                                       scope=SCOPE_SUBTREE,
-                                      expression="(samAccountName=%s)" % username)
+                                      expression="(samAccountName={0!s})".format(username))
         self.assertEquals(len(ldb_res), 1)
         user_orig = ldb_res[0]
         user_dn   = ldb_res[0]["dn"]
 
         # check user info on DC1
-        print "Testing for %s with GUID %s" % (username, self._GUID_string(user_orig["objectGUID"][0]))
+        print "Testing for {0!s} with GUID {1!s}".format(username, self._GUID_string(user_orig["objectGUID"][0]))
         self._check_obj(sam_ldb=self.ldb_dc1, obj_orig=user_orig, is_deleted=False)
 
         # trigger replication from DC1 to DC2
@@ -130,13 +130,13 @@ class DrsDeleteObjectTestCase(drs_base.DrsBaseTestCase):
         self.assertFalse("description" in user_cur)
         self.assertFalse("memberOf" in user_cur)
 
-        self.ldb_dc2.newgroup("group_%s" % username)
+        self.ldb_dc2.newgroup("group_{0!s}".format(username))
 
-        self.ldb_dc2.newgroup("group2_%s" % username)
+        self.ldb_dc2.newgroup("group2_{0!s}".format(username))
 
         ldb_res = self.ldb_dc2.search(base=self.domain_dn,
                                       scope=SCOPE_SUBTREE,
-                                      expression="(samAccountName=group_%s)" % username)
+                                      expression="(samAccountName=group_{0!s})".format(username))
         self.assertTrue(len(ldb_res) == 1)
         self.assertTrue("sAMAccountName" in ldb_res[0])
         group_orig = ldb_res[0]
@@ -156,7 +156,7 @@ class DrsDeleteObjectTestCase(drs_base.DrsBaseTestCase):
 
         ldb_res = self.ldb_dc2.search(base=self.domain_dn,
                                       scope=SCOPE_SUBTREE,
-                                      expression="(samAccountName=group2_%s)" % username)
+                                      expression="(samAccountName=group2_{0!s})".format(username))
         self.assertTrue(len(ldb_res) == 1)
         self.assertTrue("sAMAccountName" in ldb_res[0])
         group2_dn = ldb_res[0]["dn"]
@@ -177,7 +177,7 @@ class DrsDeleteObjectTestCase(drs_base.DrsBaseTestCase):
 
         ldb_res = self.ldb_dc2.search(base=self.domain_dn,
                                       scope=SCOPE_SUBTREE,
-                                      expression="(samAccountName=group_%s)" % username)
+                                      expression="(samAccountName=group_{0!s})".format(username))
         self.assertTrue(len(ldb_res) == 1)
 
         # This group is a member of another group
@@ -196,7 +196,7 @@ class DrsDeleteObjectTestCase(drs_base.DrsBaseTestCase):
 
         ldb_res = self.ldb_dc1.search(base=self.domain_dn,
                                       scope=SCOPE_SUBTREE,
-                                      expression="(samAccountName=group_%s)" % username)
+                                      expression="(samAccountName=group_{0!s})".format(username))
         self.assertTrue(len(ldb_res) == 1)
 
         # This group is a member of another group
@@ -227,7 +227,7 @@ class DrsDeleteObjectTestCase(drs_base.DrsBaseTestCase):
 
         ldb_res = self.ldb_dc2.search(base=self.domain_dn,
                                       scope=SCOPE_SUBTREE,
-                                      expression="(samAccountName=group2_%s)" % username)
+                                      expression="(samAccountName=group2_{0!s})".format(username))
         self.assertTrue(len(ldb_res) == 1)
         self.assertFalse("member" in ldb_res[0])
 
@@ -263,13 +263,13 @@ class DrsDeleteObjectTestCase(drs_base.DrsBaseTestCase):
         self.ldb_dc1.newuser(username=username, password="P@sswOrd!")
         ldb_res = self.ldb_dc1.search(base=self.domain_dn,
                                       scope=SCOPE_SUBTREE,
-                                      expression="(samAccountName=%s)" % username)
+                                      expression="(samAccountName={0!s})".format(username))
         self.assertEquals(len(ldb_res), 1)
         user_orig = ldb_res[0]
         user_dn   = ldb_res[0]["dn"]
 
         # check user info on DC1
-        print "Testing for %s with GUID %s" % (username, self._GUID_string(user_orig["objectGUID"][0]))
+        print "Testing for {0!s} with GUID {1!s}".format(username, self._GUID_string(user_orig["objectGUID"][0]))
         self._check_obj(sam_ldb=self.ldb_dc1, obj_orig=user_orig, is_deleted=False)
 
         # trigger replication from DC1 to DC2
@@ -286,13 +286,13 @@ class DrsDeleteObjectTestCase(drs_base.DrsBaseTestCase):
         self.assertFalse("description" in user_cur)
         self.assertFalse("memberOf" in user_cur)
 
-        self.ldb_dc2.newgroup("group_%s" % username)
+        self.ldb_dc2.newgroup("group_{0!s}".format(username))
 
-        self.ldb_dc2.newgroup("group2_%s" % username)
+        self.ldb_dc2.newgroup("group2_{0!s}".format(username))
 
         ldb_res = self.ldb_dc2.search(base=self.domain_dn,
                                       scope=SCOPE_SUBTREE,
-                                      expression="(samAccountName=group_%s)" % username)
+                                      expression="(samAccountName=group_{0!s})".format(username))
         self.assertTrue(len(ldb_res) == 1)
         self.assertTrue("sAMAccountName" in ldb_res[0])
         group_orig = ldb_res[0]
@@ -312,7 +312,7 @@ class DrsDeleteObjectTestCase(drs_base.DrsBaseTestCase):
 
         ldb_res = self.ldb_dc2.search(base=self.domain_dn,
                                       scope=SCOPE_SUBTREE,
-                                      expression="(samAccountName=group2_%s)" % username)
+                                      expression="(samAccountName=group2_{0!s})".format(username))
         self.assertTrue(len(ldb_res) == 1)
         self.assertTrue("sAMAccountName" in ldb_res[0])
         group2_dn = ldb_res[0]["dn"]
@@ -341,7 +341,7 @@ class DrsDeleteObjectTestCase(drs_base.DrsBaseTestCase):
 
         ldb_res = self.ldb_dc2.search(base=self.domain_dn,
                                       scope=SCOPE_SUBTREE,
-                                      expression="(samAccountName=group_%s)" % username)
+                                      expression="(samAccountName=group_{0!s})".format(username))
         self.assertTrue(len(ldb_res) == 1)
         self.assertTrue("memberOf" in ldb_res[0])
         self.assertFalse("member" in ldb_res[0])
@@ -356,7 +356,7 @@ class DrsDeleteObjectTestCase(drs_base.DrsBaseTestCase):
 
         ldb_res = self.ldb_dc1.search(base=self.domain_dn,
                                       scope=SCOPE_SUBTREE,
-                                      expression="(samAccountName=group_%s)" % username)
+                                      expression="(samAccountName=group_{0!s})".format(username))
         self.assertTrue(len(ldb_res) == 1)
         self.assertTrue("memberOf" in ldb_res[0])
         self.assertFalse("member" in ldb_res[0])

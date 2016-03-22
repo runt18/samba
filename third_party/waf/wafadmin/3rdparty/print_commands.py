@@ -11,9 +11,9 @@ def exec_command(self, cmd, **kw):
 	txt = cmd
 	if isinstance(cmd, list):
 		txt = ' '.join(cmd)
-	Logs.debug('runner: %s' % txt)
+	Logs.debug('runner: {0!s}'.format(txt))
 	if self.log:
-		self.log.write('%s\n' % cmd)
+		self.log.write('{0!s}\n'.format(cmd))
 		kw['log'] = self.log
 	try:
 		if not kw.get('cwd', None):

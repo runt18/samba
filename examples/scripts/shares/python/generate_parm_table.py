@@ -90,7 +90,7 @@ obj_table = {
 cmd = "/usr/bin/testparm -s -v /dev/null"
 ( status, testparm_output ) = commands.getstatusoutput( cmd )
 if status:
-	sys.stderr.write( "Failed to execute testparm!\n%s\n" % testparm_output )
+	sys.stderr.write( "Failed to execute testparm!\n{0!s}\n".format(testparm_output) )
 
 
 ## break the output into a list ##
@@ -116,13 +116,13 @@ for input_str in lines:
 ## including synonums                                    ##
 		
 if len(sys.argv) != 2:
-	print "Usage: %s <.../param/loadparm.c>" % ( sys.argv[0] )
+	print "Usage: {0!s} <.../param/loadparm.c>".format(( sys.argv[0] ))
 	sys.exit( 1 )
 	
 try:
 	fconfig = open( sys.argv[1], "r" )
 except IOError:
-	print "%s does not exist!" % sys.argv[1]
+	print "{0!s} does not exist!".format(sys.argv[1])
 	sys.exit (1)
 
 ## Loop through loadparm.c --  all parameters are either ##
@@ -199,8 +199,8 @@ smbparm.write( HEADER )
 smbparm.write( "parm_table = {\n" )
 
 for x in parm_table.keys():
-	key = "\"%s\"" % x
-	smbparm.write("\t%-25s: (\"%s\", %s, %s, \"%s\"),\n" % ( key, parm_table[x][0], 
+	key = "\"{0!s}\"".format(x)
+	smbparm.write("\t{0:<25!s}: (\"{1!s}\", {2!s}, {3!s}, \"{4!s}\"),\n".format(key, parm_table[x][0], 
 		obj_table[parm_table[x][1]], parm_table[x][2], parm_table[x][3] ))
 
 smbparm.write( "}\n" )

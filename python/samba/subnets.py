@@ -60,15 +60,15 @@ def create_subnet(samdb, configDn, subnet_name, site_name):
     :raise SiteNotFound: if the site does not exist.
     """
     ret = samdb.search(base=configDn, scope=ldb.SCOPE_SUBTREE,
-                       expression='(&(objectclass=Site)(cn=%s))' %
-                       ldb.binary_encode(site_name))
+                       expression='(&(objectclass=Site)(cn={0!s}))'.format(
+                       ldb.binary_encode(site_name)))
     if len(ret) != 1:
-        raise SiteNotFound('A site with the name %s does not exist' %
-                           site_name)
+        raise SiteNotFound('A site with the name {0!s} does not exist'.format(
+                           site_name))
     dn_site = ret[0].dn
 
     if not isinstance(subnet_name, str):
-        raise SubnetInvalid("%s is not a valid subnet (not a string)" % subnet_name)
+        raise SubnetInvalid("{0!s} is not a valid subnet (not a string)".format(subnet_name))
 
     dnsubnet = ldb.Dn(samdb, "CN=Subnets,CN=Sites")
     if dnsubnet.add_base(configDn) == False:
@@ -87,15 +87,14 @@ def create_subnet(samdb, configDn, subnet_name, site_name):
         samdb.add(m)
     except ldb.LdbError as (enum, estr):
         if enum == ldb.ERR_INVALID_DN_SYNTAX:
-            raise SubnetInvalid("%s is not a valid subnet: %s" % (subnet_name, estr))
+            raise SubnetInvalid("{0!s} is not a valid subnet: {1!s}".format(subnet_name, estr))
         elif enum == ldb.ERR_ENTRY_ALREADY_EXISTS:
             # Subnet collisions are checked by exact match only, not
             # overlapping range. This won't stop you creating
             # 10.1.1.0/24 when there is already 10.1.0.0/16, or
             # prevent you from having numerous IPv6 subnets that refer
             # to the same range (e.g 5::0/16, 5::/16, 5:0:0::/16).
-            raise SubnetAlreadyExists('A subnet with the CIDR %s already exists'
-                                      % subnet_name)
+            raise SubnetAlreadyExists('A subnet with the CIDR {0!s} already exists'.format(subnet_name))
         else:
             raise
 
@@ -120,10 +119,10 @@ def delete_subnet(samdb, configDn, subnet_name):
         ret = samdb.search(base=dnsubnet, scope=ldb.SCOPE_BASE,
                            expression="objectClass=subnet")
         if len(ret) != 1:
-            raise SubnetNotFound('Subnet %s does not exist' % subnet_name)
+            raise SubnetNotFound('Subnet {0!s} does not exist'.format(subnet_name))
     except LdbError as (enum, estr):
         if enum == ldb.ERR_NO_SUCH_OBJECT:
-            raise SubnetNotFound('Subnet %s does not exist' % subnet_name)
+            raise SubnetNotFound('Subnet {0!s} does not exist'.format(subnet_name))
 
     samdb.delete(dnsubnet)
 
@@ -153,10 +152,10 @@ def set_subnet_site(samdb, configDn, subnet_name, site_name):
         ret = samdb.search(base=dnsubnet, scope=ldb.SCOPE_BASE,
                            expression="objectClass=subnet")
         if len(ret) != 1:
-            raise SubnetNotFound('Subnet %s does not exist' % subnet_name)
+            raise SubnetNotFound('Subnet {0!s} does not exist'.format(subnet_name))
     except LdbError as (enum, estr):
         if enum == ldb.ERR_NO_SUCH_OBJECT:
-            raise SubnetNotFound('Subnet %s does not exist' % subnet_name)
+            raise SubnetNotFound('Subnet {0!s} does not exist'.format(subnet_name))
 
     dnsite = ldb.Dn(samdb, "CN=Sites")
     if dnsite.add_base(configDn) == False:
@@ -172,10 +171,10 @@ def set_subnet_site(samdb, configDn, subnet_name, site_name):
         ret = samdb.search(base=dnsite, scope=ldb.SCOPE_BASE,
                            expression="objectClass=site")
         if len(ret) != 1:
-            raise SiteNotFoundException('Site %s does not exist' % site_name)
+            raise SiteNotFoundException('Site {0!s} does not exist'.format(site_name))
     except LdbError as (enum, estr):
         if enum == ldb.ERR_NO_SUCH_OBJECT:
-            raise SiteNotFoundException('Site %s does not exist' % site_name)
+            raise SiteNotFoundException('Site {0!s} does not exist'.format(site_name))
 
     siteDn = str(ret[0].dn)
 

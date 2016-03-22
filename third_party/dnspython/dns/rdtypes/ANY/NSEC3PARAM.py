@@ -45,7 +45,7 @@ class NSEC3PARAM(dns.rdata.Rdata):
             salt = '-'
         else:
             salt = self.salt.encode('hex-codec')
-        return '%u %u %u %s' % (self.algorithm, self.flags, self.iterations, salt)
+        return '{0:d} {1:d} {2:d} {3!s}'.format(self.algorithm, self.flags, self.iterations, salt)
 
     def from_text(cls, rdclass, rdtype, tok, origin = None, relativize = True):
         algorithm = tok.get_uint8()

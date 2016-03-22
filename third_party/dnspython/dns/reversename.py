@@ -40,7 +40,7 @@ def from_address(text):
         parts = list(dns.ipv6.inet_aton(text).encode('hex_codec'))
         origin = ipv6_reverse_domain
     except:
-        parts = ['%d' % ord(byte) for byte in dns.ipv4.inet_aton(text)]
+        parts = ['{0:d}'.format(ord(byte)) for byte in dns.ipv4.inet_aton(text)]
         origin = ipv4_reverse_domain
     parts.reverse()
     return dns.name.from_text('.'.join(parts), origin=origin)

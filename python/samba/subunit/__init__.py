@@ -56,8 +56,8 @@ class RemotedTestCase(unittest.TestCase):
         self.__description = description
 
     def error(self, label):
-        raise NotImplementedError("%s on RemotedTestCases is not permitted." %
-            label)
+        raise NotImplementedError("{0!s} on RemotedTestCases is not permitted.".format(
+            label))
 
     def setUp(self):
         self.error("setUp")
@@ -69,14 +69,13 @@ class RemotedTestCase(unittest.TestCase):
         return self.__description
 
     def id(self):
-        return "%s" % (self.__description,)
+        return "{0!s}".format(self.__description)
 
     def __str__(self):
-        return "%s (%s)" % (self.__description, self._strclass())
+        return "{0!s} ({1!s})".format(self.__description, self._strclass())
 
     def __repr__(self):
-        return "<%s description='%s'>" % \
-               (self._strclass(), self.__description)
+        return "<{0!s} description='{1!s}'>".format(self._strclass(), self.__description)
 
     def run(self, result=None):
         if result is None: result = self.defaultTestResult()
@@ -86,4 +85,4 @@ class RemotedTestCase(unittest.TestCase):
 
     def _strclass(self):
         cls = self.__class__
-        return "%s.%s" % (cls.__module__, cls.__name__)
+        return "{0!s}.{1!s}".format(cls.__module__, cls.__name__)

@@ -74,7 +74,7 @@ class DrsReplicaSyncTestCase(drs_base.DrsBaseTestCase):
         return req8
 
     def _ds_bind(self, server_name):
-        binding_str = "ncacn_ip_tcp:%s[print,seal]" % server_name
+        binding_str = "ncacn_ip_tcp:{0!s}[print,seal]".format(server_name)
 
         drs = drsuapi.drsuapi(binding_str, self.get_loadparm(), self.get_credentials())
         (drs_handle, supported_extensions) = drs_DsBind(drs)
@@ -94,7 +94,7 @@ class DrsReplicaSyncTestCase(drs_base.DrsBaseTestCase):
         # determine the owner dc
         res = self.ldb_dc1.search(fsmo_obj_dn,
                                   scope=SCOPE_BASE, attrs=["fSMORoleOwner"])
-        assert len(res) == 1, "Only one fSMORoleOwner value expected for %s!"%fsmo_obj_dn
+        assert len(res) == 1, "Only one fSMORoleOwner value expected for {0!s}!".format(fsmo_obj_dn)
         fsmo_owner = res[0]["fSMORoleOwner"][0]
         if fsmo_owner == self.info_dc1["dsServiceName"][0]:
             return (fsmo_info_1, fsmo_info_2)

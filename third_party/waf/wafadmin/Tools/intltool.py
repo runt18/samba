@@ -33,7 +33,7 @@ def iapply_intltool_in_f(self):
 		podir = getattr(self, 'podir', 'po')
 		podirnode = self.path.find_dir(podir)
 		if not podirnode:
-			error("could not find the podir %r" % podir)
+			error("could not find the podir {0!r}".format(podir))
 			continue
 
 		cache = getattr(self, 'intlcache', '.intlcache')

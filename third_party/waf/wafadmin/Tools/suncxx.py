@@ -20,7 +20,7 @@ def find_sxx(conf):
 
 	try:
 		if not Utils.cmd_output(cc + ['-flags']):
-			conf.fatal('sunc++ %r was not found' % cc)
+			conf.fatal('sunc++ {0!r} was not found'.format(cc))
 	except ValueError:
 		conf.fatal('sunc++ -flags could not be executed')
 

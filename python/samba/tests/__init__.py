@@ -62,8 +62,8 @@ class TestCase(unittest.TestCase):
             ll = src[:8]
             lr = src[8:16]
             src = src[16:]
-            hl = ' '.join(["%02X" % ord(x) for x in ll])
-            hr = ' '.join(["%02X" % ord(x) for x in lr])
+            hl = ' '.join(["{0:02X}".format(ord(x)) for x in ll])
+            hr = ' '.join(["{0:02X}".format(ord(x)) for x in lr])
             ll = ll.translate(HEXDUMP_FILTER)
             lr = lr.translate(HEXDUMP_FILTER)
             result += "[%04X] %-*s  %-*s  %s %s\n" % (N, 8*3, hl, 8*3, hr, ll, lr)
@@ -213,7 +213,7 @@ def env_get_var_value(var_name):
     Unit-test based python tests require certain input params
     to be set in environment, otherwise they can't be run
     """
-    assert var_name in os.environ.keys(), "Please supply %s in environment" % var_name
+    assert var_name in os.environ.keys(), "Please supply {0!s} in environment".format(var_name)
     return os.environ[var_name]
 
 
@@ -250,7 +250,7 @@ class BlackboxProcessError(Exception):
         self.stderr = stderr
 
     def __str__(self):
-        return "Command '%s'; exit status %d; stdout: '%s'; stderr: '%s'" % (self.cmd, self.returncode,
+        return "Command '{0!s}'; exit status {1:d}; stdout: '{2!s}'; stderr: '{3!s}'".format(self.cmd, self.returncode,
                                                                              self.stdout, self.stderr)
 
 class BlackboxTestCase(TestCaseInTempDir):
@@ -298,9 +298,9 @@ def connect_samdb(samdb_url, lp=None, session_info=None, credentials=None,
     """
     if not "://" in samdb_url:
         if not ldap_only and os.path.isfile(samdb_url):
-            samdb_url = "tdb://%s" % samdb_url
+            samdb_url = "tdb://{0!s}".format(samdb_url)
         else:
-            samdb_url = "ldap://%s" % samdb_url
+            samdb_url = "ldap://{0!s}".format(samdb_url)
     # use 'paged_search' module when connecting remotely
     if samdb_url.startswith("ldap://"):
         ldb_options = ["modules:paged_searches"]
@@ -369,4 +369,4 @@ def delete_force(samdb, dn):
     try:
         samdb.delete(dn)
     except ldb.LdbError, (num, errstr):
-        assert num == ldb.ERR_NO_SUCH_OBJECT, "ldb.delete() failed: %s" % errstr
+        assert num == ldb.ERR_NO_SUCH_OBJECT, "ldb.delete() failed: {0!s}".format(errstr)

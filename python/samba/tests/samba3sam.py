@@ -56,8 +56,8 @@ class MapBaseTestCase(TestCaseInTempDir):
                  "@LIST": "rootdse,paged_results,server_sort,asq,samldb,password_hash,operational,objectguid,rdn_name,samba3sam,samba3sid,show_deleted,partition"})
 
         ldb.add({"dn": "@PARTITION",
-            "partition": ["%s" % (s4.basedn_casefold),
-                          "%s" % (s3.basedn_casefold)],
+            "partition": ["{0!s}".format((s4.basedn_casefold)),
+                          "{0!s}".format((s3.basedn_casefold))],
             "replicateEntries": ["@ATTRIBUTES", "@INDEXLIST"],
             "modules": "*:"})
 
@@ -68,10 +68,10 @@ class MapBaseTestCase(TestCaseInTempDir):
         super(MapBaseTestCase, self).setUp()
 
         def make_dn(basedn, rdn):
-            return "%s,sambaDomainName=TESTS,%s" % (rdn, basedn)
+            return "{0!s},sambaDomainName=TESTS,{1!s}".format(rdn, basedn)
 
         def make_s4dn(basedn, rdn):
-            return "%s,%s" % (rdn, basedn)
+            return "{0!s},{1!s}".format(rdn, basedn)
 
         self.ldbfile = os.path.join(self.tempdir, "test.ldb")
         self.ldburl = "tdb://" + self.ldbfile
@@ -88,7 +88,7 @@ class MapBaseTestCase(TestCaseInTempDir):
                 self.basedn = basedn
                 self.basedn_casefold = ldb.Dn(self.db, basedn).get_casefold()
                 self.substvars = {"BASEDN": self.basedn}
-                self.file = os.path.join(tempdir, "%s.ldb" % self.basedn_casefold)
+                self.file = os.path.join(tempdir, "{0!s}.ldb".format(self.basedn_casefold))
                 self.url = "tdb://" + self.file
                 self._dn = dn
 
@@ -120,7 +120,7 @@ class MapBaseTestCase(TestCaseInTempDir):
         os.unlink(self.ldbfile)
         os.unlink(self.samba3.file)
         os.unlink(self.samba4.file)
-        pdir = "%s.d" % self.ldbfile
+        pdir = "{0!s}.d".format(self.ldbfile)
         mdata = os.path.join(pdir, "metadata.tdb")
         if os.path.exists(mdata):
             os.unlink(mdata)
@@ -805,7 +805,7 @@ objectSid: S-1-5-21-4231626423-2410014848-2360679739-1052
         self.assertEquals(str(res[4]["lastLogon"]), "z")
 
         # Clean up
-        dns = [self.samba4.dn("cn=%s" % n) for n in ["A","B","C","X","Y","Z"]]
+        dns = [self.samba4.dn("cn={0!s}".format(n)) for n in ["A","B","C","X","Y","Z"]]
         for dn in dns:
             self.ldb.delete(dn)
 

@@ -114,7 +114,7 @@ def make_ds(name, key, algorithm, origin=None):
         dsalg = 2
         hash = dns.hash.get('SHA256')()
     else:
-        raise UnsupportedAlgorithm, 'unsupported algorithm "%s"' % algorithm
+        raise UnsupportedAlgorithm, 'unsupported algorithm "{0!s}"'.format(algorithm)
 
     if isinstance(name, (str, unicode)):
         name = dns.name.from_text(name, origin)
@@ -174,7 +174,7 @@ def _make_hash(algorithm):
         return dns.hash.get('SHA256')()
     if _is_sha512(algorithm):
         return dns.hash.get('SHA512')()
-    raise ValidationFailure, 'unknown hash for algorithm %u' % algorithm
+    raise ValidationFailure, 'unknown hash for algorithm {0:d}'.format(algorithm)
 
 def _make_algorithm_id(algorithm):
     if _is_md5(algorithm):
@@ -186,7 +186,7 @@ def _make_algorithm_id(algorithm):
     elif _is_sha512(algorithm):
         oid = [0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x03]
     else:
-        raise ValidationFailure, 'unknown algorithm %u' % algorithm
+        raise ValidationFailure, 'unknown algorithm {0:d}'.format(algorithm)
     olen = len(oid)
     dlen = _make_hash(algorithm).digest_size
     idbytes = [0x30] + [8 + olen + dlen] + \
@@ -274,7 +274,7 @@ def _validate_rrsig(rrset, rrsig, keys, origin=None, now=None):
         sig = (Crypto.Util.number.bytes_to_long(dsa_r),
                Crypto.Util.number.bytes_to_long(dsa_s))
     else:
-        raise ValidationFailure, 'unknown algorithm %u' % rrsig.algorithm
+        raise ValidationFailure, 'unknown algorithm {0:d}'.format(rrsig.algorithm)
 
     hash.update(_to_rdata(rrsig, origin)[:18])
     hash.update(rrsig.signer.to_digestable(origin))
@@ -307,7 +307,7 @@ def _validate_rrsig(rrset, rrsig, keys, origin=None, now=None):
         # Raise here for code clarity; this won't actually ever happen
         # since if the algorithm is really unknown we'd already have
         # raised an exception above
-        raise ValidationFailure, 'unknown algorithm %u' % rrsig.algorithm
+        raise ValidationFailure, 'unknown algorithm {0:d}'.format(rrsig.algorithm)
 
     if not pubkey.verify(digest, sig):
         raise ValidationFailure, 'verify failure'

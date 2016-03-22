@@ -197,7 +197,7 @@ def get_paths(param, targetdir=None, smbconf=None):
         smbconf = param.default_path()
 
     if not os.path.exists(smbconf):
-        raise ProvisioningError("Unable to find smb.conf at %s" % smbconf)
+        raise ProvisioningError("Unable to find smb.conf at {0!s}".format(smbconf))
 
     lp = param.LoadParm()
     lp.load(smbconf)
@@ -299,8 +299,8 @@ def identic_rename(ldbobj, dn):
     """
     (before, after) = str(dn).split('=', 1)
     # we need to use relax to avoid the subtree_rename constraints
-    ldbobj.rename(dn, ldb.Dn(ldbobj, "%s=foo%s" % (before, after)), ["relax:0"])
-    ldbobj.rename(ldb.Dn(ldbobj, "%s=foo%s" % (before, after)), dn, ["relax:0"])
+    ldbobj.rename(dn, ldb.Dn(ldbobj, "{0!s}=foo{1!s}".format(before, after)), ["relax:0"])
+    ldbobj.rename(ldb.Dn(ldbobj, "{0!s}=foo{1!s}".format(before, after)), dn, ["relax:0"])
 
 
 def update_secrets(newsecrets_ldb, secrets_ldb, messagefunc):
@@ -351,24 +351,24 @@ def update_secrets(newsecrets_ldb, secrets_ldb, messagefunc):
             listPresent.append(hash_new[k])
 
     for entry in listMissing:
-        reference = newsecrets_ldb.search(expression="distinguishedName=%s" % entry,
+        reference = newsecrets_ldb.search(expression="distinguishedName={0!s}".format(entry),
                                             base="", scope=SCOPE_SUBTREE)
-        current = secrets_ldb.search(expression="distinguishedName=%s" % entry,
+        current = secrets_ldb.search(expression="distinguishedName={0!s}".format(entry),
                                             base="", scope=SCOPE_SUBTREE)
         delta = secrets_ldb.msg_diff(empty, reference[0])
         for att in hashAttrNotCopied:
             delta.remove(att)
-        messagefunc(CHANGE, "Entry %s is missing from secrets.ldb" %
-                    reference[0].dn)
+        messagefunc(CHANGE, "Entry {0!s} is missing from secrets.ldb".format(
+                    reference[0].dn))
         for att in delta:
-            messagefunc(CHANGE, " Adding attribute %s" % att)
+            messagefunc(CHANGE, " Adding attribute {0!s}".format(att))
         delta.dn = reference[0].dn
         secrets_ldb.add(delta)
 
     for entry in listPresent:
-        reference = newsecrets_ldb.search(expression="distinguishedName=%s" % entry,
+        reference = newsecrets_ldb.search(expression="distinguishedName={0!s}".format(entry),
                                             base="", scope=SCOPE_SUBTREE)
-        current = secrets_ldb.search(expression="distinguishedName=%s" % entry, base="",
+        current = secrets_ldb.search(expression="distinguishedName={0!s}".format(entry), base="",
                                             scope=SCOPE_SUBTREE)
         delta = secrets_ldb.msg_diff(current[0], reference[0])
         for att in hashAttrNotCopied:
@@ -382,9 +382,9 @@ def update_secrets(newsecrets_ldb, secrets_ldb, messagefunc):
                 delta.remove(att)
 
     for entry in listPresent:
-        reference = newsecrets_ldb.search(expression="distinguishedName=%s" % entry, base="",
+        reference = newsecrets_ldb.search(expression="distinguishedName={0!s}".format(entry), base="",
                                             scope=SCOPE_SUBTREE)
-        current = secrets_ldb.search(expression="distinguishedName=%s" % entry, base="",
+        current = secrets_ldb.search(expression="distinguishedName={0!s}".format(entry), base="",
                                             scope=SCOPE_SUBTREE)
         delta = secrets_ldb.msg_diff(current[0], reference[0])
         for att in hashAttrNotCopied:
@@ -394,8 +394,7 @@ def update_secrets(newsecrets_ldb, secrets_ldb, messagefunc):
                 delta.remove(att)
             if att != "dn":
                 messagefunc(CHANGE,
-                            "Adding/Changing attribute %s to %s" %
-                            (att, current[0].dn))
+                            "Adding/Changing attribute {0!s} to {1!s}".format(att, current[0].dn))
 
         delta.dn = current[0].dn
         secrets_ldb.modify(delta)
@@ -439,7 +438,7 @@ def updateOEMInfo(samdb, rootdn):
             info = str(res[0]["oEMInformation"])
         else:
             info = ""
-        info = "%s, upgrade to %s" % (info, version)
+        info = "{0!s}, upgrade to {1!s}".format(info, version)
         delta = ldb.Message()
         delta.dn = ldb.Dn(samdb, str(res[0]["dn"]))
         delta["oEMInformation"] = ldb.MessageElement(info, ldb.FLAG_MOD_REPLACE,
@@ -516,11 +515,11 @@ def delta_update_basesamdb(refsampath, sampath, creds, session, lp, message):
     reference = refsam.search(expression="")
 
     for refentry in reference:
-        entry = sam.search(expression="distinguishedName=%s" % refentry["dn"],
+        entry = sam.search(expression="distinguishedName={0!s}".format(refentry["dn"]),
                             scope=SCOPE_SUBTREE)
         if not len(entry):
             delta = sam.msg_diff(empty, refentry)
-            message(CHANGE, "Adding %s to sam db" % str(refentry.dn))
+            message(CHANGE, "Adding {0!s} to sam db".format(str(refentry.dn)))
             if str(refentry.dn) == "@PROVISION" and\
                 delta.get(samba.provision.LAST_PROVISION_USN_ATTRIBUTE):
                 delta.remove(samba.provision.LAST_PROVISION_USN_ATTRIBUTE)
@@ -552,8 +551,8 @@ def construct_existor_expr(attrs):
     if len(attrs) > 0:
         expr = "(|"
         for att in attrs:
-            expr = "%s(%s=*)"%(expr,att)
-        expr = "%s)"%expr
+            expr = "{0!s}({1!s}=*)".format(expr, att)
+        expr = "{0!s})".format(expr)
     return expr
 
 def update_machine_account_password(samdb, secrets_ldb, names):
@@ -565,7 +564,7 @@ def update_machine_account_password(samdb, secrets_ldb, names):
                         provision
     :param names: List of key provision parameters"""
 
-    expression = "samAccountName=%s$" % names.netbiosname
+    expression = "samAccountName={0!s}$".format(names.netbiosname)
     secrets_msg = secrets_ldb.search(expression=expression,
                                         attrs=["secureChannelType"])
     if int(secrets_msg[0]["secureChannelType"][0]) == SEC_CHAN_BDC:
@@ -580,7 +579,7 @@ def update_machine_account_password(samdb, secrets_ldb, names):
                                                 "clearTextPassword")
         samdb.modify(msg)
 
-        res = samdb.search(expression=("samAccountName=%s$" % names.netbiosname),
+        res = samdb.search(expression=("samAccountName={0!s}$".format(names.netbiosname)),
                      attrs=["msDs-keyVersionNumber"])
         assert(len(res) == 1)
         kvno = int(str(res[0]["msDs-keyVersionNumber"]))
@@ -607,7 +606,7 @@ def update_dns_account_password(samdb, secrets_ldb, names):
                         provision
     :param names: List of key provision parameters"""
 
-    expression = "samAccountName=dns-%s" % names.netbiosname
+    expression = "samAccountName=dns-{0!s}".format(names.netbiosname)
     secrets_msg = secrets_ldb.search(expression=expression)
     if len(secrets_msg) == 1:
         res = samdb.search(expression=expression, attrs=[])
@@ -771,7 +770,7 @@ def print_provision_ranges(dic, limit_print, dest, samdb_path, invocationid):
             obj = hash_ts[k]
             if obj["num"] > limit_print:
                 dt = _glue.nttime2string(_glue.unix2nttime(k*60))
-                print "%s # of modification: %d  \tmin: %d max: %d" % (dt , obj["num"],
+                print "{0!s} # of modification: {1:d}  \tmin: {2:d} max: {3:d}".format(dt , obj["num"],
                                                                     obj["min"],
                                                                     obj["max"])
             if hash_ts[k]["num"] > 600:
@@ -793,17 +792,17 @@ def print_provision_ranges(dic, limit_print, dest, samdb_path, invocationid):
         for k in kept_record:
                 obj = hash_ts[k]
                 if obj.get("skipped") is None:
-                    ldif = "%slastProvisionUSN: %d-%d;%s\n" % (ldif, obj["min"],
+                    ldif = "{0!s}lastProvisionUSN: {1:d}-{2:d};{3!s}\n".format(ldif, obj["min"],
                                 obj["max"], id)
 
     if ldif != "":
         file = tempfile.mktemp(dir=dest, prefix="usnprov", suffix=".ldif")
         print
         print "To track the USNs modified/created by provision and upgrade proivsion,"
-        print " the following ranges are proposed to be added to your provision sam.ldb: \n%s" % ldif
-        print "We recommend to review them, and if it's correct to integrate the following ldif: %s in your sam.ldb" % file
-        print "You can load this file like this: ldbadd -H %s %s\n"%(str(samdb_path),file)
-        ldif = "dn: @PROVISION\nprovisionnerID: %s\n%s" % (invocationid, ldif)
+        print " the following ranges are proposed to be added to your provision sam.ldb: \n{0!s}".format(ldif)
+        print "We recommend to review them, and if it's correct to integrate the following ldif: {0!s} in your sam.ldb".format(file)
+        print "You can load this file like this: ldbadd -H {0!s} {1!s}\n".format(str(samdb_path), file)
+        ldif = "dn: @PROVISION\nprovisionnerID: {0!s}\n{1!s}".format(invocationid, ldif)
         open(file,'w').write(ldif)
 
 def int64range2str(value):
@@ -814,5 +813,5 @@ def int64range2str(value):
     """
 
     lvalue = long(value)
-    str = "%d-%d" % (lvalue&0xFFFFFFFF, lvalue>>32)
+    str = "{0:d}-{1:d}".format(lvalue&0xFFFFFFFF, lvalue>>32)
     return str

@@ -43,7 +43,7 @@ class SRV(dns.rdata.Rdata):
 
     def to_text(self, origin=None, relativize=True, **kw):
         target = self.target.choose_relativity(origin, relativize)
-        return '%d %d %d %s' % (self.priority, self.weight, self.port,
+        return '{0:d} {1:d} {2:d} {3!s}'.format(self.priority, self.weight, self.port,
                                 target)
 
     def from_text(cls, rdclass, rdtype, tok, origin = None, relativize = True):

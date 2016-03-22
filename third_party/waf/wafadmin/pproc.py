@@ -15,7 +15,7 @@ class CalledProcessError(Exception):
         self.returncode = returncode
         self.cmd = cmd
     def __str__(self):
-        return "Command '%s' returned non-zero exit status %d" % (self.cmd, self.returncode)
+        return "Command '{0!s}' returned non-zero exit status {1:d}".format(self.cmd, self.returncode)
 
 if mswindows:
     import threading
@@ -314,7 +314,7 @@ class Popen(object):
                 if (GetVersion() >= 0x80000000L or
                         os.path.basename(comspec).lower() == "command.com"):
                     w9xpopen = self._find_w9xpopen()
-                    args = '"%s" %s' % (w9xpopen, args)
+                    args = '"{0!s}" {1!s}'.format(w9xpopen, args)
                     creationflags |= CREATE_NEW_CONSOLE
 
             try:

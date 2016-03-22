@@ -54,7 +54,7 @@ class cmd_spn_list(Command):
         (cleaneduser, realm, domain) = _get_user_realm_domain(user)
         self.outf.write(cleaneduser+"\n")
         res = sam.search(
-            expression="samaccountname=%s" % ldb.binary_encode(cleaneduser),
+            expression="samaccountname={0!s}".format(ldb.binary_encode(cleaneduser)),
             scope=ldb.SCOPE_SUBTREE, attrs=["servicePrincipalName"])
         if len(res) >0:
             spns = res[0].get("servicePrincipalName")
@@ -62,15 +62,15 @@ class cmd_spn_list(Command):
             flag = ldb.FLAG_MOD_ADD
             if spns is not None:
                 self.outf.write(
-                    "User %s has the following servicePrincipalName: \n" %
-                    res[0].dn)
+                    "User {0!s} has the following servicePrincipalName: \n".format(
+                    res[0].dn))
                 for e in spns:
-                    self.outf.write("\t %s\n" % e)
+                    self.outf.write("\t {0!s}\n".format(e))
             else:
-                self.outf.write("User %s has no servicePrincipalName" %
-                    res[0].dn)
+                self.outf.write("User {0!s} has no servicePrincipalName".format(
+                    res[0].dn))
         else:
-            raise CommandError("User %s not found" % user)
+            raise CommandError("User {0!s} not found".format(user))
 
 
 class cmd_spn_add(Command):
@@ -97,7 +97,7 @@ class cmd_spn_add(Command):
         sam = SamDB(paths.samdb, session_info=system_session(),
                     credentials=creds, lp=lp)
         res = sam.search(
-            expression="servicePrincipalName=%s" % ldb.binary_encode(name),
+            expression="servicePrincipalName={0!s}".format(ldb.binary_encode(name)),
             scope=ldb.SCOPE_SUBTREE)
         if len(res) != 0 and not force:
             raise CommandError("Service principal %s already"
@@ -105,7 +105,7 @@ class cmd_spn_add(Command):
 
         (cleaneduser, realm, domain) = _get_user_realm_domain(user)
         res = sam.search(
-            expression="samaccountname=%s" % ldb.binary_encode(cleaneduser),
+            expression="samaccountname={0!s}".format(ldb.binary_encode(cleaneduser)),
             scope=ldb.SCOPE_SUBTREE, attrs=["servicePrincipalName"])
         if len(res) >0:
             res[0].dn
@@ -130,7 +130,7 @@ class cmd_spn_add(Command):
                 raise CommandError("Service principal %s already"
                                        " affected to %s" % (name, user))
         else:
-            raise CommandError("User %s not found" % user)
+            raise CommandError("User {0!s} not found".format(user))
 
 
 class cmd_spn_delete(Command):
@@ -154,7 +154,7 @@ class cmd_spn_delete(Command):
         sam = SamDB(paths.samdb, session_info=system_session(),
                     credentials=creds, lp=lp)
         res = sam.search(
-            expression="servicePrincipalName=%s" % ldb.binary_encode(name),
+            expression="servicePrincipalName={0!s}".format(ldb.binary_encode(name)),
             scope=ldb.SCOPE_SUBTREE,
             attrs=["servicePrincipalName", "samAccountName"])
         if len(res) >0:
@@ -171,7 +171,7 @@ class cmd_spn_delete(Command):
                 if len(res) != 1:
                     listUser = ""
                     for r in res:
-                        listUser = "%s\n%s" % (listUser, str(r.dn))
+                        listUser = "{0!s}\n{1!s}".format(listUser, str(r.dn))
                     raise CommandError("More than one user has the spn %s "
                            "and no specific user was specified, list of users"
                            " with this spn:%s" % (name, listUser))
@@ -192,7 +192,7 @@ class cmd_spn_delete(Command):
                                             "servicePrincipalName")
             sam.modify(msg)
         else:
-            raise CommandError("Service principal %s not affected" % name)
+            raise CommandError("Service principal {0!s} not affected".format(name))
 
 
 class cmd_spn(SuperCommand):

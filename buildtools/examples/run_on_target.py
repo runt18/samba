@@ -66,16 +66,14 @@ def xfer_files(ssh, srcdir, host, user, targ_destdir):
 
     userhost = host
     if user:
-        userhost = '%s@%s' % (user, host)
+        userhost = '{0!s}@{1!s}'.format(user, host)
 
-    cmd = 'rsync --verbose -rl --ignore-times --delete -e "%s" %s %s:%s/' % \
-          (ssh, srcdir, userhost, targ_destdir)
+    cmd = 'rsync --verbose -rl --ignore-times --delete -e "{0!s}" {1!s} {2!s}:{3!s}/'.format(ssh, srcdir, userhost, targ_destdir)
     p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
                          stderr=subprocess.PIPE)
     (out, err) = p.communicate()
     if p.returncode != 0:
-        raise Exception('failed syncing files\n stdout:\n%s\nstderr:%s\n'
-                        % (out, err))
+        raise Exception('failed syncing files\n stdout:\n{0!s}\nstderr:{1!s}\n'.format(out, err))
 
 
 def exec_remote(ssh, host, user, destdir, targdir, prog, args):
@@ -88,9 +86,9 @@ def exec_remote(ssh, host, user, destdir, targdir, prog, args):
     """
     userhost = host
     if user:
-        userhost = '%s@%s' % (user, host)
+        userhost = '{0!s}@{1!s}'.format(user, host)
 
-    cmd = '%s %s %s/%s/%s' % (ssh, userhost, destdir, targdir, prog)
+    cmd = '{0!s} {1!s} {2!s}/{3!s}/{4!s}'.format(ssh, userhost, destdir, targdir, prog)
     if args:
         cmd = cmd + ' ' + ' '.join(args)
     p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,

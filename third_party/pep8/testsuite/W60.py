@@ -4,7 +4,7 @@ if a.has_key("b"):
 #: W602
 raise DummyError, "Message"
 #: W602
-raise ValueError, "hello %s %s" % (1, 2)
+raise ValueError, "hello {0!s} {1!s}".format(1, 2)
 #: Okay
 raise type_, val, tb
 raise Exception, Exception("f"), t

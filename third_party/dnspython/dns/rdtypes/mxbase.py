@@ -39,7 +39,7 @@ class MXBase(dns.rdata.Rdata):
 
     def to_text(self, origin=None, relativize=True, **kw):
         exchange = self.exchange.choose_relativity(origin, relativize)
-        return '%d %s' % (self.preference, exchange)
+        return '{0:d} {1!s}'.format(self.preference, exchange)
 
     def from_text(cls, rdclass, rdtype, tok, origin = None, relativize = True):
         preference = tok.get_uint16()

@@ -115,8 +115,8 @@ lockoutTime: 0
 dn: """ + str(res[0].dn) + """
 changetype: modify
 replace: userAccountControl
-userAccountControl: %d
-""" % uac)
+userAccountControl: {0:d}
+""".format(uac))
 
     def _reset_by_method(self, res, method):
         if method is "ldap_userAccountControl":
@@ -126,13 +126,12 @@ userAccountControl: %d
         elif method is "samr":
             self._reset_samr(res)
         else:
-            self.assertTrue(False, msg="Invalid reset method[%s]" % method)
+            self.assertTrue(False, msg="Invalid reset method[{0!s}]".format(method))
 
     def _check_attribute(self, res, name, value):
         if value is None:
             self.assertTrue(name not in res[0],
-                            msg="attr[%s]=%r on dn[%s]" %
-                            (name, res[0], res[0].dn))
+                            msg="attr[{0!s}]={1!r} on dn[{2!s}]".format(name, res[0], res[0].dn))
             return
 
         if isinstance(value, tuple):
@@ -145,19 +144,16 @@ userAccountControl: %d
 
         if mode == "absent":
             self.assertFalse(name in res[0],
-                            msg="attr[%s] not missing on dn[%s]" %
-                            (name, res[0].dn))
+                            msg="attr[{0!s}] not missing on dn[{1!s}]".format(name, res[0].dn))
             return
 
         self.assertTrue(name in res[0],
-                        msg="attr[%s] missing on dn[%s]" %
-                        (name, res[0].dn))
+                        msg="attr[{0!s}] missing on dn[{1!s}]".format(name, res[0].dn))
         self.assertTrue(len(res[0][name]) == 1,
-                        msg="attr[%s]=%r on dn[%s]" %
-                        (name, res[0][name], res[0].dn))
+                        msg="attr[{0!s}]={1!r} on dn[{2!s}]".format(name, res[0][name], res[0].dn))
 
 
-        print  "%s = '%s'" % (name, res[0][name][0])
+        print  "{0!s} = '{1!s}'".format(name, res[0][name][0])
 
         if mode == "present":
             return
@@ -176,16 +172,14 @@ userAccountControl: %d
         if mode == "greater":
             v = int(res[0][name][0])
             self.assertTrue(v > int(value),
-                            msg="attr[%s]=[%s] <= [%s] on dn[%s] (diff %d)" %
-                            (name, v, int(value), res[0].dn, v - int(value)))
+                            msg="attr[{0!s}]=[{1!s}] <= [{2!s}] on dn[{3!s}] (diff {4:d})".format(name, v, int(value), res[0].dn, v - int(value)))
             return
         if mode == "less":
             v = int(res[0][name][0])
             self.assertTrue(v < int(value),
-                            msg="attr[%s]=[%s] >= [%s] on dn[%s] (diff %d)" %
-                            (name, v, int(value), res[0].dn, v - int(value)))
+                            msg="attr[{0!s}]=[{1!s}] >= [{2!s}] on dn[{3!s}] (diff {4:d})".format(name, v, int(value), res[0].dn, v - int(value)))
             return
-        self.assertEqual(mode, not mode, "Invalid Mode[%s]" % mode)
+        self.assertEqual(mode, not mode, "Invalid Mode[{0!s}]".format(mode))
 
     def _check_account(self, dn,
                        badPwdCount=None,
@@ -199,7 +193,7 @@ userAccountControl: %d
                        msg=None):
         print '-=' * 36
         if msg is not None:
-            print  "\033[01;32m %s \033[00m\n" % msg
+            print  "\033[01;32m {0!s} \033[00m\n".format(msg)
         attrs = [
            "objectSid",
            "badPwdCount",
@@ -365,7 +359,7 @@ lockoutThreshold: """ + str(lockoutThreshold) + """
         self.base_dn = self.ldb.domain_dn()
 
         self.domain_sid = security.dom_sid(self.ldb.get_domain_sid())
-        self.samr = samr.samr("ncacn_ip_tcp:%s[sign]" % host, lp, global_creds)
+        self.samr = samr.samr("ncacn_ip_tcp:{0!s}[sign]".format(host), lp, global_creds)
         self.samr_handle = self.samr.Connect2(None, security.SEC_FLAG_MAXIMUM_ALLOWED)
         self.samr_domain = self.samr.OpenDomain(self.samr_handle, security.SEC_FLAG_MAXIMUM_ALLOWED, self.domain_sid)
 
@@ -1680,7 +1674,7 @@ unicodePwd:: """ + base64.b64encode("\"thatsAcomplPASS2\"".encode('utf-16-le')) 
         lastLogon = int(res[0]["lastLogon"][0])
         lastLogonTimestamp = int(res[0]["lastLogonTimestamp"][0])
         firstLogon = lastLogon
-        print "last logon is %d" % lastLogon
+        print "last logon is {0:d}".format(lastLogon)
         self.assertGreater(lastLogon, badPasswordTime)
 
         time.sleep(1)
@@ -1694,8 +1688,8 @@ unicodePwd:: """ + base64.b64encode("\"thatsAcomplPASS2\"".encode('utf-16-le')) 
                                   userAccountControl=
                                   dsdb.UF_NORMAL_ACCOUNT,
                                   msDSUserAccountControlComputed=0,
-                                  msg=("second logon, firstlogon was %s" %
-                                       firstLogon))
+                                  msg=("second logon, firstlogon was {0!s}".format(
+                                       firstLogon)))
 
 
         lastLogon = int(res[0]["lastLogon"][0])
@@ -1727,6 +1721,6 @@ unicodePwd:: """ + base64.b64encode("\"thatsAcomplPASS2\"".encode('utf-16-le')) 
         # Close the second LDB connection (with the user credentials)
         self.ldb2 = None
 
-host_url = "ldap://%s" % host
+host_url = "ldap://{0!s}".format(host)
 
 TestProgram(module=__name__, opts=subunitopts)

@@ -55,7 +55,7 @@ def from_text(text):
                 elif c == 's':
                     total += current
                 else:
-                    raise BadTTL("unknown unit '%s'" % c)
+                    raise BadTTL("unknown unit '{0!s}'".format(c))
                 current = 0
         if not current == 0:
             raise BadTTL("trailing integer")

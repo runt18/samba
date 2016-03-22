@@ -61,11 +61,11 @@ def _samdb_fetch_schi(samdb):
 
 def _drs_fetch_pfm(server, samdb, creds, lp):
     """Fetch prefixMap using DRS interface"""
-    binding_str = "ncacn_ip_tcp:%s[print,seal]" % server
+    binding_str = "ncacn_ip_tcp:{0!s}[print,seal]".format(server)
 
     drs = drsuapi.drsuapi(binding_str, lp, creds)
     (drs_handle, supported_extensions) = drs_DsBind(drs)
-    print "DRS Handle: %s" % drs_handle
+    print "DRS Handle: {0!s}".format(drs_handle)
 
     req8 = drsuapi.DsGetNCChangesRequest8()
 
@@ -109,8 +109,7 @@ def _drs_fetch_pfm(server, samdb, creds, lp):
 def _pfm_verify(drs_pfm, ldb_pfm):
     errors = []
     if drs_pfm.num_mappings != ldb_pfm.num_mappings:
-        errors.append("Different count of prefixes: drs = %d, ldb = %d"
-                      % (drs_pfm.num_mappings, ldb_pfm.num_mappings))
+        errors.append("Different count of prefixes: drs = {0:d}, ldb = {1:d}".format(drs_pfm.num_mappings, ldb_pfm.num_mappings))
     count = min(drs_pfm.num_mappings, ldb_pfm.num_mappings)
     for i in range(0, count):
         it_err = []
@@ -123,7 +122,7 @@ def _pfm_verify(drs_pfm, ldb_pfm):
         if drs_it.oid.binary_oid != ldb_it.oid.binary_oid:
             it_err.append("oid.binary_oid")
         if len(it_err):
-            errors.append("[%2d] differences in (%s)" % (i, it_err))
+            errors.append("[{0:2d}] differences in ({1!s})".format(i, it_err))
     return errors
 
 def _pfm_schi_verify(drs_schi, ldb_schi):
@@ -131,14 +130,11 @@ def _pfm_schi_verify(drs_schi, ldb_schi):
     print drs_schi.revision
     print drs_schi.invocation_id
     if drs_schi.marker != ldb_schi.marker:
-        errors.append("Different marker in schemaInfo: drs = %d, ldb = %d"
-                      % (drs_schi.marker, ldb_schi.marker))
+        errors.append("Different marker in schemaInfo: drs = {0:d}, ldb = {1:d}".format(drs_schi.marker, ldb_schi.marker))
     if drs_schi.revision != ldb_schi.revision:
-        errors.append("Different revision in schemaInfo: drs = %d, ldb = %d"
-                      % (drs_schi.revision, ldb_schi.revision))
+        errors.append("Different revision in schemaInfo: drs = {0:d}, ldb = {1:d}".format(drs_schi.revision, ldb_schi.revision))
     if drs_schi.invocation_id != ldb_schi.invocation_id:
-        errors.append("Different invocation_id in schemaInfo: drs = %s, ldb = %s"
-                      % (drs_schi.invocation_id, ldb_schi.invocation_id))
+        errors.append("Different invocation_id in schemaInfo: drs = {0!s}, ldb = {1!s}".format(drs_schi.invocation_id, ldb_schi.invocation_id))
     return errors
 
 ########### main code ###########
@@ -167,7 +163,7 @@ if __name__ == "__main__":
 
     server = args[0]
 
-    samdb = SamDB(url="ldap://%s" % server,
+    samdb = SamDB(url="ldap://{0!s}".format(server),
                   session_info=system_session(lp),
                   credentials=creds, lp=lp)
 
@@ -178,13 +174,13 @@ if __name__ == "__main__":
     errors = _pfm_verify(drs_pfm, ldb_pfm)
     if len(errors):
         print "prefixMap verification errors:"
-        print "%s" % errors
+        print "{0!s}".format(errors)
         exit_code = 1
     # verify schemaInfos
     errors = _pfm_schi_verify(drs_schi, ldb_schi)
     if len(errors):
         print "schemaInfo verification errors:"
-        print "%s" % errors
+        print "{0!s}".format(errors)
         exit_code = 2
 
     if exit_code != 0:

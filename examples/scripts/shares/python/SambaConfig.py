@@ -55,7 +55,7 @@ class SambaParameter :
 	def __init__( self, name, value, comment=None ):
 		self.key = string.upper(string.strip(name))
 		self.comment = None
-		assert parm_table.has_key( self.key ), "Bad parameter name! [%s]" % name
+		assert parm_table.has_key( self.key ), "Bad parameter name! [{0!s}]".format(name)
 		self.parm = parm_table[self.key][self.ObjectType]( value )
 		if comment :
 			self.comment = SambaComment( comment )
@@ -71,7 +71,7 @@ class SambaParameter :
 	def Dump( self, stream ):
 		if self.comment:
 			self.comment.Dump( stream, "\t" )
-		stream.write( "\t%s = %s\n" % ( parm_table[self.key][self.DisplayName], self.parm.StringValue() ))
+		stream.write( "\t{0!s} = {1!s}\n".format(parm_table[self.key][self.DisplayName], self.parm.StringValue() ))
 
 
 #####################################################################
@@ -234,7 +234,7 @@ class SambaConf:
 			self.services[servicename]['_comment_'].Dump( stream )
 			
 		## section header
-		stream.write( "[%s]\n" % (servicename) )
+		stream.write( "[{0!s}]\n".format((servicename)) )
 		
 		## parameter = value
 		for parm in self.services[servicename]['_order_']:

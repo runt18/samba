@@ -49,7 +49,7 @@ class WKS(dns.rdata.Rdata):
                 if byte & (0x80 >> j):
                     bits.append(str(i * 8 + j))
         text = ' '.join(bits)
-        return '%s %d %s' % (self.address, self.protocol, text)
+        return '{0!s} {1:d} {2!s}'.format(self.address, self.protocol, text)
 
     def from_text(cls, rdclass, rdtype, tok, origin = None, relativize = True):
         address = tok.get_string()

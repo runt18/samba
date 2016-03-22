@@ -30,24 +30,24 @@ def mk_realms_stanza(realm, dnsname, domain, kdc_ipv4):
     :return: String with stanza
     """
     return """\
- %(realm)s = {
-  kdc = %(kdc_ipv4)s:88
-  admin_server = %(kdc_ipv4)s:88
-  default_domain = %(dnsname)s
- }
- %(dnsname)s = {
-  kdc = %(kdc_ipv4)s:88
-  admin_server = %(kdc_ipv4)s:88
-  default_domain = %(dnsname)s
- }
- %(domain)s = {
-  kdc = %(kdc_ipv4)s:88
-  admin_server = %(kdc_ipv4)s:88
-  default_domain = %(dnsname)s
- }
+ {realm!s} = {{
+  kdc = {kdc_ipv4!s}:88
+  admin_server = {kdc_ipv4!s}:88
+  default_domain = {dnsname!s}
+ }}
+ {dnsname!s} = {{
+  kdc = {kdc_ipv4!s}:88
+  admin_server = {kdc_ipv4!s}:88
+  default_domain = {dnsname!s}
+ }}
+ {domain!s} = {{
+  kdc = {kdc_ipv4!s}:88
+  admin_server = {kdc_ipv4!s}:88
+  default_domain = {dnsname!s}
+ }}
 
-""" % {
-    "kdc_ipv4": kdc_ipv4, "dnsname": dnsname, "realm": realm, "domain": domain}
+""".format(**{
+    "kdc_ipv4": kdc_ipv4, "dnsname": dnsname, "realm": realm, "domain": domain})
 
 
 def write_krb5_conf(f, realm, dnsname, domain, kdc_ipv4, tlsdir=None,
@@ -63,16 +63,16 @@ def write_krb5_conf(f, realm, dnsname, domain, kdc_ipv4, tlsdir=None,
     :param other_realms_stanza: Optional extra raw text for [realms] section
     """
     f.write("""\
-#Generated krb5.conf for %(realm)s
+#Generated krb5.conf for {realm!s}
 
 [libdefaults]
-\tdefault_realm = %(realm)s
+\tdefault_realm = {realm!s}
 \tdns_lookup_realm = false
 \tdns_lookup_kdc = false
 \tticket_lifetime = 24h
 \tforwardable = yes
 \tallow_weak_crypto = yes
-""" % {"realm": realm})
+""".format(**{"realm": realm}))
 
     f.write("\n[realms]\n")
     f.write(mk_realms_stanza(realm, dnsname, domain, kdc_ipv4))
@@ -82,14 +82,14 @@ def write_krb5_conf(f, realm, dnsname, domain, kdc_ipv4, tlsdir=None,
     if tlsdir:
         f.write("""
 [appdefaults]
-	pkinit_anchors = FILE:%(tlsdir)s/ca.pem
+	pkinit_anchors = FILE:{tlsdir!s}/ca.pem
 
 [kdc]
 	enable-pkinit = true
-	pkinit_identity = FILE:%(tlsdir)s/kdc.pem,%(tlsdir)s/key.pem
-	pkinit_anchors = FILE:%(tlsdir)s/ca.pem
+	pkinit_identity = FILE:{tlsdir!s}/kdc.pem,{tlsdir!s}/key.pem
+	pkinit_anchors = FILE:{tlsdir!s}/ca.pem
 
-    """ % {"tlsdir": tlsdir})
+    """.format(**{"tlsdir": tlsdir}))
 
 
 def cleanup_child(pid, name, outf=None):
@@ -106,16 +106,16 @@ def cleanup_child(pid, name, outf=None):
     if childpid == 0:
         pass
     elif childpid < 0:
-        outf.write("%s child process %d isn't here any more.\n" % (name, pid))
+        outf.write("{0!s} child process {1:d} isn't here any more.\n".format(name, pid))
         return childpid
     elif status & 127:
         if status & 128:
             core_status = 'with'
         else:
             core_status = 'without'
-        outf.write("%s child process %d, died with signal %d, %s coredump.\n" % (name, childpid, (status & 127), core_status))
+        outf.write("{0!s} child process {1:d}, died with signal {2:d}, {3!s} coredump.\n".format(name, childpid, (status & 127), core_status))
     else:
-        outf.write("%s child process %d exited with value %d.\n" % (name, childpid, status >> 8))
+        outf.write("{0!s} child process {1:d} exited with value {2:d}.\n".format(name, childpid, status >> 8))
     return childpid
 
 

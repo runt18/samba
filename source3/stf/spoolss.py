@@ -12,8 +12,7 @@ class PrintServerTest(comfychair.TestCase):
         self.require(self.server != None, "print server required")
         # TODO: remove hardcoded printer name
         self.printername = "p"
-        self.uncname = "\\\\%s\\%s" % \
-                           (self.server["hostname"], self.printername)
+        self.uncname = "\\\\{0!s}\\{1!s}".format(self.server["hostname"], self.printername)
 
 class W2kPrintServerTest(comfychair.TestCase):
     """An abstract class requiring a print server."""
@@ -23,8 +22,7 @@ class W2kPrintServerTest(comfychair.TestCase):
         self.require(self.server != None, "print server required")
         # TODO: remove hardcoded printer name
         self.printername = "p"
-        self.uncname = "\\\\%s\\%s" % \
-                           (self.server["hostname"], self.printername)
+        self.uncname = "\\\\{0!s}\\{1!s}".format(self.server["hostname"], self.printername)
 
 class CredentialTest(PrintServerTest):
     """An class that calls a function with various sets of credentials."""
@@ -129,7 +127,7 @@ class ClosePrinter(PrintServerTest):
 class ClosePrinterServer(PrintServerTest):
     """Test the ClosePrinter RPC on a print server handle."""
     def runTest(self):
-        hnd = spoolss.openprinter("\\\\%s" % self.server["hostname"])
+        hnd = spoolss.openprinter("\\\\{0!s}".format(self.server["hostname"]))
         spoolss.closeprinter(hnd)
         
 class GetPrinterInfo(PrintServerTest):
@@ -154,7 +152,7 @@ class GetPrinterInfo(PrintServerTest):
             try:
                 stf.dict_check(self.sample_info[i], info)
             except ValueError, msg:
-                raise "info%d: %s" % (i, msg)
+                raise "info{0:d}: {1!s}".format(i, msg)
 
 class EnumPrinters(PrintServerTest):
     """Enumerate print info at various levels."""
@@ -169,11 +167,11 @@ class EnumPrinters(PrintServerTest):
     def runTest(self):
         for i in (0, 1):
             info = spoolss.enumprinters(
-                "\\\\%s" % self.server["hostname"], level = i)
+                "\\\\{0!s}".format(self.server["hostname"]), level = i)
             try:
                 stf.dict_check(self.sample_info[i], info)
             except ValueError, msg:
-                raise "info%d: %s" % (i, msg)
+                raise "info{0:d}: {1!s}".format(i, msg)
 
 class EnumPrintersArg(ArgTestServer):
     def runTestArg(self, unc):
@@ -183,7 +181,7 @@ class EnumPrintersCred(CredentialTest):
     """Test opening printer with good and bad credentials."""
     def runTestArg(self, creds):
         spoolss.enumprinters(
-            "\\\\%s" % self.server["hostname"], creds = creds)
+            "\\\\{0!s}".format(self.server["hostname"]), creds = creds)
 
 class EnumPrinterdrivers(PrintServerTest):
 
@@ -195,14 +193,14 @@ class EnumPrinterdrivers(PrintServerTest):
     def runTest(self):
         for i in (1, 2):
             info = spoolss.enumprinterdrivers(
-                "\\\\%s" % self.server["hostname"], level = i)
+                "\\\\{0!s}".format(self.server["hostname"]), level = i)
             try:
                 if not self.sample_info.has_key(i):
-                    self.log("%s" % info)
+                    self.log("{0!s}".format(info))
                     self.fail()
                 stf.dict_check(self.sample_info[i], info)
             except ValueError, msg:
-                raise "info%d: %s" % (i, msg)
+                raise "info{0:d}: {1!s}".format(i, msg)
 
 class EnumPrinterdriversArg(ArgTestServer):
     def runTestArg(self, unc):
@@ -212,7 +210,7 @@ class EnumPrinterdriversCred(CredentialTest):
     """Test opening printer with good and bad credentials."""
     def runTestArg(self, creds):
         spoolss.enumprinterdrivers(
-            "\\\\%s" % self.server["hostname"], creds = creds)
+            "\\\\{0!s}".format(self.server["hostname"]), creds = creds)
 
 def usage():
     print "Usage: spoolss.py [options] [test1[,test2...]]"

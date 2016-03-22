@@ -31,7 +31,7 @@ class X25(dns.rdata.Rdata):
         self.address = address
 
     def to_text(self, origin=None, relativize=True, **kw):
-        return '"%s"' % dns.rdata._escapify(self.address)
+        return '"{0!s}"'.format(dns.rdata._escapify(self.address))
 
     def from_text(cls, rdclass, rdtype, tok, origin = None, relativize = True):
         address = tok.get_string()

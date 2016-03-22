@@ -84,7 +84,7 @@ class cmd_dbcheck(Command):
                 samdb = SamDB(session_info=system_session(), url=H,
                               credentials=creds, lp=lp)
             except:
-                raise CommandError("Failed to connect to DB at %s.  If this is a really old sam.ldb (before alpha9), then try again with --force-modules" % H)
+                raise CommandError("Failed to connect to DB at {0!s}.  If this is a really old sam.ldb (before alpha9), then try again with --force-modules".format(H))
 
 
         if H is None or not over_ldap:
@@ -96,7 +96,7 @@ class cmd_dbcheck(Command):
         scope_map = { "SUB": ldb.SCOPE_SUBTREE, "BASE": ldb.SCOPE_BASE, "ONE":ldb.SCOPE_ONELEVEL }
         scope = scope.upper()
         if not scope in scope_map:
-            raise CommandError("Unknown scope %s" % scope)
+            raise CommandError("Unknown scope {0!s}".format(scope))
         search_scope = scope_map[scope]
 
         controls = ['show_deleted:1']

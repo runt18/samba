@@ -77,7 +77,7 @@ schema_base = rootDse["schemaNamingContext"][0]
 def possible_inferiors_search(db, oc):
     """return the possible inferiors via a search for the possibleInferiors attribute"""
     res = db.search(base=schema_base,
-                    expression=("ldapDisplayName=%s" % oc),
+                    expression=("ldapDisplayName={0!s}".format(oc)),
                     attrs=["possibleInferiors"])
 
     poss=[]
@@ -222,20 +222,20 @@ def possible_inferiors_constructed(db, classinfo, c):
 
 def test_class(db, classinfo, oc):
     """test to see if one objectclass returns the correct possibleInferiors"""
-    print "test: objectClass.%s" % oc
+    print "test: objectClass.{0!s}".format(oc)
     poss1 = possible_inferiors_search(db, oc)
     poss2 = possible_inferiors_constructed(db, classinfo, oc)
     if poss1 != poss2:
-        print "failure: objectClass.%s [" % oc
-        print "Returned incorrect list for objectclass %s" % oc
-        print "search:      %s" % poss1
-        print "constructed: %s" % poss2
+        print "failure: objectClass.{0!s} [".format(oc)
+        print "Returned incorrect list for objectclass {0!s}".format(oc)
+        print "search:      {0!s}".format(poss1)
+        print "constructed: {0!s}".format(poss2)
         for i in range(0,min(len(poss1),len(poss2))):
-            print "%30s %30s" % (poss1[i], poss2[i])
+            print "{0:30!s} {1:30!s}".format(poss1[i], poss2[i])
         print "]"
         sys.exit(1)
     else:
-        print "success: objectClass.%s" % oc
+        print "success: objectClass.{0!s}".format(oc)
 
 def get_object_classes(db):
     """return a list of all object classes"""

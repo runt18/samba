@@ -107,7 +107,7 @@ def _escapify(qstring):
         elif ord(c) >= 0x20 and ord(c) < 0x7F:
             text += c
         else:
-            text += '\\%03d' % ord(c)
+            text += '\\{0:03d}'.format(ord(c))
     return text
 
 def _truncate_bitmap(what):
@@ -334,7 +334,7 @@ class GenericRdata(Rdata):
         self.data = data
 
     def to_text(self, origin=None, relativize=True, **kw):
-        return r'\# %d ' % len(self.data) + _hexify(self.data)
+        return r'\# {0:d} '.format(len(self.data)) + _hexify(self.data)
 
     def from_text(cls, rdclass, rdtype, tok, origin = None, relativize = True):
         token = tok.get()

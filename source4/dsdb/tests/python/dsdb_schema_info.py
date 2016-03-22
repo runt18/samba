@@ -101,7 +101,7 @@ schemaUpdateNow: 1
     def _make_obj_names(self, prefix):
         obj_name = prefix + time.strftime("%s", time.gmtime())
         obj_ldap_name = obj_name.replace("-", "")
-        obj_dn = "CN=%s,%s" % (obj_name, self.schema_dn)
+        obj_dn = "CN={0!s},{1!s}".format(obj_name, self.schema_dn)
         return (obj_name, obj_ldap_name, obj_dn)
 
     def _make_attr_ldif(self, attr_name, attr_dn):
@@ -141,7 +141,7 @@ systemOnly: FALSE
         try:
             self.sam_db.rename(attr_dn, attr_dn_new)
         except LdbError, (num, _):
-            self.fail("failed to change lDAPDisplayName for %s: %s" % (attr_name, _))
+            self.fail("failed to change lDAPDisplayName for {0!s}: {1!s}".format(attr_name, _))
 
         # compare resulting schemaInfo
         schi_after = self._getSchemaInfo()
@@ -187,7 +187,7 @@ systemOnly: FALSE
         try:
             self.sam_db.rename(class_dn, class_dn_new)
         except LdbError, (num, _):
-            self.fail("failed to change lDAPDisplayName for %s: %s" % (class_name, _))
+            self.fail("failed to change lDAPDisplayName for {0!s}: {1!s}".format(class_name, _))
 
         # compare resulting schemaInfo
         schi_after = self._getSchemaInfo()

@@ -66,7 +66,7 @@ class _WrapBase(object):
             return self._wrapped >= other
 
     def __repr__(self):
-        return '%s.text' % repr(self._wrapped)
+        return '{0!s}.text'.format(repr(self._wrapped))
 
 
 class MessageElementTextWrapper(_WrapBase):

@@ -42,7 +42,7 @@ import generate
 import UnicodeData
 
 if len(sys.argv) != 3:
-    print "usage: %s UnicodeData.txt out-dir" % sys.argv[0]
+    print "usage: {0!s} UnicodeData.txt out-dir".format(sys.argv[0])
     sys.exit(1)
 
 ud = UnicodeData.read(sys.argv[1])
@@ -54,8 +54,8 @@ for k,v in ud.items():
 
 # trans = [(x[0], int(x[3]), x[1]) for x in UnicodeData.read() if int(x[3]) != 0]
 
-combining_h = generate.Header('%s/combining_table.h' % sys.argv[2])
-combining_c = generate.Implementation('%s/combining_table.c' % sys.argv[2])
+combining_h = generate.Header('{0!s}/combining_table.h'.format(sys.argv[2]))
+combining_c = generate.Implementation('{0!s}/combining_table.c'.format(sys.argv[2]))
 
 combining_h.file.write(
 '''
@@ -83,8 +83,7 @@ s = trans.keys()
 s.sort()
 for k in s:
     v = trans[k]
-    combining_c.file.write("{0x%x, %u}, /* %s */\n"
-                           % (k, v[0], v[1]))
+    combining_c.file.write("{{0x{0:x}, {1:d}}}, /* {2!s} */\n".format(k, v[0], v[1]))
     
 
 #trans.sort()
@@ -98,7 +97,7 @@ combining_c.file.write(
 ''')
 
 combining_c.file.write(
-    "const size_t _wind_combining_table_size = %u;\n" % len(trans))
+    "const size_t _wind_combining_table_size = {0:d};\n".format(len(trans)))
 
 
 combining_h.close()

@@ -95,10 +95,10 @@ class WscriptError(WafError):
 
 		msg_file_line = ''
 		if self.wscript_file:
-			msg_file_line = "%s:" % self.wscript_file
+			msg_file_line = "{0!s}:".format(self.wscript_file)
 			if self.wscript_line:
-				msg_file_line += "%s:" % self.wscript_line
-		err_message = "%s error: %s" % (msg_file_line, message)
+				msg_file_line += "{0!s}:".format(self.wscript_line)
+		err_message = "{0!s} error: {1!s}".format(msg_file_line, message)
 		WafError.__init__(self, err_message)
 
 	def locate_error(self):
@@ -253,14 +253,14 @@ def waf_version(mini = 0x010000, maxi = 0x100000):
 	except TypeError: min_val = int(mini.replace('.', '0'), 16)
 
 	if min_val > ver:
-		Logs.error("waf version should be at least %s (%s found)" % (mini, ver))
+		Logs.error("waf version should be at least {0!s} ({1!s} found)".format(mini, ver))
 		sys.exit(1)
 
 	try: max_val = maxi + 0
 	except TypeError: max_val = int(maxi.replace('.', '0'), 16)
 
 	if max_val < ver:
-		Logs.error("waf version should be at most %s (%s found)" % (maxi, ver))
+		Logs.error("waf version should be at most {0!s} ({1!s} found)".format(maxi, ver))
 		sys.exit(1)
 
 def python_24_guard():
@@ -298,7 +298,7 @@ def load_module(file_path, name=WSCRIPT_FILE):
 	try:
 		code = readf(file_path, m='rU')
 	except (IOError, OSError):
-		raise WscriptError('Could not read the file %r' % file_path)
+		raise WscriptError('Could not read the file {0!r}'.format(file_path))
 
 	module.waf_hash_val = code
 
@@ -417,7 +417,7 @@ def quote_define_name(path):
 	return fu
 
 def quote_whitespace(path):
-	return (path.strip().find(' ') > 0 and '"%s"' % path or path).replace('""', '"')
+	return (path.strip().find(' ') > 0 and '"{0!s}"'.format(path) or path).replace('""', '"')
 
 def trimquotes(s):
 	if not s: return ''
@@ -446,7 +446,7 @@ def h_fun(fun):
 
 def pprint(col, str, label='', sep='\n'):
 	"print messages in color"
-	sys.stderr.write("%s%s%s %s%s" % (Logs.colors(col), str, Logs.colors.NORMAL, label, sep))
+	sys.stderr.write("{0!s}{1!s}{2!s} {3!s}{4!s}".format(Logs.colors(col), str, Logs.colors.NORMAL, label, sep))
 
 def check_dir(path):
 	"""If a folder doesn't exists, create it."""
@@ -455,7 +455,7 @@ def check_dir(path):
 			os.makedirs(path)
 		except OSError, e:
 			if not os.path.isdir(path):
-				raise WafError("Cannot create the folder '%s' (error: %s)" % (path, e))
+				raise WafError("Cannot create the folder '{0!s}' (error: {1!s})".format(path, e))
 
 def cmd_output(cmd, **kw):
 
@@ -482,7 +482,7 @@ def cmd_output(cmd, **kw):
 
 	if p.returncode:
 		if not silent:
-			msg = "command execution failed: %s -> %r" % (cmd, str(output))
+			msg = "command execution failed: {0!s} -> {1!r}".format(cmd, str(output))
 			raise ValueError(msg)
 		output = ''
 	return output
@@ -641,12 +641,12 @@ class Context(object):
 				try:
 					module = load_module(base)
 				except OSError:
-					raise WscriptError('No such script %s' % base)
+					raise WscriptError('No such script {0!s}'.format(base))
 
 				try:
 					f = module.__dict__[name]
 				except KeyError:
-					raise WscriptError('No function %s defined in %s' % (name, base))
+					raise WscriptError('No function {0!s} defined in {1!s}'.format(name, base))
 
 				if getattr(self.__class__, 'pre_recurse', None):
 					self.pre_recurse(f, base, nexdir)
@@ -712,12 +712,12 @@ def get_elapsed_time(start):
 		+ float(delta.microseconds) / 1000 / 1000
 	result = ''
 	if days:
-		result += '%dd' % days
+		result += '{0:d}d'.format(days)
 	if days or hours:
-		result += '%dh' % hours
+		result += '{0:d}h'.format(hours)
 	if days or hours or minutes:
-		result += '%dm' % minutes
-	return '%s%.3fs' % (result, seconds)
+		result += '{0:d}m'.format(minutes)
+	return '{0!s}{1:.3f}s'.format(result, seconds)
 
 if os.name == 'java':
 	# For Jython (they should really fix the inconsistency)

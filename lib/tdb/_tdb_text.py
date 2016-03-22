@@ -64,7 +64,7 @@ class TdbTextWrapper(object):
         return key in self._tdb
 
     def __repr__(self):
-        return '<TdbTextWrapper for %r>' % self._tdb
+        return '<TdbTextWrapper for {0!r}>'.format(self._tdb)
 
     def __setitem__(self, key, value):
         key = key.encode('utf-8')

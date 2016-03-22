@@ -38,7 +38,7 @@ class Environment(object):
 			cur = getattr(cur, 'parent', None)
 		keys = list(keys)
 		keys.sort()
-		return "\n".join(["%r %r" % (x, self.__getitem__(x)) for x in keys])
+		return "\n".join(["{0!r} {1!r}".format(x, self.__getitem__(x)) for x in keys])
 
 	def __getitem__(self, key):
 		try:
@@ -168,7 +168,7 @@ class Environment(object):
 		merged_table = self.get_merged_dict()
 		keys = list(merged_table.keys())
 		keys.sort()
-		for k in keys: file.write('%s = %r\n' % (k, merged_table[k]))
+		for k in keys: file.write('{0!s} = {1!r}\n'.format(k, merged_table[k]))
 		file.close()
 
 	def load(self, filename):

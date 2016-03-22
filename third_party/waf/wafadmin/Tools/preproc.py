@@ -94,7 +94,7 @@ exp_types = [
 	r'[a-zA-Z_]\w*',
 	r'%:%:|<<=|>>=|\.\.\.|<<|<%|<:|<=|>>|>=|\+\+|\+=|--|->|-=|\*=|/=|%:|%=|%>|==|&&|&=|\|\||\|=|\^=|:>|!=|##|[\(\)\{\}\[\]<>\?\|\^\*\+&=:!#;,%/\-\?\~\.]',
 ]
-re_clexer = re.compile('|'.join(["(?P<%s>%s)" % (name, part) for name, part in zip(tok_types, exp_types)]), re.M)
+re_clexer = re.compile('|'.join(["(?P<{0!s}>{1!s})".format(name, part) for name, part in zip(tok_types, exp_types)]), re.M)
 
 accepted  = 'a'
 ignored   = 'i'
@@ -178,7 +178,7 @@ def get_num(lst):
 						count_par += 1
 				i += 1
 			else:
-				raise PreprocError("rparen expected %r" % lst)
+				raise PreprocError("rparen expected {0!r}".format(lst))
 
 			(num, _) = get_term(lst[1:i])
 			return (num, lst[i+1:])
@@ -194,14 +194,14 @@ def get_num(lst):
 		elif v == '~':
 			return (~ int(num), lst)
 		else:
-			raise PreprocError("invalid op token %r for get_num" % lst)
+			raise PreprocError("invalid op token {0!r} for get_num".format(lst))
 	elif p == NUM:
 		return v, lst[1:]
 	elif p == IDENT:
 		# all macros should have been replaced, remaining identifiers eval to 0
 		return 0, lst[1:]
 	else:
-		raise PreprocError("invalid token %r for get_num" % lst)
+		raise PreprocError("invalid token {0!r} for get_num".format(lst))
 
 def get_term(lst):
 	if not lst: raise PreprocError("empty list for get_term")
@@ -233,7 +233,7 @@ def get_term(lst):
 							break
 				i += 1
 			else:
-				raise PreprocError("rparen expected %r" % lst)
+				raise PreprocError("rparen expected {0!r}".format(lst))
 
 			if int(num):
 				return get_term(lst[1:i])
@@ -251,7 +251,7 @@ def get_term(lst):
 			# operator precedence
 			p2, v2 = lst[0]
 			if p2 != OP:
-				raise PreprocError("op expected %r" % lst)
+				raise PreprocError("op expected {0!r}".format(lst))
 
 			if prec[v2] >= prec[v]:
 				num2 = reduce_nums(num, num2, v)
@@ -262,7 +262,7 @@ def get_term(lst):
 				return get_term([(NUM, num), (p, v), (NUM, num3)] + lst)
 
 
-	raise PreprocError("cannot reduce %r" % lst)
+	raise PreprocError("cannot reduce {0!r}".format(lst))
 
 def reduce_eval(lst):
 	"""take a list of tokens and output true or false (#if/#elif conditions)"""
@@ -289,7 +289,7 @@ def paste_tokens(t1, t2):
 	elif t1[0] == NUM and t2[0] == NUM:
 		p1 = NUM
 	if not p1:
-		raise PreprocError('tokens do not make a valid paste %r and %r' % (t1, t2))
+		raise PreprocError('tokens do not make a valid paste {0!r} and {1!r}'.format(t1, t2))
 	return (p1, t1[1] + t2[1])
 
 def reduce_tokens(lst, defs, ban=[]):
@@ -317,7 +317,7 @@ def reduce_tokens(lst, defs, ban=[]):
 					else:
 						lst[i] = (NUM, 0)
 				else:
-					raise PreprocError("invalid define expression %r" % lst)
+					raise PreprocError("invalid define expression {0!r}".format(lst))
 
 		elif p == IDENT and v in defs:
 
@@ -340,11 +340,11 @@ def reduce_tokens(lst, defs, ban=[]):
 				del lst[i]
 
 				if i >= len(lst):
-					raise PreprocError("expected '(' after %r (got nothing)" % v)
+					raise PreprocError("expected '(' after {0!r} (got nothing)".format(v))
 
 				(p2, v2) = lst[i]
 				if p2 != OP or v2 != '(':
-					raise PreprocError("expected '(' after %r" % v)
+					raise PreprocError("expected '(' after {0!r}".format(v))
 
 				del lst[i]
 
@@ -362,7 +362,7 @@ def reduce_tokens(lst, defs, ban=[]):
 							if one_param: args.append(one_param)
 							break
 						elif v2 == ',':
-							if not one_param: raise PreprocError("empty param in funcall %s" % p)
+							if not one_param: raise PreprocError("empty param in funcall {0!s}".format(p))
 							args.append(one_param)
 							one_param = []
 						else:
@@ -526,7 +526,7 @@ def extract_include(txt, defs):
 	reduce_tokens(toks, defs, ['waf_include'])
 
 	if not toks:
-		raise PreprocError("could not parse include %s" % txt)
+		raise PreprocError("could not parse include {0!s}".format(txt))
 
 	if len(toks) == 1:
 		if toks[0][0] == STR:
@@ -535,7 +535,7 @@ def extract_include(txt, defs):
 		if toks[0][1] == '<' and toks[-1][1] == '>':
 			return stringize(toks).lstrip('<').rstrip('>')
 
-	raise PreprocError("could not parse include %s." % txt)
+	raise PreprocError("could not parse include {0!s}.".format(txt))
 
 def parse_char(txt):
 	if not txt: raise PreprocError("attempted to parse a null char")
@@ -552,7 +552,7 @@ def parse_char(txt):
 				return (1+i, int(txt[1:1+i], 8))
 	else:
 		try: return chr_esc[c]
-		except KeyError: raise PreprocError("could not parse char literal '%s'" % txt)
+		except KeyError: raise PreprocError("could not parse char literal '{0!s}'".format(txt))
 
 @Utils.run_once
 def tokenize_private(s):
@@ -681,10 +681,10 @@ class c_parser(object):
 			pc[filepath] = lines # cache the lines filtered
 			self.lines.extend(lines)
 		except IOError:
-			raise PreprocError("could not read the file %s" % filepath)
+			raise PreprocError("could not read the file {0!s}".format(filepath))
 		except Exception:
 			if Logs.verbose > 0:
-				error("parsing %s failed" % filepath)
+				error("parsing {0!s} failed".format(filepath))
 				traceback.print_exc()
 
 	def start(self, node, env):
@@ -767,7 +767,7 @@ class c_parser(object):
 			try:
 				self.defs[define_name(line)] = line
 			except:
-				raise PreprocError("invalid define line %s" % line)
+				raise PreprocError("invalid define line {0!s}".format(line))
 		elif token == 'undef':
 			m = re_mac.match(line)
 			if m and m.group(0) in self.defs:

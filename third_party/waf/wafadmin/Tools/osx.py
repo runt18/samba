@@ -137,7 +137,7 @@ def apply_link_osx(self):
 	if not self.install_path:
 		return
 	if getattr(self, 'vnum', None):
-		name = name.replace('.dylib', '.%s.dylib' % self.vnum)
+		name = name.replace('.dylib', '.{0!s}.dylib'.format(self.vnum))
 
 	path = os.path.join(Utils.subst_vars(self.install_path, self.env), name)
 	if '-dynamiclib' in self.env['LINKFLAGS']:

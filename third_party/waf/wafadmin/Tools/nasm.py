@@ -28,13 +28,13 @@ def apply_nasm_vars(self):
 			node = self.path.find_dir(inc)
 			if not node:
 				raise Utils.WafError('cannot find the dir' + inc)
-			self.env.append_value('NASM_INCLUDES', '-I%s' % node.srcpath(self.env))
-			self.env.append_value('NASM_INCLUDES', '-I%s' % node.bldpath(self.env))
+			self.env.append_value('NASM_INCLUDES', '-I{0!s}'.format(node.srcpath(self.env)))
+			self.env.append_value('NASM_INCLUDES', '-I{0!s}'.format(node.bldpath(self.env)))
 
 @extension(EXT_NASM)
 def nasm_file(self, node):
 	try: obj_ext = self.obj_ext
-	except AttributeError: obj_ext = '_%d.o' % self.idx
+	except AttributeError: obj_ext = '_{0:d}.o'.format(self.idx)
 
 	task = self.create_task('nasm', node, node.change_ext(obj_ext))
 	self.compiled_tasks.append(task)

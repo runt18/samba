@@ -109,7 +109,7 @@ def parseCommandLine():
 		parser.error("Invalid number of arguments.")
 
 	if not os.access(args[0], os.X_OK):
-		parser.error("%s is not executable." % args[0])
+		parser.error("{0!s} is not executable.".format(args[0]))
 
 	return (opts, args[0])
 
@@ -140,15 +140,15 @@ def main():
 		os.close(client_in_w)
 
 		client_args = []
-		client_args.append("--helper-protocol=%s" % opts.client_helper)
-		client_args.append("--username=%s" % opts.client_username)
-		client_args.append("--password=%s" % opts.client_password)
-		client_args.append("--domain=%s" % opts.client_domain)
-		client_args.append("--configfile=%s" % opts.config_file)
+		client_args.append("--helper-protocol={0!s}".format(opts.client_helper))
+		client_args.append("--username={0!s}".format(opts.client_username))
+		client_args.append("--password={0!s}".format(opts.client_password))
+		client_args.append("--domain={0!s}".format(opts.client_domain))
+		client_args.append("--configfile={0!s}".format(opts.config_file))
 		if opts.target_service:
-			client_args.append("--target-service=%s" % opts.target_service)
+			client_args.append("--target-service={0!s}".format(opts.target_service))
 		if opts.target_hostname:
-			client_args.append("--target-hostname=%s" % opts.target_hostname)
+			client_args.append("--target-hostname={0!s}".format(opts.target_hostname))
 
 		os.execv(ntlm_auth_path, client_args)
 
@@ -177,18 +177,18 @@ def main():
 		os.close(server_in_w)
 
 		server_args = []
-		server_args.append("--helper-protocol=%s" % opts.server_helper)
+		server_args.append("--helper-protocol={0!s}".format(opts.server_helper))
 		if not opts.server_use_winbindd:
-			server_args.append("--username=%s" % opts.server_username)
-			server_args.append("--password=%s" % opts.server_password)
-			server_args.append("--domain=%s" % opts.server_domain)
+			server_args.append("--username={0!s}".format(opts.server_username))
+			server_args.append("--password={0!s}".format(opts.server_password))
+			server_args.append("--domain={0!s}".format(opts.server_domain))
 			if opts.sid:
 				raise Exception("Server must be using winbindd for require-membership-of.")
 		else:
 			if opts.sid:
-				server_args.append("--require-membership-of=%s" % opts.sid)
+				server_args.append("--require-membership-of={0!s}".format(opts.sid))
 
-		server_args.append("--configfile=%s" % opts.config_file)
+		server_args.append("--configfile={0!s}".format(opts.config_file))
 
 		os.execv(ntlm_auth_path, server_args)
 

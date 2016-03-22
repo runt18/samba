@@ -131,10 +131,10 @@ class MessageTestCase(unittest.TestCase):
         def bad():
             q = dns.message.from_text(query_text)
             for i in xrange(0, 25):
-                rrset = dns.rrset.from_text('foo%d.' % i, 3600,
+                rrset = dns.rrset.from_text('foo{0:d}.'.format(i), 3600,
                                             dns.rdataclass.IN,
                                             dns.rdatatype.A,
-                                            '10.0.0.%d' % i)
+                                            '10.0.0.{0:d}'.format(i))
                 q.additional.append(rrset)
             w = q.to_wire(max_size=512)
         self.failUnlessRaises(dns.exception.TooBig, bad)

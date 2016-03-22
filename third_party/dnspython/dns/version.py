@@ -22,13 +22,11 @@ RELEASELEVEL = 0x0f
 SERIAL = 0
 
 if RELEASELEVEL == 0x0f:
-    version = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
+    version = '{0:d}.{1:d}.{2:d}'.format(MAJOR, MINOR, MICRO)
 elif RELEASELEVEL == 0x00:
-    version = '%d.%d.%dx%d' % \
-              (MAJOR, MINOR, MICRO, SERIAL)
+    version = '{0:d}.{1:d}.{2:d}x{3:d}'.format(MAJOR, MINOR, MICRO, SERIAL)
 else:
-    version = '%d.%d.%d%x%d' % \
-              (MAJOR, MINOR, MICRO, RELEASELEVEL, SERIAL)
+    version = '{0:d}.{1:d}.{2:d}{3:x}{4:d}'.format(MAJOR, MINOR, MICRO, RELEASELEVEL, SERIAL)
 
 hexversion = MAJOR << 24 | MINOR << 16 | MICRO << 8 | RELEASELEVEL << 4 | \
              SERIAL

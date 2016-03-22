@@ -136,7 +136,7 @@ class TaskManager(object):
 		g = TaskGroup()
 
 		if name and name in self.groups_names:
-			error('add_group: name %s already present' % name)
+			error('add_group: name {0!s} already present'.format(name))
 		self.groups_names[name] = g
 		self.groups.append(g)
 		if set:
@@ -223,7 +223,7 @@ class TaskGroup(object):
 			tasks = self.tasks_with_inner_constraints()
 			maxj = MAXJOBS
 		else:
-			raise Utils.WafError("unknown algorithm type %s" % (algotype))
+			raise Utils.WafError("unknown algorithm type {0!s}".format((algotype)))
 
 		if not tasks: return ()
 		return (maxj, tasks)
@@ -314,7 +314,7 @@ class TaskGroup(object):
 				self.cstr_groups.__delitem__(y)
 
 		if not toreturn and remainder:
-			raise Utils.WafError("circular order constraint detected %r" % remainder)
+			raise Utils.WafError("circular order constraint detected {0!r}".format(remainder))
 
 		return toreturn
 
@@ -404,12 +404,12 @@ class TaskBase(object):
 
 	def __repr__(self):
 		"used for debugging"
-		return '\n\t{task: %s %s}' % (self.__class__.__name__, str(getattr(self, "fun", "")))
+		return '\n\t{{task: {0!s} {1!s}}}'.format(self.__class__.__name__, str(getattr(self, "fun", "")))
 
 	def __str__(self):
 		"string to display to the user"
 		if hasattr(self, 'fun'):
-			return 'executing: %s\n' % self.fun.__name__
+			return 'executing: {0!s}\n'.format(self.fun.__name__)
 		return self.__class__.__name__ + '\n'
 
 	def exec_command(self, *k, **kw):
@@ -459,11 +459,11 @@ class TaskBase(object):
 				outs = ','.join([n.name for n in self.outputs])
 			except AttributeError:
 				outs = ''
-			return '|Total %s|Current %s|Inputs %s|Outputs %s|Time %s|\n' % (self.position[1], self.position[0], ins, outs, ela)
+			return '|Total {0!s}|Current {1!s}|Inputs {2!s}|Outputs {3!s}|Time {4!s}|\n'.format(self.position[1], self.position[0], ins, outs, ela)
 
 		total = self.position[1]
 		n = len(str(total))
-		fs = '[%%%dd/%%%dd] %%s%%s%%s' % (n, n)
+		fs = '[%{0:d}d/%{1:d}d] %s%s%s'.format(n, n)
 		return fs % (self.position[0], self.position[1], col1, str(self), col2)
 
 	def attr(self, att, default=None):
@@ -489,11 +489,11 @@ class TaskBase(object):
 			return self.err_msg
 		elif self.hasrun == CRASHED:
 			try:
-				return " -> task failed (err #%d): %r" % (self.err_code, self)
+				return " -> task failed (err #{0:d}): {1!r}".format(self.err_code, self)
 			except AttributeError:
-				return " -> task failed: %r" % self
+				return " -> task failed: {0!r}".format(self)
 		elif self.hasrun == MISSING:
-			return " -> missing files: %r" % self
+			return " -> missing files: {0!r}".format(self)
 		else:
 			return ''
 
@@ -552,7 +552,7 @@ class Task(TaskBase):
 		tgt_str = ' '.join([a.nice_path(env) for a in self.outputs])
 		if self.outputs: sep = ' -> '
 		else: sep = ''
-		return '%s: %s%s%s\n' % (self.__class__.__name__.replace('_task', ''), src_str, sep, tgt_str)
+		return '{0!s}: {1!s}{2!s}{3!s}\n'.format(self.__class__.__name__.replace('_task', ''), src_str, sep, tgt_str)
 
 	def __repr__(self):
 		return "".join(['\n\t{task: ', self.__class__.__name__, " ", ",".join([x.name for x in self.inputs]), " -> ", ",".join([x.name for x in self.outputs]), '}'])
@@ -628,7 +628,7 @@ class Task(TaskBase):
 
 		if self.inputs and (not self.outputs):
 			if not getattr(self.__class__, 'quiet', None):
-				warn("invalid task (no inputs OR outputs): override in a Task subclass or set the attribute 'quiet' %r" % self)
+				warn("invalid task (no inputs OR outputs): override in a Task subclass or set the attribute 'quiet' {0!r}".format(self))
 
 		for t in self.run_after:
 			if not t.hasrun:
@@ -679,7 +679,7 @@ class Task(TaskBase):
 				os.stat(node.abspath(env))
 			except OSError:
 				self.hasrun = MISSING
-				self.err_msg = '-> missing file: %r' % node.abspath(env)
+				self.err_msg = '-> missing file: {0!r}'.format(node.abspath(env))
 				raise Utils.WafError
 
 			# important, store the signature for the next run
@@ -780,7 +780,7 @@ class Task(TaskBase):
 		for node in self.outputs:
 			self.generator.bld.node_sigs[variant][node.id] = sig
 			if Options.options.progress_bar < 1:
-				self.generator.bld.printout('restoring from cache %r\n' % node.bldpath(env))
+				self.generator.bld.printout('restoring from cache {0!r}\n'.format(node.bldpath(env)))
 
 		self.cached = True
 		return 1
@@ -812,7 +812,7 @@ class Task(TaskBase):
 			try:
 				up(bld.node_sigs[variant][x.id])
 			except KeyError:
-				raise Utils.WafError('Missing node signature for %r (required by %r)' % (x, self))
+				raise Utils.WafError('Missing node signature for {0!r} (required by {1!r})'.format(x, self))
 
 		# manual dependencies, they can slow down the builds
 		if bld.deps_man:
@@ -830,7 +830,7 @@ class Task(TaskBase):
 						try:
 							v = bld.node_sigs[variant][v.id]
 						except KeyError:
-							raise Utils.WafError('Missing node signature for %r (required by %r)' % (v, self))
+							raise Utils.WafError('Missing node signature for {0!r} (required by {1!r})'.format(v, self))
 					elif hasattr(v, '__call__'):
 						v = v() # dependency is a function, call it
 					up(v)
@@ -908,7 +908,7 @@ class Task(TaskBase):
 							nodes.append(k)
 			except:
 				nodes = '?'
-			raise Utils.WafError('Missing node signature for %r (for implicit dependencies %r)' % (nodes, self))
+			raise Utils.WafError('Missing node signature for {0!r} (for implicit dependencies {1!r})'.format(nodes, self))
 
 		return sig
 
@@ -968,15 +968,15 @@ def compile_fun_shell(name, line):
 	app = parm.append
 	for (var, meth) in extr:
 		if var == 'SRC':
-			if meth: app('task.inputs%s' % meth)
+			if meth: app('task.inputs{0!s}'.format(meth))
 			else: app('" ".join([a.srcpath(env) for a in task.inputs])')
 		elif var == 'TGT':
-			if meth: app('task.outputs%s' % meth)
+			if meth: app('task.outputs{0!s}'.format(meth))
 			else: app('" ".join([a.bldpath(env) for a in task.outputs])')
 		else:
 			if not var in dvars: dvars.append(var)
-			app("p('%s')" % var)
-	if parm: parm = "%% (%s) " % (',\n\t\t'.join(parm))
+			app("p('{0!s}')".format(var))
+	if parm: parm = "% ({0!s}) ".format((',\n\t\t'.join(parm)))
 	else: parm = ''
 
 	c = COMPILE_TEMPLATE_SHELL % (line, parm)
@@ -1002,20 +1002,20 @@ def compile_fun_noshell(name, line):
 	for x in xrange(len(extr)):
 		params[x] = params[x].strip()
 		if params[x]:
-			app("lst.extend(%r)" % params[x].split())
+			app("lst.extend({0!r})".format(params[x].split()))
 		(var, meth) = extr[x]
 		if var == 'SRC':
-			if meth: app('lst.append(task.inputs%s)' % meth)
+			if meth: app('lst.append(task.inputs{0!s})'.format(meth))
 			else: app("lst.extend([a.srcpath(env) for a in task.inputs])")
 		elif var == 'TGT':
-			if meth: app('lst.append(task.outputs%s)' % meth)
+			if meth: app('lst.append(task.outputs{0!s})'.format(meth))
 			else: app("lst.extend([a.bldpath(env) for a in task.outputs])")
 		else:
-			app('lst.extend(to_list(env[%r]))' % var)
+			app('lst.extend(to_list(env[{0!r}]))'.format(var))
 			if not var in dvars: dvars.append(var)
 
 	if params[-1]:
-		app("lst.extend(%r)" % shlex.split(params[-1]))
+		app("lst.extend({0!r})".format(shlex.split(params[-1])))
 
 	fun = COMPILE_TEMPLATE_NOSHELL % "\n\t".join(buf)
 	debug('action: %s', fun)

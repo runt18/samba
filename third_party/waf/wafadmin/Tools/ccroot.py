@@ -28,7 +28,7 @@ def get_cc_version(conf, cc, gcc=False, icc=False):
 		p.stdin.write('\n')
 		out = p.communicate()[0]
 	except:
-		conf.fatal('could not determine the compiler version %r' % cmd)
+		conf.fatal('could not determine the compiler version {0!r}'.format(cmd))
 
 	# PY3K: do not touch
 	out = str(out)
@@ -184,9 +184,9 @@ def get_target_name(self):
 			# the import lib file name stays unversionned.
 			name = name + '-' + nums[0]
 		elif self.env.DEST_OS == 'openbsd':
-			pattern = '%s.%s' % (pattern, nums[0])
+			pattern = '{0!s}.{1!s}'.format(pattern, nums[0])
 			if len(nums) >= 2:
-				pattern += '.%s' % nums[1]
+				pattern += '.{0!s}'.format(nums[1])
 
 	return os.path.join(dir, pattern % name)
 
@@ -221,9 +221,9 @@ def default_cc(self):
 def apply_verif(self):
 	"""no particular order, used for diagnostic"""
 	if not (self.source or getattr(self, 'add_objects', None) or getattr(self, 'uselib_local', None) or getattr(self, 'obj_files', None)):
-		raise Utils.WafError('no source files specified for %s' % self)
+		raise Utils.WafError('no source files specified for {0!s}'.format(self))
 	if not self.target:
-		raise Utils.WafError('no target for %s' % self)
+		raise Utils.WafError('no target for {0!s}'.format(self))
 
 # TODO reference the d programs, shlibs in d.py, not here
 
@@ -316,7 +316,7 @@ def apply_type_vars(self):
 		# each compiler defines variables like 'shlib_CXXFLAGS', 'shlib_LINKFLAGS', etc
 		# so when we make a task generator of the type shlib, CXXFLAGS are modified accordingly
 		for var in self.p_type_vars:
-			compvar = '%s_%s' % (x, var)
+			compvar = '{0!s}_{1!s}'.format(x, var)
 			#print compvar
 			value = self.env[compvar]
 			if value: self.env.append_value(var, value)
@@ -364,7 +364,7 @@ def apply_lib_vars(self):
 
 		y = self.name_to_obj(lib_name)
 		if not y:
-			raise Utils.WafError('object %r was not found in uselib_local (required by %r)' % (lib_name, self.name))
+			raise Utils.WafError('object {0!r} was not found in uselib_local (required by {1!r})'.format(lib_name, self.name))
 		y.post()
 		seen.add(lib_name)
 
@@ -408,7 +408,7 @@ def apply_lib_vars(self):
 			for x in self.to_list(y.export_incdirs):
 				node = y.path.find_dir(x)
 				if not node:
-					raise Utils.WafError('object %r: invalid folder %r in export_incdirs' % (y.target, x))
+					raise Utils.WafError('object {0!r}: invalid folder {1!r} in export_incdirs'.format(y.target, x))
 				self.env.append_unique('INC_PATHS', node)
 
 	# 2. the case of the libs defined outside
@@ -436,7 +436,7 @@ def apply_objdeps(self):
 		# object does not exist ?
 		y = self.name_to_obj(x)
 		if not y:
-			raise Utils.WafError('object %r was not found in uselib_local (required by add_objects %r)' % (x, self.name))
+			raise Utils.WafError('object {0!r} was not found in uselib_local (required by add_objects {1!r})'.format(x, self.name))
 
 		# object has ancestors to process first ? update the list of names
 		if getattr(y, 'add_objects', None):
@@ -563,7 +563,7 @@ def apply_implib(self):
 
 	implib = dll.parent.find_or_declare(implib)
 	self.link_task.outputs.append(implib)
-	self.bld.install_as('${LIBDIR}/%s' % implib.name, implib, self.env)
+	self.bld.install_as('${{LIBDIR}}/{0!s}'.format(implib.name), implib, self.env)
 
 	self.env.append_value('LINKFLAGS', (self.env['IMPLIB_ST'] % implib.bldpath(self.env)).split())
 
@@ -587,8 +587,8 @@ def apply_vnum(self):
 
 	libname = node.name
 	if libname.endswith('.dylib'):
-		name3 = libname.replace('.dylib', '.%s.dylib' % self.vnum)
-		name2 = libname.replace('.dylib', '.%s.dylib' % nums[0])
+		name3 = libname.replace('.dylib', '.{0!s}.dylib'.format(self.vnum))
+		name2 = libname.replace('.dylib', '.{0!s}.dylib'.format(nums[0]))
 	else:
 		name3 = libname + '.' + self.vnum
 		name2 = libname + '.' + nums[0]
@@ -605,7 +605,7 @@ def apply_vnum(self):
 
 	if self.env.DEST_OS == 'openbsd':
 		libname = self.link_task.outputs[0].name
-		bld.install_as('%s%s%s' % (path, os.sep, libname), node, env=self.env)
+		bld.install_as('{0!s}{1!s}{2!s}'.format(path, os.sep, libname), node, env=self.env)
 	else:
 		bld.install_as(path + os.sep + name3, node, env=self.env)
 		bld.symlink_as(path + os.sep + name2, name3)

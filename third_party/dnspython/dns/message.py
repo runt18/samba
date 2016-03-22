@@ -188,17 +188,17 @@ class Message(object):
         """
 
         s = cStringIO.StringIO()
-        print >> s, 'id %d' % self.id
-        print >> s, 'opcode %s' % \
-              dns.opcode.to_text(dns.opcode.from_flags(self.flags))
+        print >> s, 'id {0:d}'.format(self.id)
+        print >> s, 'opcode {0!s}'.format( \
+              dns.opcode.to_text(dns.opcode.from_flags(self.flags)))
         rc = dns.rcode.from_flags(self.flags, self.ednsflags)
-        print >> s, 'rcode %s' % dns.rcode.to_text(rc)
-        print >> s, 'flags %s' % dns.flags.to_text(self.flags)
+        print >> s, 'rcode {0!s}'.format(dns.rcode.to_text(rc))
+        print >> s, 'flags {0!s}'.format(dns.flags.to_text(self.flags))
         if self.edns >= 0:
-            print >> s, 'edns %s' % self.edns
+            print >> s, 'edns {0!s}'.format(self.edns)
             if self.ednsflags != 0:
-                print >> s, 'eflags %s' % \
-                      dns.flags.edns_to_text(self.ednsflags)
+                print >> s, 'eflags {0!s}'.format( \
+                      dns.flags.edns_to_text(self.ednsflags))
             print >> s, 'payload', self.payload
         is_update = dns.opcode.is_update(self.flags)
         if is_update:
@@ -661,7 +661,7 @@ class _WireReader(object):
                     raise UnknownTSIGKey('got signed message without keyring')
                 secret = self.message.keyring.get(absolute_name)
                 if secret is None:
-                    raise UnknownTSIGKey("key '%s' unknown" % name)
+                    raise UnknownTSIGKey("key '{0!s}' unknown".format(name))
                 self.message.tsig_ctx = \
                                       dns.tsig.validate(self.wire,
                                           absolute_name,

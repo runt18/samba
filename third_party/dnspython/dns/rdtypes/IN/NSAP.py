@@ -31,7 +31,7 @@ class NSAP(dns.rdata.Rdata):
         self.address = address
 
     def to_text(self, origin=None, relativize=True, **kw):
-        return "0x%s" % self.address.encode('hex_codec')
+        return "0x{0!s}".format(self.address.encode('hex_codec'))
 
     def from_text(cls, rdclass, rdtype, tok, origin = None, relativize = True):
         address = tok.get_string()

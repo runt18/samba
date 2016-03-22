@@ -59,7 +59,7 @@ def parse_results(msg_ops, statistics, fh):
             try:
                 dt = iso8601.parse_date(arg.rstrip("\n"))
             except TypeError, e:
-                print "Unable to parse time line: %s" % arg.rstrip("\n")
+                print "Unable to parse time line: {0!s}".format(arg.rstrip("\n"))
             else:
                 msg_ops.time(dt)
         elif command in VALID_RESULTS:
@@ -86,7 +86,7 @@ def parse_results(msg_ops, statistics, fh):
 
                 if not terminated:
                     statistics['TESTS_ERROR']+=1
-                    msg_ops.addError(subunit.RemotedTestCase(testname), subunit.RemoteError(u"reason (%s) interrupted" % result))
+                    msg_ops.addError(subunit.RemotedTestCase(testname), subunit.RemoteError(u"reason ({0!s}) interrupted".format(result)))
                     return 1
             else:
                 reason = None
@@ -165,8 +165,8 @@ def parse_results(msg_ops, statistics, fh):
                 msg_ops.end_testsuite(testname, "error", reason)
                 exitcode = 1
             else:
-                raise AssertionError("Recognized but unhandled result %r" %
-                    result)
+                raise AssertionError("Recognized but unhandled result {0!r}".format(
+                    result))
         elif command == "testsuite":
             msg_ops.start_testsuite(arg.strip())
         elif command == "progress":
@@ -199,25 +199,25 @@ class SubunitOps(TestProtocolClient,TestsuiteEnabledTestResult):
         elif whence == subunit.PROGRESS_PUSH:
             self._stream.write("progress: push\n")
         elif whence == subunit.PROGRESS_SET:
-            self._stream.write("progress: %d\n" % count)
+            self._stream.write("progress: {0:d}\n".format(count))
         elif whence == subunit.PROGRESS_CUR:
             raise NotImplementedError
 
     # The following are Samba extensions:
     def start_testsuite(self, name):
-        self._stream.write("testsuite: %s\n" % name)
+        self._stream.write("testsuite: {0!s}\n".format(name))
 
     def skip_testsuite(self, name, reason=None):
         if reason:
-            self._stream.write("skip-testsuite: %s [\n%s\n]\n" % (name, reason))
+            self._stream.write("skip-testsuite: {0!s} [\n{1!s}\n]\n".format(name, reason))
         else:
-            self._stream.write("skip-testsuite: %s\n" % name)
+            self._stream.write("skip-testsuite: {0!s}\n".format(name))
 
     def end_testsuite(self, name, result, reason=None):
         if reason:
-            self._stream.write("testsuite-%s: %s [\n%s\n]\n" % (result, name, reason))
+            self._stream.write("testsuite-{0!s}: {1!s} [\n{2!s}\n]\n".format(result, name, reason))
         else:
-            self._stream.write("testsuite-%s: %s\n" % (result, name))
+            self._stream.write("testsuite-{0!s}: {1!s}\n".format(result, name))
 
     def output_msg(self, msg):
         self._stream.write(msg)
@@ -382,19 +382,19 @@ class FilterOps(unittest.TestResult):
             result = "uxsuccess"
             if reason is None:
                 reason = "Subunit/Filter Reason"
-            reason += "\n uxsuccess[%d]" % self.uxsuccess_added
+            reason += "\n uxsuccess[{0:d}]".format(self.uxsuccess_added)
 
         if self.fail_added > 0 and result != "failure":
             result = "failure"
             if reason is None:
                 reason = "Subunit/Filter Reason"
-            reason += "\n failures[%d]" % self.fail_added
+            reason += "\n failures[{0:d}]".format(self.fail_added)
 
         if self.error_added > 0 and result != "error":
             result = "error"
             if reason is None:
                 reason = "Subunit/Filter Reason"
-            reason += "\n errors[%d]" % self.error_added
+            reason += "\n errors[{0:d}]".format(self.error_added)
 
         self._ops.end_testsuite(name, result, reason)
         if result not in ("success", "xfail"):
@@ -457,10 +457,10 @@ class PlainFormatter(TestsuiteEnabledTestResult):
         hours, minutes = divmod(minutes, 60)
         ret = ""
         if hours:
-            ret += "%dh" % hours
+            ret += "{0:d}h".format(hours)
         if minutes:
-            ret += "%dm" % minutes
-        ret += "%ds" % seconds
+            ret += "{0:d}m".format(minutes)
+        ret += "{0:d}s".format(seconds)
         return ret
 
     def progress(self, offset, whence):
@@ -492,14 +492,14 @@ class PlainFormatter(TestsuiteEnabledTestResult):
                        self.statistics['TESTS_UNEXPECTED_FAIL'] +
                        self.statistics['TESTS_UNEXPECTED_OK'])
 
-        out = "[%d(%d)" % (self.index, total_tests)
+        out = "[{0:d}({1:d})".format(self.index, total_tests)
         if self.totalsuites is not None:
-            out += "/%d" % self.totalsuites
+            out += "/{0:d}".format(self.totalsuites)
         if self.start_time is not None:
             out += " at " + self._format_time(self.last_time - self.start_time)
         if self.suitesfailed:
-            out += ", %d errors" % (len(self.suitesfailed),)
-        out += "] %s" % name
+            out += ", {0:d} errors".format(len(self.suitesfailed))
+        out += "] {0!s}".format(name)
         if self.immediate:
             sys.stdout.write(out + "\n")
         else:
@@ -521,14 +521,14 @@ class PlainFormatter(TestsuiteEnabledTestResult):
         unexpected = False
 
         if not name in self.test_output:
-            print "no output for name[%s]" % name
+            print "no output for name[{0!s}]".format(name)
 
         if result in ("success", "xfail"):
             self.suites_ok+=1
         else:
-            self.output_msg("ERROR: Testsuite[%s]\n" % name)
+            self.output_msg("ERROR: Testsuite[{0!s}]\n".format(name))
             if reason is not None:
-                self.output_msg("REASON: %s\n" % (reason,))
+                self.output_msg("REASON: {0!s}\n".format(reason))
             self.suitesfailed.append(name)
             if self.immediate and not self.verbose and name in self.test_output:
                 out += self.test_output[name]
@@ -571,15 +571,15 @@ class PlainFormatter(TestsuiteEnabledTestResult):
                     'failure': 'f',
                     'xfail': 'X',
                     'skip': 's',
-                    'success': '.'}.get(result, "?(%s)" % result))
+                    'success': '.'}.get(result, "?({0!s})".format(result)))
             return
 
         if not self.name in self.test_output:
             self.test_output[self.name] = ""
 
-        self.test_output[self.name] += "UNEXPECTED(%s): %s\n" % (result, testname)
+        self.test_output[self.name] += "UNEXPECTED({0!s}): {1!s}\n".format(result, testname)
         if err is not None:
-            self.test_output[self.name] += "REASON: %s\n" % str(err[1]).strip()
+            self.test_output[self.name] += "REASON: {0!s}\n".format(str(err[1]).strip())
 
         if self.immediate and not self.verbose:
             sys.stdout.write(self.test_output[self.name])
@@ -599,7 +599,7 @@ class PlainFormatter(TestsuiteEnabledTestResult):
             f.write("= Failed tests =\n")
 
             for suite in self.suitesfailed:
-                f.write("== %s ==\n" % suite)
+                f.write("== {0!s} ==\n".format(suite))
                 if suite in self.test_output:
                     f.write(self.test_output[suite]+"\n\n")
 
@@ -608,7 +608,7 @@ class PlainFormatter(TestsuiteEnabledTestResult):
         if not self.immediate and not self.verbose:
             for suite in self.suitesfailed:
                 print "=" * 78
-                print "FAIL: %s" % suite
+                print "FAIL: {0!s}".format(suite)
                 if suite in self.test_output:
                     print self.test_output[suite]
                 print ""
@@ -617,7 +617,7 @@ class PlainFormatter(TestsuiteEnabledTestResult):
         for reason in self.skips.keys():
             f.write(reason + "\n")
             for name in self.skips[reason]:
-                f.write("\t%s\n" % name)
+                f.write("\t{0!s}\n".format(name))
             f.write("\n")
         f.close()
 
@@ -627,9 +627,9 @@ class PlainFormatter(TestsuiteEnabledTestResult):
             not self.statistics['TESTS_ERROR']):
             ok = (self.statistics['TESTS_EXPECTED_OK'] +
                   self.statistics['TESTS_EXPECTED_FAIL'])
-            print "\nALL OK (%d tests in %d testsuites)" % (ok, self.suites_ok)
+            print "\nALL OK ({0:d} tests in {1:d} testsuites)".format(ok, self.suites_ok)
         else:
-            print "\nFAILED (%d failures, %d errors and %d unexpected successes in %d testsuites)" % (
+            print "\nFAILED ({0:d} failures, {1:d} errors and {2:d} unexpected successes in {3:d} testsuites)".format(
                 self.statistics['TESTS_UNEXPECTED_FAIL'],
                 self.statistics['TESTS_ERROR'],
                 self.statistics['TESTS_UNEXPECTED_OK'],

@@ -19,7 +19,7 @@ def subst_at_vars(task):
             if not vname in task.env and vname.upper() in task.env:
                 vname = vname.upper()
             if not vname in task.env:
-                Logs.error("Unknown substitution %s in %s" % (v, task.name))
+                Logs.error("Unknown substitution {0!s} in {1!s}".format(v, task.name))
                 sys.exit(1)
             v = SUBST_VARS_RECURSIVE(task.env[vname], task.env)
         out.append(v)
@@ -31,7 +31,7 @@ def CONFIGURE_FILE(bld, in_file, **kwargs):
     '''configure file'''
 
     base=os.path.basename(in_file)
-    t = bld.SAMBA_GENERATOR('INFILE_%s' % base,
+    t = bld.SAMBA_GENERATOR('INFILE_{0!s}'.format(base),
                             rule = subst_at_vars,
                             source = in_file + '.in',
                             target = in_file,

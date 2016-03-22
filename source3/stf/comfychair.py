@@ -56,9 +56,9 @@ class TestCase:
                                    'testtmp', 
                                    self.__class__.__name__)
         self.tmpdir = os.path.join(self.rundir, 'tmp')
-        os.system("rm -fr %s" % self.rundir)
+        os.system("rm -fr {0!s}".format(self.rundir))
         os.makedirs(self.tmpdir)
-        os.system("mkdir -p %s" % self.rundir)
+        os.system("mkdir -p {0!s}".format(self.rundir))
         os.chdir(self.rundir)
 
     def _restore_directory(self):
@@ -127,11 +127,11 @@ why."""
 
     def assert_equal(self, a, b):
         if not a == b:
-            raise AssertionError("assertEquals failed: %s" % `(a, b)`)
+            raise AssertionError("assertEquals failed: {0!s}".format(`(a, b)`))
             
     def assert_notequal(self, a, b):
         if a == b:
-            raise AssertionError("assertNotEqual failed: %s" % `(a, b)`)
+            raise AssertionError("assertNotEqual failed: {0!s}".format(`(a, b)`))
 
     def assert_re_match(self, pattern, s):
         """Assert that a string matches a particular pattern
@@ -166,7 +166,7 @@ why."""
 
     def assert_no_file(self, filename):
         import os.path
-        assert not os.path.exists(filename), ("file exists but should not: %s" % filename)
+        assert not os.path.exists(filename), ("file exists but should not: {0!s}".format(filename))
 
 
     #############################################################
@@ -182,7 +182,7 @@ why."""
                 os.execvp("/bin/sh", ["/bin/sh", "-c", cmd])
             finally:
                 os._exit(127)
-        self.test_log = self.test_log + "pid: %d\n" % pid
+        self.test_log = self.test_log + "pid: {0:d}\n".format(pid)
         return pid
 
 
@@ -191,11 +191,11 @@ why."""
         code.  Return the output produced."""
         rc, output, stderr = self.runcmd_unchecked(cmd)
         if rc != expectedResult:
-            raise AssertionError("""command returned %d; expected %s: \"%s\"
+            raise AssertionError("""command returned {0:d}; expected {1!s}: \"{2!s}\"
 stdout:
-%s
+{3!s}
 stderr:
-%s""" % (rc, expectedResult, cmd, output, stderr))
+{4!s}""".format(rc, expectedResult, cmd, output, stderr))
 
         return output, stderr
 
@@ -214,11 +214,11 @@ stderr:
                 pid = os.getpid()
                 openmode = os.O_WRONLY|os.O_CREAT|os.O_TRUNC
 
-                outfd = os.open('%d.out' % pid, openmode, 0666)
+                outfd = os.open('{0:d}.out'.format(pid), openmode, 0666)
                 os.dup2(outfd, 1)
                 os.close(outfd)
 
-                errfd = os.open('%d.err' % pid, openmode, 0666)
+                errfd = os.open('{0:d}.err'.format(pid), openmode, 0666)
                 os.dup2(errfd, 2)
                 os.close(errfd)
 
@@ -231,8 +231,8 @@ stderr:
         else:
             # parent
             exited_pid, waitstatus = os.waitpid(pid, 0)
-            stdout = open('%d.out' % pid).read()
-            stderr = open('%d.err' % pid).read()
+            stdout = open('{0:d}.out'.format(pid)).read()
+            stderr = open('{0:d}.err'.format(pid)).read()
             return waitstatus, stdout, stderr
 
 
@@ -241,20 +241,20 @@ stderr:
         import os
         waitstatus, stdout, stderr = self.run_captured(cmd)
         assert not os.WIFSIGNALED(waitstatus), \
-               ("%s terminated with signal %d" % (`cmd`, os.WTERMSIG(waitstatus)))
+               ("{0!s} terminated with signal {1:d}".format(`cmd`, os.WTERMSIG(waitstatus)))
         rc = os.WEXITSTATUS(waitstatus)
-        self.test_log = self.test_log + ("""Run command: %s
-Wait status: %#x (exit code %d, signal %d)
+        self.test_log = self.test_log + ("""Run command: {0!s}
+Wait status: {1:#x} (exit code {2:d}, signal {3:d})
 stdout:
-%s
+{4!s}
 stderr:
-%s""" % (cmd, waitstatus, os.WEXITSTATUS(waitstatus), os.WTERMSIG(waitstatus),
+{5!s}""".format(cmd, waitstatus, os.WEXITSTATUS(waitstatus), os.WTERMSIG(waitstatus),
          stdout, stderr))
         if skip_on_noexec and rc == 127:
             # Either we could not execute the command or the command
             # returned exit code 127.  According to system(3) we can't
             # tell the difference.
-            raise NotRunError, "could not execute %s" % `cmd`
+            raise NotRunError, "could not execute {0!s}".format(`cmd`)
         return rc, stdout, stderr
     
 
@@ -311,7 +311,7 @@ def runtests(test_list, verbose = 0, debugger = None):
     import traceback
     ret = 0
     for test_class in test_list:
-        print "%-30s" % _test_name(test_class),
+        print "{0:<30!s}".format(_test_name(test_class)),
         # flush now so that long running tests are easier to follow
         sys.stdout.flush()
 
@@ -328,7 +328,7 @@ def runtests(test_list, verbose = 0, debugger = None):
                 ret = 2
                 break
             except NotRunError, msg:
-                print "NOTRUN, %s" % msg.value
+                print "NOTRUN, {0!s}".format(msg.value)
             except:
                 print "FAIL"
                 _report_error(obj, debugger)
@@ -365,7 +365,7 @@ def _test_name(test_class):
 def print_help():
     """Help for people running tests"""
     import sys
-    print """%s: software test suite based on ComfyChair
+    print """{0!s}: software test suite based on ComfyChair
 
 usage:
     To run all tests, just run this program.  To run particular tests,
@@ -376,13 +376,13 @@ options:
     --list              list available tests
     --verbose, -v       show more information while running tests
     --post-mortem, -p   enter Python debugger on error
-""" % sys.argv[0]
+""".format(sys.argv[0])
 
 
 def print_list(test_list):
     """Show list of available tests"""
     for test_class in test_list:
-        print "    %s" % _test_name(test_class)
+        print "    {0!s}".format(_test_name(test_class))
 
 
 def main(tests, extra_tests=[]):

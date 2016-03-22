@@ -32,7 +32,7 @@ def provision_s4(t, func_level="2008"):
                '--domain=${DOMAIN}',
                '--adminpass=${PASSWORD1}',
                '--server-role=domain controller',
-               '--function-level=%s' % func_level,
+               '--function-level={0!s}'.format(func_level),
                '-d${DEBUGLEVEL}',
                '--option=interfaces=${INTERFACE}',
                '--host-ip=${INTERFACE_IP}',
@@ -65,9 +65,9 @@ def test_smbclient(t):
     t.info('Testing smbclient')
     smbclient = t.getvar("smbclient")
     t.chdir('${PREFIX}')
-    t.cmd_contains("%s --version" % (smbclient), ["Version 4.1"])
-    t.retry_cmd('%s -L ${INTERFACE_IP} -U%%' % (smbclient), ["netlogon", "sysvol", "IPC Service"])
-    child = t.pexpect_spawn('%s //${INTERFACE_IP}/netlogon -Uadministrator%%${PASSWORD1}' % (smbclient))
+    t.cmd_contains("{0!s} --version".format((smbclient)), ["Version 4.1"])
+    t.retry_cmd('{0!s} -L ${{INTERFACE_IP}} -U%'.format((smbclient)), ["netlogon", "sysvol", "IPC Service"])
+    child = t.pexpect_spawn('{0!s} //${{INTERFACE_IP}}/netlogon -Uadministrator%${{PASSWORD1}}'.format((smbclient)))
     child.expect("smb:")
     child.sendline("dir")
     child.expect("blocks available")
@@ -134,11 +134,11 @@ def test_winjoin(t, vm):
     smbclient = t.getvar("smbclient")
     t.chdir('${PREFIX}')
     t.port_wait("${WIN_IP}", 139)
-    t.retry_cmd('%s -L ${WIN_HOSTNAME}.${LCREALM} -Uadministrator@${LCREALM}%%${PASSWORD1}' % (smbclient), ["C$", "IPC$", "Sharename"], retries=100)
+    t.retry_cmd('{0!s} -L ${{WIN_HOSTNAME}}.${{LCREALM}} -Uadministrator@${{LCREALM}}%${{PASSWORD1}}'.format((smbclient)), ["C$", "IPC$", "Sharename"], retries=100)
     t.cmd_contains("host -t A ${WIN_HOSTNAME}.${LCREALM}.", ['has address'])
-    t.cmd_contains('%s -L ${WIN_HOSTNAME}.${LCREALM} -Utestallowed@${LCREALM}%%${PASSWORD1}' % (smbclient), ["C$", "IPC$", "Sharename"])
-    t.cmd_contains('%s -L ${WIN_HOSTNAME}.${LCREALM} -k no -Utestallowed@${LCREALM}%%${PASSWORD1}' % (smbclient), ["C$", "IPC$", "Sharename"])
-    t.cmd_contains('%s -L ${WIN_HOSTNAME}.${LCREALM} -k yes -Utestallowed@${LCREALM}%%${PASSWORD1}' % (smbclient), ["C$", "IPC$", "Sharename"])
+    t.cmd_contains('{0!s} -L ${{WIN_HOSTNAME}}.${{LCREALM}} -Utestallowed@${{LCREALM}}%${{PASSWORD1}}'.format((smbclient)), ["C$", "IPC$", "Sharename"])
+    t.cmd_contains('{0!s} -L ${{WIN_HOSTNAME}}.${{LCREALM}} -k no -Utestallowed@${{LCREALM}}%${{PASSWORD1}}'.format((smbclient)), ["C$", "IPC$", "Sharename"])
+    t.cmd_contains('{0!s} -L ${{WIN_HOSTNAME}}.${{LCREALM}} -k yes -Utestallowed@${{LCREALM}}%${{PASSWORD1}}'.format((smbclient)), ["C$", "IPC$", "Sharename"])
     child = t.open_telnet("${WIN_HOSTNAME}", "${DOMAIN}\\administrator", "${PASSWORD1}")
     child.sendline("net use t: \\\\${HOSTNAME}.${LCREALM}\\test")
     child.expect("The command completed successfully")
@@ -194,9 +194,9 @@ def test_dcpromo(t, vm):
     t.retry_cmd("host -t A ${WIN_HOSTNAME}.${LCREALM}. ${NAMED_INTERFACE_IP}",
                 ['${WIN_HOSTNAME}.${LCREALM} has address'],
                 retries=30, delay=10, casefold=True)
-    t.retry_cmd('%s -L ${WIN_HOSTNAME}.${LCREALM} -Uadministrator@${LCREALM}%%${PASSWORD1}' % (smbclient), ["C$", "IPC$", "Sharename"])
+    t.retry_cmd('{0!s} -L ${{WIN_HOSTNAME}}.${{LCREALM}} -Uadministrator@${{LCREALM}}%${{PASSWORD1}}'.format((smbclient)), ["C$", "IPC$", "Sharename"])
     t.cmd_contains("host -t A ${WIN_HOSTNAME}.${LCREALM}.", ['has address'])
-    t.cmd_contains('%s -L ${WIN_HOSTNAME}.${LCREALM} -Utestallowed@${LCREALM}%%${PASSWORD1}' % (smbclient), ["C$", "IPC$", "Sharename"])
+    t.cmd_contains('{0!s} -L ${{WIN_HOSTNAME}}.${{LCREALM}} -Utestallowed@${{LCREALM}}%${{PASSWORD1}}'.format((smbclient)), ["C$", "IPC$", "Sharename"])
 
     t.cmd_contains("bin/samba-tool drs kcc ${HOSTNAME}.${LCREALM} -Uadministrator@${LCREALM}%${PASSWORD1}", ['Consistency check', 'successful'])
     t.retry_cmd("bin/samba-tool drs kcc ${WIN_HOSTNAME}.${LCREALM} -Uadministrator@${LCREALM}%${PASSWORD1}", ['Consistency check', 'successful'])
@@ -207,8 +207,8 @@ def test_dcpromo(t, vm):
     t.cmd_contains("bin/samba-tool drs replicate ${HOSTNAME}.${LCREALM} ${WIN_HOSTNAME} CN=Configuration,${BASEDN} -k yes", ["was successful"])
 
     for nc in [ '${BASEDN}', 'CN=Configuration,${BASEDN}', 'CN=Schema,CN=Configuration,${BASEDN}' ]:
-        t.cmd_contains("bin/samba-tool drs replicate ${HOSTNAME}.${LCREALM} ${WIN_HOSTNAME}.${LCREALM} %s -k yes" % nc, ["was successful"])
-        t.cmd_contains("bin/samba-tool drs replicate ${WIN_HOSTNAME}.${LCREALM} ${HOSTNAME}.${LCREALM} %s -k yes" % nc, ["was successful"])
+        t.cmd_contains("bin/samba-tool drs replicate ${{HOSTNAME}}.${{LCREALM}} ${{WIN_HOSTNAME}}.${{LCREALM}} {0!s} -k yes".format(nc), ["was successful"])
+        t.cmd_contains("bin/samba-tool drs replicate ${{WIN_HOSTNAME}}.${{LCREALM}} ${{HOSTNAME}}.${{LCREALM}} {0!s} -k yes".format(nc), ["was successful"])
 
     t.cmd_contains("bin/samba-tool drs showrepl ${HOSTNAME}.${LCREALM} -k yes",
                  [ "INBOUND NEIGHBORS",
@@ -271,8 +271,8 @@ def test_dcpromo(t, vm):
 
     t.info("Checking if new users propogate to windows")
     t.retry_cmd('bin/samba-tool user add test2 ${PASSWORD2}', ["created successfully"])
-    t.retry_cmd("%s -L ${WIN_HOSTNAME}.${LCREALM} -Utest2%%${PASSWORD2} -k no" % (smbclient), ['Sharename', 'Remote IPC'])
-    t.retry_cmd("%s -L ${WIN_HOSTNAME}.${LCREALM} -Utest2%%${PASSWORD2} -k yes" % (smbclient), ['Sharename', 'Remote IPC'])
+    t.retry_cmd("{0!s} -L ${{WIN_HOSTNAME}}.${{LCREALM}} -Utest2%${{PASSWORD2}} -k no".format((smbclient)), ['Sharename', 'Remote IPC'])
+    t.retry_cmd("{0!s} -L ${{WIN_HOSTNAME}}.${{LCREALM}} -Utest2%${{PASSWORD2}} -k yes".format((smbclient)), ['Sharename', 'Remote IPC'])
 
     t.info("Checking if new users on windows propogate to samba")
     child.sendline("net user test3 ${PASSWORD3} /add")
@@ -283,18 +283,18 @@ def test_dcpromo(t, vm):
             break
         time.sleep(2)
 
-    t.retry_cmd("%s -L ${HOSTNAME}.${LCREALM} -Utest3%%${PASSWORD3} -k no" % (smbclient), ['Sharename', 'IPC'])
-    t.retry_cmd("%s -L ${HOSTNAME}.${LCREALM} -Utest3%%${PASSWORD3} -k yes" % (smbclient), ['Sharename', 'IPC'])
+    t.retry_cmd("{0!s} -L ${{HOSTNAME}}.${{LCREALM}} -Utest3%${{PASSWORD3}} -k no".format((smbclient)), ['Sharename', 'IPC'])
+    t.retry_cmd("{0!s} -L ${{HOSTNAME}}.${{LCREALM}} -Utest3%${{PASSWORD3}} -k yes".format((smbclient)), ['Sharename', 'IPC'])
 
     t.info("Checking propogation of user deletion")
     t.run_cmd('bin/samba-tool user delete test2 -Uadministrator@${LCREALM}%${PASSWORD1}')
     child.sendline("net user test3 /del")
     child.expect("The command completed successfully")
 
-    t.retry_cmd("%s -L ${WIN_HOSTNAME}.${LCREALM} -Utest2%%${PASSWORD2} -k no" % (smbclient), ['LOGON_FAILURE'])
-    t.retry_cmd("%s -L ${HOSTNAME}.${LCREALM} -Utest3%%${PASSWORD3} -k no" % (smbclient), ['LOGON_FAILURE'])
-    t.retry_cmd("%s -L ${WIN_HOSTNAME}.${LCREALM} -Utest2%%${PASSWORD2} -k yes" % (smbclient), ['LOGON_FAILURE'])
-    t.retry_cmd("%s -L ${HOSTNAME}.${LCREALM} -Utest3%%${PASSWORD3} -k yes" % (smbclient), ['LOGON_FAILURE'])
+    t.retry_cmd("{0!s} -L ${{WIN_HOSTNAME}}.${{LCREALM}} -Utest2%${{PASSWORD2}} -k no".format((smbclient)), ['LOGON_FAILURE'])
+    t.retry_cmd("{0!s} -L ${{HOSTNAME}}.${{LCREALM}} -Utest3%${{PASSWORD3}} -k no".format((smbclient)), ['LOGON_FAILURE'])
+    t.retry_cmd("{0!s} -L ${{WIN_HOSTNAME}}.${{LCREALM}} -Utest2%${{PASSWORD2}} -k yes".format((smbclient)), ['LOGON_FAILURE'])
+    t.retry_cmd("{0!s} -L ${{HOSTNAME}}.${{LCREALM}} -Utest3%${{PASSWORD3}} -k yes".format((smbclient)), ['LOGON_FAILURE'])
     t.vm_poweroff("${WIN_VM}")
 
 
@@ -354,9 +354,9 @@ def test_dcpromo_rodc(t, vm):
     t.port_wait("${WIN_IP}", 139)
     child = t.open_telnet("${WIN_HOSTNAME}", "${DOMAIN}\\administrator", "${PASSWORD1}", set_time=True)
     child.sendline("ipconfig /registerdns")
-    t.retry_cmd('%s -L ${WIN_HOSTNAME}.${LCREALM} -Uadministrator@${LCREALM}%%${PASSWORD1}' % (smbclient), ["C$", "IPC$", "Sharename"])
+    t.retry_cmd('{0!s} -L ${{WIN_HOSTNAME}}.${{LCREALM}} -Uadministrator@${{LCREALM}}%${{PASSWORD1}}'.format((smbclient)), ["C$", "IPC$", "Sharename"])
     t.cmd_contains("host -t A ${WIN_HOSTNAME}.${LCREALM}.", ['has address'])
-    t.cmd_contains('%s -L ${WIN_HOSTNAME}.${LCREALM} -Utestallowed@${LCREALM}%%${PASSWORD1}' % (smbclient), ["C$", "IPC$", "Sharename"])
+    t.cmd_contains('{0!s} -L ${{WIN_HOSTNAME}}.${{LCREALM}} -Utestallowed@${{LCREALM}}%${{PASSWORD1}}'.format((smbclient)), ["C$", "IPC$", "Sharename"])
     child.sendline("net use t: \\\\${HOSTNAME}.${LCREALM}\\test")
     child.expect("The command completed successfully")
 
@@ -370,7 +370,7 @@ def test_dcpromo_rodc(t, vm):
     child.expect("was successful")
 
     for nc in [ '${BASEDN}', 'CN=Configuration,${BASEDN}', 'CN=Schema,CN=Configuration,${BASEDN}' ]:
-        t.cmd_contains("bin/samba-tool drs replicate --add-ref ${WIN_HOSTNAME}.${LCREALM} ${HOSTNAME}.${LCREALM} %s" % nc, ["was successful"])
+        t.cmd_contains("bin/samba-tool drs replicate --add-ref ${{WIN_HOSTNAME}}.${{LCREALM}} ${{HOSTNAME}}.${{LCREALM}} {0!s}".format(nc), ["was successful"])
 
     t.cmd_contains("bin/samba-tool drs showrepl ${HOSTNAME}.${LCREALM}",
                  [ "INBOUND NEIGHBORS",
@@ -386,12 +386,12 @@ def test_dcpromo_rodc(t, vm):
 
     t.info("Checking if new users are available on windows")
     t.run_cmd('bin/samba-tool user add test2 ${PASSWORD2}')
-    t.retry_cmd("%s -L ${WIN_HOSTNAME}.${LCREALM} -Utest2%%${PASSWORD2} -k yes" % (smbclient), ['Sharename', 'Remote IPC'])
+    t.retry_cmd("{0!s} -L ${{WIN_HOSTNAME}}.${{LCREALM}} -Utest2%${{PASSWORD2}} -k yes".format((smbclient)), ['Sharename', 'Remote IPC'])
     t.retry_cmd("bin/samba-tool drs replicate ${WIN_HOSTNAME}.${LCREALM} ${HOSTNAME}.${LCREALM} ${BASEDN}", ["was successful"])
-    t.retry_cmd("%s -L ${WIN_HOSTNAME}.${LCREALM} -Utest2%%${PASSWORD2} -k no" % (smbclient), ['Sharename', 'Remote IPC'])
+    t.retry_cmd("{0!s} -L ${{WIN_HOSTNAME}}.${{LCREALM}} -Utest2%${{PASSWORD2}} -k no".format((smbclient)), ['Sharename', 'Remote IPC'])
     t.run_cmd('bin/samba-tool user delete test2 -Uadministrator@${LCREALM}%${PASSWORD1}')
-    t.retry_cmd("%s -L ${WIN_HOSTNAME}.${LCREALM} -Utest2%%${PASSWORD2} -k yes" % (smbclient), ['LOGON_FAILURE'])
-    t.retry_cmd("%s -L ${WIN_HOSTNAME}.${LCREALM} -Utest2%%${PASSWORD2} -k no" % (smbclient), ['LOGON_FAILURE'])
+    t.retry_cmd("{0!s} -L ${{WIN_HOSTNAME}}.${{LCREALM}} -Utest2%${{PASSWORD2}} -k yes".format((smbclient)), ['LOGON_FAILURE'])
+    t.retry_cmd("{0!s} -L ${{WIN_HOSTNAME}}.${{LCREALM}} -Utest2%${{PASSWORD2}} -k no".format((smbclient)), ['LOGON_FAILURE'])
     t.vm_poweroff("${WIN_VM}")
 
 
@@ -423,7 +423,7 @@ def test_join_as_dc(t, vm):
     t.info("Checking the DC join is OK")
     smbclient = t.getvar("smbclient")
     t.chdir('${PREFIX}')
-    t.retry_cmd('%s -L ${HOSTNAME}.${WIN_REALM} -Uadministrator@${WIN_REALM}%%${WIN_PASS}' % (smbclient), ["C$", "IPC$", "Sharename"])
+    t.retry_cmd('{0!s} -L ${{HOSTNAME}}.${{WIN_REALM}} -Uadministrator@${{WIN_REALM}}%${{WIN_PASS}}'.format((smbclient)), ["C$", "IPC$", "Sharename"])
     t.cmd_contains("host -t A ${HOSTNAME}.${WIN_REALM}.", ['has address'])
     child = t.open_telnet("${WIN_HOSTNAME}", "${WIN_DOMAIN}\\administrator", "${WIN_PASS}", set_time=True)
 
@@ -433,8 +433,8 @@ def test_join_as_dc(t, vm):
 
     t.kinit("administrator@${WIN_REALM}", "${WIN_PASS}")
     for nc in [ '${WIN_BASEDN}', 'CN=Configuration,${WIN_BASEDN}', 'CN=Schema,CN=Configuration,${WIN_BASEDN}' ]:
-        t.cmd_contains("bin/samba-tool drs replicate ${HOSTNAME}.${WIN_REALM} ${WIN_HOSTNAME}.${WIN_REALM} %s -k yes" % nc, ["was successful"])
-        t.cmd_contains("bin/samba-tool drs replicate ${WIN_HOSTNAME}.${WIN_REALM} ${HOSTNAME}.${WIN_REALM} %s -k yes" % nc, ["was successful"])
+        t.cmd_contains("bin/samba-tool drs replicate ${{HOSTNAME}}.${{WIN_REALM}} ${{WIN_HOSTNAME}}.${{WIN_REALM}} {0!s} -k yes".format(nc), ["was successful"])
+        t.cmd_contains("bin/samba-tool drs replicate ${{WIN_HOSTNAME}}.${{WIN_REALM}} ${{HOSTNAME}}.${{WIN_REALM}} {0!s} -k yes".format(nc), ["was successful"])
 
     child.sendline("ipconfig /flushdns")
     child.expect("Successfully flushed")
@@ -460,24 +460,24 @@ def test_join_as_dc(t, vm):
 
     t.info("Checking if new users propogate to windows")
     t.retry_cmd('bin/samba-tool user add test2 ${PASSWORD2}', ["created successfully"])
-    t.retry_cmd("%s -L ${WIN_HOSTNAME}.${WIN_REALM} -Utest2%%${PASSWORD2} -k no" % (smbclient), ['Sharename', 'Remote IPC'])
-    t.retry_cmd("%s -L ${WIN_HOSTNAME}.${WIN_REALM} -Utest2%%${PASSWORD2} -k yes" % (smbclient), ['Sharename', 'Remote IPC'])
+    t.retry_cmd("{0!s} -L ${{WIN_HOSTNAME}}.${{WIN_REALM}} -Utest2%${{PASSWORD2}} -k no".format((smbclient)), ['Sharename', 'Remote IPC'])
+    t.retry_cmd("{0!s} -L ${{WIN_HOSTNAME}}.${{WIN_REALM}} -Utest2%${{PASSWORD2}} -k yes".format((smbclient)), ['Sharename', 'Remote IPC'])
 
     t.info("Checking if new users on windows propogate to samba")
     child.sendline("net user test3 ${PASSWORD3} /add")
     child.expect("The command completed successfully")
-    t.retry_cmd("%s -L ${HOSTNAME}.${WIN_REALM} -Utest3%%${PASSWORD3} -k no" % (smbclient), ['Sharename', 'IPC'])
-    t.retry_cmd("%s -L ${HOSTNAME}.${WIN_REALM} -Utest3%%${PASSWORD3} -k yes" % (smbclient), ['Sharename', 'IPC'])
+    t.retry_cmd("{0!s} -L ${{HOSTNAME}}.${{WIN_REALM}} -Utest3%${{PASSWORD3}} -k no".format((smbclient)), ['Sharename', 'IPC'])
+    t.retry_cmd("{0!s} -L ${{HOSTNAME}}.${{WIN_REALM}} -Utest3%${{PASSWORD3}} -k yes".format((smbclient)), ['Sharename', 'IPC'])
 
     t.info("Checking propogation of user deletion")
     t.run_cmd('bin/samba-tool user delete test2 -Uadministrator@${WIN_REALM}%${WIN_PASS}')
     child.sendline("net user test3 /del")
     child.expect("The command completed successfully")
 
-    t.retry_cmd("%s -L ${WIN_HOSTNAME}.${WIN_REALM} -Utest2%%${PASSWORD2} -k no" % (smbclient), ['LOGON_FAILURE'])
-    t.retry_cmd("%s -L ${HOSTNAME}.${WIN_REALM} -Utest3%%${PASSWORD3} -k no" % (smbclient), ['LOGON_FAILURE'])
-    t.retry_cmd("%s -L ${WIN_HOSTNAME}.${WIN_REALM} -Utest2%%${PASSWORD2} -k yes" % (smbclient), ['LOGON_FAILURE'])
-    t.retry_cmd("%s -L ${HOSTNAME}.${WIN_REALM} -Utest3%%${PASSWORD3} -k yes" % (smbclient), ['LOGON_FAILURE'])
+    t.retry_cmd("{0!s} -L ${{WIN_HOSTNAME}}.${{WIN_REALM}} -Utest2%${{PASSWORD2}} -k no".format((smbclient)), ['LOGON_FAILURE'])
+    t.retry_cmd("{0!s} -L ${{HOSTNAME}}.${{WIN_REALM}} -Utest3%${{PASSWORD3}} -k no".format((smbclient)), ['LOGON_FAILURE'])
+    t.retry_cmd("{0!s} -L ${{WIN_HOSTNAME}}.${{WIN_REALM}} -Utest2%${{PASSWORD2}} -k yes".format((smbclient)), ['LOGON_FAILURE'])
+    t.retry_cmd("{0!s} -L ${{HOSTNAME}}.${{WIN_REALM}} -Utest3%${{PASSWORD3}} -k yes".format((smbclient)), ['LOGON_FAILURE'])
 
     t.run_cmd('bin/samba-tool domain demote -Uadministrator@${WIN_REALM}%${WIN_PASS}')
 
@@ -500,7 +500,7 @@ def test_join_as_rodc(t, vm):
     t.info("Checking the RODC join is OK")
     smbclient = t.getvar("smbclient")
     t.chdir('${PREFIX}')
-    t.retry_cmd('%s -L ${HOSTNAME}.${WIN_REALM} -Uadministrator@${WIN_REALM}%%${WIN_PASS}' % (smbclient), ["C$", "IPC$", "Sharename"])
+    t.retry_cmd('{0!s} -L ${{HOSTNAME}}.${{WIN_REALM}} -Uadministrator@${{WIN_REALM}}%${{WIN_PASS}}'.format((smbclient)), ["C$", "IPC$", "Sharename"])
     t.cmd_contains("host -t A ${HOSTNAME}.${WIN_REALM}.", ['has address'])
     child = t.open_telnet("${WIN_HOSTNAME}", "${WIN_DOMAIN}\\administrator", "${WIN_PASS}", set_time=True)
 
@@ -510,7 +510,7 @@ def test_join_as_rodc(t, vm):
 
     t.kinit("administrator@${WIN_REALM}", "${WIN_PASS}")
     for nc in [ '${WIN_BASEDN}', 'CN=Configuration,${WIN_BASEDN}', 'CN=Schema,CN=Configuration,${WIN_BASEDN}' ]:
-        t.cmd_contains("bin/samba-tool drs replicate ${HOSTNAME}.${WIN_REALM} ${WIN_HOSTNAME}.${WIN_REALM} %s -k yes" % nc, ["was successful"])
+        t.cmd_contains("bin/samba-tool drs replicate ${{HOSTNAME}}.${{WIN_REALM}} ${{WIN_HOSTNAME}}.${{WIN_REALM}} {0!s} -k yes".format(nc), ["was successful"])
 
     retries = 10
     i = 1
@@ -541,8 +541,8 @@ def test_join_as_rodc(t, vm):
     t.info("Checking if new users on windows propogate to samba")
     child.sendline("net user test3 ${PASSWORD3} /add")
     child.expect("The command completed successfully")
-    t.retry_cmd("%s -L ${HOSTNAME}.${WIN_REALM} -Utest3%%${PASSWORD3} -k no" % (smbclient), ['Sharename', 'IPC'])
-    t.retry_cmd("%s -L ${HOSTNAME}.${WIN_REALM} -Utest3%%${PASSWORD3} -k yes" % (smbclient), ['Sharename', 'IPC'])
+    t.retry_cmd("{0!s} -L ${{HOSTNAME}}.${{WIN_REALM}} -Utest3%${{PASSWORD3}} -k no".format((smbclient)), ['Sharename', 'IPC'])
+    t.retry_cmd("{0!s} -L ${{HOSTNAME}}.${{WIN_REALM}} -Utest3%${{PASSWORD3}} -k yes".format((smbclient)), ['Sharename', 'IPC'])
 
     # should this work?
     t.info("Checking if new users propogate to windows")
@@ -552,8 +552,8 @@ def test_join_as_rodc(t, vm):
     child.sendline("net user test3 /del")
     child.expect("The command completed successfully")
 
-    t.retry_cmd("%s -L ${HOSTNAME}.${WIN_REALM} -Utest3%%${PASSWORD3} -k no" % (smbclient), ['LOGON_FAILURE'])
-    t.retry_cmd("%s -L ${HOSTNAME}.${WIN_REALM} -Utest3%%${PASSWORD3} -k yes" % (smbclient), ['LOGON_FAILURE'])
+    t.retry_cmd("{0!s} -L ${{HOSTNAME}}.${{WIN_REALM}} -Utest3%${{PASSWORD3}} -k no".format((smbclient)), ['LOGON_FAILURE'])
+    t.retry_cmd("{0!s} -L ${{HOSTNAME}}.${{WIN_REALM}} -Utest3%${{PASSWORD3}} -k yes".format((smbclient)), ['LOGON_FAILURE'])
     t.vm_poweroff("${WIN_VM}")
 
 

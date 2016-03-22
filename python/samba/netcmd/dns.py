@@ -36,11 +36,11 @@ from samba.dcerpc import dnsp, dnsserver
 def dns_connect(server, lp, creds):
     if server.lower() == 'localhost':
         server = '127.0.0.1'
-    binding_str = "ncacn_ip_tcp:%s[sign]" % server
+    binding_str = "ncacn_ip_tcp:{0!s}[sign]".format(server)
     try:
         dns_conn = dnsserver.dnsserver(binding_str, lp, creds)
     except RuntimeError, e:
-        raise CommandError('Connecting to DNS RPC server %s failed with %s' % (server, e))
+        raise CommandError('Connecting to DNS RPC server {0!s} failed with {1!s}'.format(server, e))
 
     return dns_conn
 
@@ -51,7 +51,7 @@ def bool_string(flag):
     elif flag == 1:
         ret = 'TRUE'
     else:
-        ret = 'UNKNOWN (0x%x)' % flag
+        ret = 'UNKNOWN (0x{0:x})'.format(flag)
     return ret
 
 
@@ -62,7 +62,7 @@ def enum_string(module, enum_defs, value):
             ret = e
             break
     if not ret:
-        ret = 'UNKNOWN (0x%x)' % value
+        ret = 'UNKNOWN (0x{0:x})'.format(value)
     return ret
 
 
@@ -70,7 +70,7 @@ def bitmap_string(module, bitmap_defs, value):
     ret = ''
     for b in bitmap_defs:
         if value & getattr(module, b):
-            ret += '%s ' % b
+            ret += '{0!s} '.format(b)
     if not ret:
         ret = 'NONE'
     return ret
@@ -178,7 +178,7 @@ def dns_type_flag(rec_type):
     elif rtype == 'ALL':
         record_type = dnsp.DNS_TYPE_ALL
     else:
-        raise CommandError('Unknown type of DNS record %s' % rec_type)
+        raise CommandError('Unknown type of DNS record {0!s}'.format(rec_type))
     return record_type
 
 
@@ -191,160 +191,160 @@ def dns_client_version(cli_version):
     elif version == 'LONGHORN':
         client_version = dnsserver.DNS_CLIENT_VERSION_LONGHORN
     else:
-        raise CommandError('Unknown client version %s' % cli_version)
+        raise CommandError('Unknown client version {0!s}'.format(cli_version))
     return client_version
 
 
 def print_serverinfo(outf, typeid, serverinfo):
-    outf.write('  dwVersion                   : 0x%x\n' % serverinfo.dwVersion)
-    outf.write('  fBootMethod                 : %s\n' % boot_method_string(serverinfo.fBootMethod))
-    outf.write('  fAdminConfigured            : %s\n' % bool_string(serverinfo.fAdminConfigured))
-    outf.write('  fAllowUpdate                : %s\n' % bool_string(serverinfo.fAllowUpdate))
-    outf.write('  fDsAvailable                : %s\n' % bool_string(serverinfo.fDsAvailable))
-    outf.write('  pszServerName               : %s\n' % serverinfo.pszServerName)
-    outf.write('  pszDsContainer              : %s\n' % serverinfo.pszDsContainer)
+    outf.write('  dwVersion                   : 0x{0:x}\n'.format(serverinfo.dwVersion))
+    outf.write('  fBootMethod                 : {0!s}\n'.format(boot_method_string(serverinfo.fBootMethod)))
+    outf.write('  fAdminConfigured            : {0!s}\n'.format(bool_string(serverinfo.fAdminConfigured)))
+    outf.write('  fAllowUpdate                : {0!s}\n'.format(bool_string(serverinfo.fAllowUpdate)))
+    outf.write('  fDsAvailable                : {0!s}\n'.format(bool_string(serverinfo.fDsAvailable)))
+    outf.write('  pszServerName               : {0!s}\n'.format(serverinfo.pszServerName))
+    outf.write('  pszDsContainer              : {0!s}\n'.format(serverinfo.pszDsContainer))
 
     if typeid != dnsserver.DNSSRV_TYPEID_SERVER_INFO:
-        outf.write('  aipServerAddrs              : %s\n' %
-                    ip4_array_string(serverinfo.aipServerAddrs))
-        outf.write('  aipListenAddrs              : %s\n' %
-                    ip4_array_string(serverinfo.aipListenAddrs))
-        outf.write('  aipForwarders               : %s\n' %
-                    ip4_array_string(serverinfo.aipForwarders))
+        outf.write('  aipServerAddrs              : {0!s}\n'.format(
+                    ip4_array_string(serverinfo.aipServerAddrs)))
+        outf.write('  aipListenAddrs              : {0!s}\n'.format(
+                    ip4_array_string(serverinfo.aipListenAddrs)))
+        outf.write('  aipForwarders               : {0!s}\n'.format(
+                    ip4_array_string(serverinfo.aipForwarders)))
     else:
-        outf.write('  aipServerAddrs              : %s\n' %
-                    dns_addr_array_string(serverinfo.aipServerAddrs))
-        outf.write('  aipListenAddrs              : %s\n' %
-                    dns_addr_array_string(serverinfo.aipListenAddrs))
-        outf.write('  aipForwarders               : %s\n' %
-                    dns_addr_array_string(serverinfo.aipForwarders))
+        outf.write('  aipServerAddrs              : {0!s}\n'.format(
+                    dns_addr_array_string(serverinfo.aipServerAddrs)))
+        outf.write('  aipListenAddrs              : {0!s}\n'.format(
+                    dns_addr_array_string(serverinfo.aipListenAddrs)))
+        outf.write('  aipForwarders               : {0!s}\n'.format(
+                    dns_addr_array_string(serverinfo.aipForwarders)))
 
-    outf.write('  dwLogLevel                  : %d\n' % serverinfo.dwLogLevel)
-    outf.write('  dwDebugLevel                : %d\n' % serverinfo.dwDebugLevel)
-    outf.write('  dwForwardTimeout            : %d\n' % serverinfo.dwForwardTimeout)
-    outf.write('  dwRpcPrototol               : 0x%x\n' % serverinfo.dwRpcProtocol)
-    outf.write('  dwNameCheckFlag             : %s\n' % name_check_flag_string(serverinfo.dwNameCheckFlag))
-    outf.write('  cAddressAnswerLimit         : %d\n' % serverinfo.cAddressAnswerLimit)
-    outf.write('  dwRecursionRetry            : %d\n' % serverinfo.dwRecursionRetry)
-    outf.write('  dwRecursionTimeout          : %d\n' % serverinfo.dwRecursionTimeout)
-    outf.write('  dwMaxCacheTtl               : %d\n' % serverinfo.dwMaxCacheTtl)
-    outf.write('  dwDsPollingInterval         : %d\n' % serverinfo.dwDsPollingInterval)
-    outf.write('  dwScavengingInterval        : %d\n' % serverinfo.dwScavengingInterval)
-    outf.write('  dwDefaultRefreshInterval    : %d\n' % serverinfo.dwDefaultRefreshInterval)
-    outf.write('  dwDefaultNoRefreshInterval  : %d\n' % serverinfo.dwDefaultNoRefreshInterval)
-    outf.write('  fAutoReverseZones           : %s\n' % bool_string(serverinfo.fAutoReverseZones))
-    outf.write('  fAutoCacheUpdate            : %s\n' % bool_string(serverinfo.fAutoCacheUpdate))
-    outf.write('  fRecurseAfterForwarding     : %s\n' % bool_string(serverinfo.fRecurseAfterForwarding))
-    outf.write('  fForwardDelegations         : %s\n' % bool_string(serverinfo.fForwardDelegations))
-    outf.write('  fNoRecursion                : %s\n' % bool_string(serverinfo.fNoRecursion))
-    outf.write('  fSecureResponses            : %s\n' % bool_string(serverinfo.fSecureResponses))
-    outf.write('  fRoundRobin                 : %s\n' % bool_string(serverinfo.fRoundRobin))
-    outf.write('  fLocalNetPriority           : %s\n' % bool_string(serverinfo.fLocalNetPriority))
-    outf.write('  fBindSecondaries            : %s\n' % bool_string(serverinfo.fBindSecondaries))
-    outf.write('  fWriteAuthorityNs           : %s\n' % bool_string(serverinfo.fWriteAuthorityNs))
-    outf.write('  fStrictFileParsing          : %s\n' % bool_string(serverinfo.fStrictFileParsing))
-    outf.write('  fLooseWildcarding           : %s\n' % bool_string(serverinfo.fLooseWildcarding))
-    outf.write('  fDefaultAgingState          : %s\n' % bool_string(serverinfo.fDefaultAgingState))
+    outf.write('  dwLogLevel                  : {0:d}\n'.format(serverinfo.dwLogLevel))
+    outf.write('  dwDebugLevel                : {0:d}\n'.format(serverinfo.dwDebugLevel))
+    outf.write('  dwForwardTimeout            : {0:d}\n'.format(serverinfo.dwForwardTimeout))
+    outf.write('  dwRpcPrototol               : 0x{0:x}\n'.format(serverinfo.dwRpcProtocol))
+    outf.write('  dwNameCheckFlag             : {0!s}\n'.format(name_check_flag_string(serverinfo.dwNameCheckFlag)))
+    outf.write('  cAddressAnswerLimit         : {0:d}\n'.format(serverinfo.cAddressAnswerLimit))
+    outf.write('  dwRecursionRetry            : {0:d}\n'.format(serverinfo.dwRecursionRetry))
+    outf.write('  dwRecursionTimeout          : {0:d}\n'.format(serverinfo.dwRecursionTimeout))
+    outf.write('  dwMaxCacheTtl               : {0:d}\n'.format(serverinfo.dwMaxCacheTtl))
+    outf.write('  dwDsPollingInterval         : {0:d}\n'.format(serverinfo.dwDsPollingInterval))
+    outf.write('  dwScavengingInterval        : {0:d}\n'.format(serverinfo.dwScavengingInterval))
+    outf.write('  dwDefaultRefreshInterval    : {0:d}\n'.format(serverinfo.dwDefaultRefreshInterval))
+    outf.write('  dwDefaultNoRefreshInterval  : {0:d}\n'.format(serverinfo.dwDefaultNoRefreshInterval))
+    outf.write('  fAutoReverseZones           : {0!s}\n'.format(bool_string(serverinfo.fAutoReverseZones)))
+    outf.write('  fAutoCacheUpdate            : {0!s}\n'.format(bool_string(serverinfo.fAutoCacheUpdate)))
+    outf.write('  fRecurseAfterForwarding     : {0!s}\n'.format(bool_string(serverinfo.fRecurseAfterForwarding)))
+    outf.write('  fForwardDelegations         : {0!s}\n'.format(bool_string(serverinfo.fForwardDelegations)))
+    outf.write('  fNoRecursion                : {0!s}\n'.format(bool_string(serverinfo.fNoRecursion)))
+    outf.write('  fSecureResponses            : {0!s}\n'.format(bool_string(serverinfo.fSecureResponses)))
+    outf.write('  fRoundRobin                 : {0!s}\n'.format(bool_string(serverinfo.fRoundRobin)))
+    outf.write('  fLocalNetPriority           : {0!s}\n'.format(bool_string(serverinfo.fLocalNetPriority)))
+    outf.write('  fBindSecondaries            : {0!s}\n'.format(bool_string(serverinfo.fBindSecondaries)))
+    outf.write('  fWriteAuthorityNs           : {0!s}\n'.format(bool_string(serverinfo.fWriteAuthorityNs)))
+    outf.write('  fStrictFileParsing          : {0!s}\n'.format(bool_string(serverinfo.fStrictFileParsing)))
+    outf.write('  fLooseWildcarding           : {0!s}\n'.format(bool_string(serverinfo.fLooseWildcarding)))
+    outf.write('  fDefaultAgingState          : {0!s}\n'.format(bool_string(serverinfo.fDefaultAgingState)))
 
     if typeid != dnsserver.DNSSRV_TYPEID_SERVER_INFO_W2K:
-        outf.write('  dwRpcStructureVersion       : 0x%x\n' % serverinfo.dwRpcStructureVersion)
-        outf.write('  aipLogFilter                : %s\n' % dns_addr_array_string(serverinfo.aipLogFilter))
-        outf.write('  pwszLogFilePath             : %s\n' % serverinfo.pwszLogFilePath)
-        outf.write('  pszDomainName               : %s\n' % serverinfo.pszDomainName)
-        outf.write('  pszForestName               : %s\n' % serverinfo.pszForestName)
-        outf.write('  pszDomainDirectoryPartition : %s\n' % serverinfo.pszDomainDirectoryPartition)
-        outf.write('  pszForestDirectoryPartition : %s\n' % serverinfo.pszForestDirectoryPartition)
+        outf.write('  dwRpcStructureVersion       : 0x{0:x}\n'.format(serverinfo.dwRpcStructureVersion))
+        outf.write('  aipLogFilter                : {0!s}\n'.format(dns_addr_array_string(serverinfo.aipLogFilter)))
+        outf.write('  pwszLogFilePath             : {0!s}\n'.format(serverinfo.pwszLogFilePath))
+        outf.write('  pszDomainName               : {0!s}\n'.format(serverinfo.pszDomainName))
+        outf.write('  pszForestName               : {0!s}\n'.format(serverinfo.pszForestName))
+        outf.write('  pszDomainDirectoryPartition : {0!s}\n'.format(serverinfo.pszDomainDirectoryPartition))
+        outf.write('  pszForestDirectoryPartition : {0!s}\n'.format(serverinfo.pszForestDirectoryPartition))
 
-        outf.write('  dwLocalNetPriorityNetMask   : 0x%x\n' % serverinfo.dwLocalNetPriorityNetMask)
-        outf.write('  dwLastScavengeTime          : %d\n' % serverinfo.dwLastScavengeTime)
-        outf.write('  dwEventLogLevel             : %d\n' % serverinfo.dwEventLogLevel)
-        outf.write('  dwLogFileMaxSize            : %d\n' % serverinfo.dwLogFileMaxSize)
-        outf.write('  dwDsForestVersion           : %d\n' % serverinfo.dwDsForestVersion)
-        outf.write('  dwDsDomainVersion           : %d\n' % serverinfo.dwDsDomainVersion)
-        outf.write('  dwDsDsaVersion              : %d\n' % serverinfo.dwDsDsaVersion)
+        outf.write('  dwLocalNetPriorityNetMask   : 0x{0:x}\n'.format(serverinfo.dwLocalNetPriorityNetMask))
+        outf.write('  dwLastScavengeTime          : {0:d}\n'.format(serverinfo.dwLastScavengeTime))
+        outf.write('  dwEventLogLevel             : {0:d}\n'.format(serverinfo.dwEventLogLevel))
+        outf.write('  dwLogFileMaxSize            : {0:d}\n'.format(serverinfo.dwLogFileMaxSize))
+        outf.write('  dwDsForestVersion           : {0:d}\n'.format(serverinfo.dwDsForestVersion))
+        outf.write('  dwDsDomainVersion           : {0:d}\n'.format(serverinfo.dwDsDomainVersion))
+        outf.write('  dwDsDsaVersion              : {0:d}\n'.format(serverinfo.dwDsDsaVersion))
 
     if typeid == dnsserver.DNSSRV_TYPEID_SERVER_INFO:
-        outf.write('  fReadOnlyDC                 : %s\n' % bool_string(serverinfo.fReadOnlyDC))
+        outf.write('  fReadOnlyDC                 : {0!s}\n'.format(bool_string(serverinfo.fReadOnlyDC)))
 
 
 def print_zoneinfo(outf, typeid, zoneinfo):
-    outf.write('  pszZoneName                 : %s\n' % zoneinfo.pszZoneName)
-    outf.write('  dwZoneType                  : %s\n' % zone_type_string(zoneinfo.dwZoneType))
-    outf.write('  fReverse                    : %s\n' % bool_string(zoneinfo.fReverse))
-    outf.write('  fAllowUpdate                : %s\n' % zone_update_string(zoneinfo.fAllowUpdate))
-    outf.write('  fPaused                     : %s\n' % bool_string(zoneinfo.fPaused))
-    outf.write('  fShutdown                   : %s\n' % bool_string(zoneinfo.fShutdown))
-    outf.write('  fAutoCreated                : %s\n' % bool_string(zoneinfo.fAutoCreated))
-    outf.write('  fUseDatabase                : %s\n' % bool_string(zoneinfo.fUseDatabase))
-    outf.write('  pszDataFile                 : %s\n' % zoneinfo.pszDataFile)
+    outf.write('  pszZoneName                 : {0!s}\n'.format(zoneinfo.pszZoneName))
+    outf.write('  dwZoneType                  : {0!s}\n'.format(zone_type_string(zoneinfo.dwZoneType)))
+    outf.write('  fReverse                    : {0!s}\n'.format(bool_string(zoneinfo.fReverse)))
+    outf.write('  fAllowUpdate                : {0!s}\n'.format(zone_update_string(zoneinfo.fAllowUpdate)))
+    outf.write('  fPaused                     : {0!s}\n'.format(bool_string(zoneinfo.fPaused)))
+    outf.write('  fShutdown                   : {0!s}\n'.format(bool_string(zoneinfo.fShutdown)))
+    outf.write('  fAutoCreated                : {0!s}\n'.format(bool_string(zoneinfo.fAutoCreated)))
+    outf.write('  fUseDatabase                : {0!s}\n'.format(bool_string(zoneinfo.fUseDatabase)))
+    outf.write('  pszDataFile                 : {0!s}\n'.format(zoneinfo.pszDataFile))
     if typeid != dnsserver.DNSSRV_TYPEID_ZONE_INFO:
-        outf.write('  aipMasters                  : %s\n' %
-                    ip4_array_string(zoneinfo.aipMasters))
+        outf.write('  aipMasters                  : {0!s}\n'.format(
+                    ip4_array_string(zoneinfo.aipMasters)))
     else:
-        outf.write('  aipMasters                  : %s\n' %
-                    dns_addr_array_string(zoneinfo.aipMasters))
-    outf.write('  fSecureSecondaries          : %s\n' % zone_secondary_security_string(zoneinfo.fSecureSecondaries))
-    outf.write('  fNotifyLevel                : %s\n' % zone_notify_level_string(zoneinfo.fNotifyLevel))
+        outf.write('  aipMasters                  : {0!s}\n'.format(
+                    dns_addr_array_string(zoneinfo.aipMasters)))
+    outf.write('  fSecureSecondaries          : {0!s}\n'.format(zone_secondary_security_string(zoneinfo.fSecureSecondaries)))
+    outf.write('  fNotifyLevel                : {0!s}\n'.format(zone_notify_level_string(zoneinfo.fNotifyLevel)))
     if typeid != dnsserver.DNSSRV_TYPEID_ZONE_INFO:
-        outf.write('  aipSecondaries              : %s\n' %
-                    ip4_array_string(zoneinfo.aipSecondaries))
-        outf.write('  aipNotify                   : %s\n' %
-                    ip4_array_string(zoneinfo.aipNotify))
+        outf.write('  aipSecondaries              : {0!s}\n'.format(
+                    ip4_array_string(zoneinfo.aipSecondaries)))
+        outf.write('  aipNotify                   : {0!s}\n'.format(
+                    ip4_array_string(zoneinfo.aipNotify)))
     else:
-        outf.write('  aipSecondaries              : %s\n' %
-                    dns_addr_array_string(zoneinfo.aipSecondaries))
-        outf.write('  aipNotify                   : %s\n' %
-                    dns_addr_array_string(zoneinfo.aipNotify))
-    outf.write('  fUseWins                    : %s\n' % bool_string(zoneinfo.fUseWins))
-    outf.write('  fUseNbstat                  : %s\n' % bool_string(zoneinfo.fUseNbstat))
-    outf.write('  fAging                      : %s\n' % bool_string(zoneinfo.fAging))
-    outf.write('  dwNoRefreshInterval         : %d\n' % zoneinfo.dwNoRefreshInterval)
-    outf.write('  dwRefreshInterval           : %d\n' % zoneinfo.dwRefreshInterval)
-    outf.write('  dwAvailForScavengeTime      : %d\n' % zoneinfo.dwAvailForScavengeTime)
+        outf.write('  aipSecondaries              : {0!s}\n'.format(
+                    dns_addr_array_string(zoneinfo.aipSecondaries)))
+        outf.write('  aipNotify                   : {0!s}\n'.format(
+                    dns_addr_array_string(zoneinfo.aipNotify)))
+    outf.write('  fUseWins                    : {0!s}\n'.format(bool_string(zoneinfo.fUseWins)))
+    outf.write('  fUseNbstat                  : {0!s}\n'.format(bool_string(zoneinfo.fUseNbstat)))
+    outf.write('  fAging                      : {0!s}\n'.format(bool_string(zoneinfo.fAging)))
+    outf.write('  dwNoRefreshInterval         : {0:d}\n'.format(zoneinfo.dwNoRefreshInterval))
+    outf.write('  dwRefreshInterval           : {0:d}\n'.format(zoneinfo.dwRefreshInterval))
+    outf.write('  dwAvailForScavengeTime      : {0:d}\n'.format(zoneinfo.dwAvailForScavengeTime))
     if typeid != dnsserver.DNSSRV_TYPEID_ZONE_INFO:
-        outf.write('  aipScavengeServers          : %s\n' %
-                    ip4_array_string(zoneinfo.aipScavengeServers))
+        outf.write('  aipScavengeServers          : {0!s}\n'.format(
+                    ip4_array_string(zoneinfo.aipScavengeServers)))
     else:
-        outf.write('  aipScavengeServers          : %s\n' %
-                    dns_addr_array_string(zoneinfo.aipScavengeServers))
+        outf.write('  aipScavengeServers          : {0!s}\n'.format(
+                    dns_addr_array_string(zoneinfo.aipScavengeServers)))
 
     if typeid != dnsserver.DNSSRV_TYPEID_ZONE_INFO_W2K:
-        outf.write('  dwRpcStructureVersion       : 0x%x\n' % zoneinfo.dwRpcStructureVersion)
-        outf.write('  dwForwarderTimeout          : %d\n' % zoneinfo.dwForwarderTimeout)
-        outf.write('  fForwarderSlave             : %d\n' % zoneinfo.fForwarderSlave)
+        outf.write('  dwRpcStructureVersion       : 0x{0:x}\n'.format(zoneinfo.dwRpcStructureVersion))
+        outf.write('  dwForwarderTimeout          : {0:d}\n'.format(zoneinfo.dwForwarderTimeout))
+        outf.write('  fForwarderSlave             : {0:d}\n'.format(zoneinfo.fForwarderSlave))
         if typeid != dnsserver.DNSSRV_TYPEID_ZONE_INFO:
-            outf.write('  aipLocalMasters             : %s\n' %
-                        ip4_array_string(zoneinfo.aipLocalMasters))
+            outf.write('  aipLocalMasters             : {0!s}\n'.format(
+                        ip4_array_string(zoneinfo.aipLocalMasters)))
         else:
-            outf.write('  aipLocalMasters             : %s\n' %
-                        dns_addr_array_string(zoneinfo.aipLocalMasters))
-        outf.write('  dwDpFlags                   : %s\n' % dp_flags_string(zoneinfo.dwDpFlags))
-        outf.write('  pszDpFqdn                   : %s\n' % zoneinfo.pszDpFqdn)
-        outf.write('  pwszZoneDn                  : %s\n' % zoneinfo.pwszZoneDn)
-        outf.write('  dwLastSuccessfulSoaCheck    : %d\n' % zoneinfo.dwLastSuccessfulSoaCheck)
-        outf.write('  dwLastSuccessfulXfr         : %d\n' % zoneinfo.dwLastSuccessfulXfr)
+            outf.write('  aipLocalMasters             : {0!s}\n'.format(
+                        dns_addr_array_string(zoneinfo.aipLocalMasters)))
+        outf.write('  dwDpFlags                   : {0!s}\n'.format(dp_flags_string(zoneinfo.dwDpFlags)))
+        outf.write('  pszDpFqdn                   : {0!s}\n'.format(zoneinfo.pszDpFqdn))
+        outf.write('  pwszZoneDn                  : {0!s}\n'.format(zoneinfo.pwszZoneDn))
+        outf.write('  dwLastSuccessfulSoaCheck    : {0:d}\n'.format(zoneinfo.dwLastSuccessfulSoaCheck))
+        outf.write('  dwLastSuccessfulXfr         : {0:d}\n'.format(zoneinfo.dwLastSuccessfulXfr))
 
     if typeid == dnsserver.DNSSRV_TYPEID_ZONE_INFO:
-        outf.write('  fQueuedForBackgroundLoad    : %s\n' % bool_string(zoneinfo.fQueuedForBackgroundLoad))
-        outf.write('  fBackgroundLoadInProgress   : %s\n' % bool_string(zoneinfo.fBackgroundLoadInProgress))
-        outf.write('  fReadOnlyZone               : %s\n' % bool_string(zoneinfo.fReadOnlyZone))
-        outf.write('  dwLastXfrAttempt            : %d\n' % zoneinfo.dwLastXfrAttempt)
-        outf.write('  dwLastXfrResult             : %d\n' % zoneinfo.dwLastXfrResult)
+        outf.write('  fQueuedForBackgroundLoad    : {0!s}\n'.format(bool_string(zoneinfo.fQueuedForBackgroundLoad)))
+        outf.write('  fBackgroundLoadInProgress   : {0!s}\n'.format(bool_string(zoneinfo.fBackgroundLoadInProgress)))
+        outf.write('  fReadOnlyZone               : {0!s}\n'.format(bool_string(zoneinfo.fReadOnlyZone)))
+        outf.write('  dwLastXfrAttempt            : {0:d}\n'.format(zoneinfo.dwLastXfrAttempt))
+        outf.write('  dwLastXfrResult             : {0:d}\n'.format(zoneinfo.dwLastXfrResult))
 
 
 def print_zone(outf, typeid, zone):
-    outf.write('  pszZoneName                 : %s\n' % zone.pszZoneName)
-    outf.write('  Flags                       : %s\n' % zone_flags_string(zone.Flags))
-    outf.write('  ZoneType                    : %s\n' % zone_type_string(zone.ZoneType))
-    outf.write('  Version                     : %s\n' % zone.Version)
+    outf.write('  pszZoneName                 : {0!s}\n'.format(zone.pszZoneName))
+    outf.write('  Flags                       : {0!s}\n'.format(zone_flags_string(zone.Flags)))
+    outf.write('  ZoneType                    : {0!s}\n'.format(zone_type_string(zone.ZoneType)))
+    outf.write('  Version                     : {0!s}\n'.format(zone.Version))
 
     if typeid != dnsserver.DNSSRV_TYPEID_ZONE_W2K:
-        outf.write('  dwDpFlags                   : %s\n' % dp_flags_string(zone.dwDpFlags))
-        outf.write('  pszDpFqdn                   : %s\n' % zone.pszDpFqdn)
+        outf.write('  dwDpFlags                   : {0!s}\n'.format(dp_flags_string(zone.dwDpFlags)))
+        outf.write('  pszDpFqdn                   : {0!s}\n'.format(zone.pszDpFqdn))
 
 
 def print_enumzones(outf, typeid, zones):
-    outf.write('  %d zone(s) found\n' % zones.dwZoneCount)
+    outf.write('  {0:d} zone(s) found\n'.format(zones.dwZoneCount))
     for zone in zones.ZoneArray:
         outf.write('\n')
         print_zone(outf, typeid, zone)
@@ -352,17 +352,17 @@ def print_enumzones(outf, typeid, zones):
 
 def print_dns_record(outf, rec):
     if rec.wType == dnsp.DNS_TYPE_A:
-        mesg = 'A: %s' % (rec.data)
+        mesg = 'A: {0!s}'.format((rec.data))
     elif rec.wType == dnsp.DNS_TYPE_AAAA:
-        mesg = 'AAAA: %s' % (rec.data)
+        mesg = 'AAAA: {0!s}'.format((rec.data))
     elif rec.wType == dnsp.DNS_TYPE_PTR:
-        mesg = 'PTR: %s' % (rec.data.str)
+        mesg = 'PTR: {0!s}'.format((rec.data.str))
     elif rec.wType == dnsp.DNS_TYPE_NS:
-        mesg = 'NS: %s' % (rec.data.str)
+        mesg = 'NS: {0!s}'.format((rec.data.str))
     elif rec.wType == dnsp.DNS_TYPE_CNAME:
-        mesg = 'CNAME: %s' % (rec.data.str)
+        mesg = 'CNAME: {0!s}'.format((rec.data.str))
     elif rec.wType == dnsp.DNS_TYPE_SOA:
-        mesg = 'SOA: serial=%d, refresh=%d, retry=%d, expire=%d, minttl=%d, ns=%s, email=%s' % (
+        mesg = 'SOA: serial={0:d}, refresh={1:d}, retry={2:d}, expire={3:d}, minttl={4:d}, ns={5!s}, email={6!s}'.format(
                     rec.data.dwSerialNo,
                     rec.data.dwRefresh,
                     rec.data.dwRetry,
@@ -371,22 +371,22 @@ def print_dns_record(outf, rec):
                     rec.data.NamePrimaryServer.str,
                     rec.data.ZoneAdministratorEmail.str)
     elif rec.wType == dnsp.DNS_TYPE_MX:
-        mesg = 'MX: %s (%d)' % (rec.data.nameExchange.str, rec.data.wPreference)
+        mesg = 'MX: {0!s} ({1:d})'.format(rec.data.nameExchange.str, rec.data.wPreference)
     elif rec.wType == dnsp.DNS_TYPE_SRV:
-        mesg = 'SRV: %s (%d, %d, %d)' % (rec.data.nameTarget.str, rec.data.wPort,
+        mesg = 'SRV: {0!s} ({1:d}, {2:d}, {3:d})'.format(rec.data.nameTarget.str, rec.data.wPort,
                                          rec.data.wPriority, rec.data.wWeight)
     elif rec.wType == dnsp.DNS_TYPE_TXT:
-        slist = ['"%s"' % name.str for name in rec.data.str]
-        mesg = 'TXT: %s' % ','.join(slist)
+        slist = ['"{0!s}"'.format(name.str) for name in rec.data.str]
+        mesg = 'TXT: {0!s}'.format(','.join(slist))
     else:
         mesg = 'Unknown: '
-    outf.write('    %s (flags=%x, serial=%d, ttl=%d)\n' % (
+    outf.write('    {0!s} (flags={1:x}, serial={2:d}, ttl={3:d})\n'.format(
                 mesg, rec.dwFlags, rec.dwSerial, rec.dwTtlSeconds))
 
 
 def print_dnsrecords(outf, records):
     for rec in records.rec:
-        outf.write('  Name=%s, Records=%d, Children=%d\n' % (
+        outf.write('  Name={0!s}, Records={1:d}, Children={2:d}\n'.format(
                     rec.dnsNodeName.str,
                     rec.wRecordCount,
                     rec.dwChildCount))
@@ -895,7 +895,7 @@ class cmd_zonecreate(Command):
         res = dns_conn.DnssrvOperation2(client_version, 0, server, zone,
                                         0, 'ResetDwordProperty', typeid,
                                         name_and_param)
-        self.outf.write('Zone %s created successfully\n' % zone)
+        self.outf.write('Zone {0!s} created successfully\n'.format(zone))
 
 
 class cmd_zonedelete(Command):
@@ -923,7 +923,7 @@ class cmd_zonedelete(Command):
                                         0, server, zone, 0, 'DeleteZoneFromDs',
                                         dnsserver.DNSSRV_TYPEID_NULL,
                                         None)
-        self.outf.write('Zone %s delete successfully\n' % zone)
+        self.outf.write('Zone {0!s} delete successfully\n'.format(zone))
 
 
 class cmd_query(Command):
@@ -1056,7 +1056,7 @@ class cmd_add_record(Command):
             credopts=None, versionopts=None):
 
         if rtype.upper() not in ('A','AAAA','PTR','CNAME','NS','MX','SRV','TXT'):
-            raise CommandError('Adding record of type %s is not supported' % rtype)
+            raise CommandError('Adding record of type {0!s} is not supported'.format(rtype))
 
         record_type = dns_type_flag(rtype)
         rec = data_to_dns_record(record_type, data)
@@ -1107,7 +1107,7 @@ class cmd_update_record(Command):
                 sambaopts=None, credopts=None, versionopts=None):
 
         if rtype.upper() not in ('A','AAAA','PTR','CNAME','NS','MX','SOA','SRV','TXT'):
-            raise CommandError('Updating record of type %s is not supported' % rtype)
+            raise CommandError('Updating record of type {0!s} is not supported'.format(rtype))
 
         record_type = dns_type_flag(rtype)
         rec = data_to_dns_record(record_type, newdata)
@@ -1170,7 +1170,7 @@ class cmd_delete_record(Command):
     def run(self, server, zone, name, rtype, data, sambaopts=None, credopts=None, versionopts=None):
 
         if rtype.upper() not in ('A','AAAA','PTR','CNAME','NS','MX','SRV','TXT'):
-            raise CommandError('Deleting record of type %s is not supported' % rtype)
+            raise CommandError('Deleting record of type {0!s} is not supported'.format(rtype))
 
         record_type = dns_type_flag(rtype)
 

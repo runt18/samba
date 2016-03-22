@@ -97,11 +97,11 @@ def get_msvc_version(conf, compiler, version, target, vcvars):
 	f.write("""@echo off
 set INCLUDE=
 set LIB=
-call "%s" %s
-echo PATH=%%PATH%%
-echo INCLUDE=%%INCLUDE%%
-echo LIB=%%LIB%%
-""" % (vcvars,target))
+call "{0!s}" {1!s}
+echo PATH=%PATH%
+echo INCLUDE=%INCLUDE%
+echo LIB=%LIB%
+""".format(vcvars, target))
 	f.close()
 	sout = Utils.cmd_output(['cmd', '/E:on', '/V:on', '/C', batfile])
 	lines = sout.splitlines()
@@ -137,7 +137,7 @@ echo LIB=%%LIB%%
 		p = pproc.Popen([cxx, '/help'], env=env, stdout=pproc.PIPE, stderr=pproc.PIPE)
 		out, err = p.communicate()
 		if p.returncode != 0:
-			raise Exception('return code: %r: %r' % (p.returncode, err))
+			raise Exception('return code: {0!r}: {1!r}'.format(p.returncode, err))
 	except Exception, e:
 		debug('msvc: get_msvc_version: %r %r %r -> failure', compiler, version, target)
 		debug(str(e))
@@ -326,8 +326,8 @@ def find_lt_names_msvc(self, libname, is_static=False):
 	this function is not attached to the task_gen class
 	"""
 	lt_names=[
-		'lib%s.la' % libname,
-		'%s.la' % libname,
+		'lib{0!s}.la'.format(libname),
+		'{0!s}.la'.format(libname),
 	]
 
 	for path in self.env['LIBPATH']:
@@ -353,7 +353,7 @@ def find_lt_names_msvc(self, libname, is_static=False):
 					else:
 						return (None, olib, True)
 				else:
-					raise Utils.WafError('invalid libtool object file: %s' % laf)
+					raise Utils.WafError('invalid libtool object file: {0!s}'.format(laf))
 	return (None, None, None)
 
 @conf
@@ -382,20 +382,20 @@ def libname_msvc(self, libname, is_static=False, mandatory=False):
 		_libpaths=self.env['LIBPATH']
 
 	static_libs=[
-		'lib%ss.lib' % lib,
-		'lib%s.lib' % lib,
-		'%ss.lib' % lib,
-		'%s.lib' %lib,
+		'lib{0!s}s.lib'.format(lib),
+		'lib{0!s}.lib'.format(lib),
+		'{0!s}s.lib'.format(lib),
+		'{0!s}.lib'.format(lib),
 		]
 
 	dynamic_libs=[
-		'lib%s.dll.lib' % lib,
-		'lib%s.dll.a' % lib,
-		'%s.dll.lib' % lib,
-		'%s.dll.a' % lib,
-		'lib%s_d.lib' % lib,
-		'%s_d.lib' % lib,
-		'%s.lib' %lib,
+		'lib{0!s}.dll.lib'.format(lib),
+		'lib{0!s}.dll.a'.format(lib),
+		'{0!s}.dll.lib'.format(lib),
+		'{0!s}.dll.a'.format(lib),
+		'lib{0!s}_d.lib'.format(lib),
+		'{0!s}_d.lib'.format(lib),
+		'{0!s}.lib'.format(lib),
 		]
 
 	libnames=static_libs
@@ -410,7 +410,7 @@ def libname_msvc(self, libname, is_static=False, mandatory=False):
 
 	#if no lib can be found, just return the libname as msvc expects it
 	if mandatory:
-		self.fatal("The library %r could not be found" % libname)
+		self.fatal("The library {0!r} could not be found".format(libname))
 	return re.sub('\.lib$', '', libname)
 
 @conf
@@ -645,7 +645,7 @@ def apply_flags_msvc(self):
 
 	subsystem = getattr(self, 'subsystem', '')
 	if subsystem:
-		subsystem = '/subsystem:%s' % subsystem
+		subsystem = '/subsystem:{0!s}'.format(subsystem)
 		flags = 'cstaticlib' in self.features and 'ARFLAGS' or 'LINKFLAGS'
 		self.env.append_value(flags, subsystem)
 
@@ -757,7 +757,7 @@ def exec_mf(self):
 	lst.extend(Utils.to_list(env['MTFLAGS']))
 	lst.extend(Utils.to_list("-manifest"))
 	lst.extend(Utils.to_list(manifest))
-	lst.extend(Utils.to_list("-outputresource:%s;%s" % (outfile, mode)))
+	lst.extend(Utils.to_list("-outputresource:{0!s};{1!s}".format(outfile, mode)))
 
 	#cmd='%s %s -manifest "%s" -outputresource:"%s";#%s' % (mtool, flags,
 	#	manifest, outfile, mode)

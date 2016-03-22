@@ -29,51 +29,51 @@ class GpoCmdTestCase(SambaToolCmdTest):
 
     def test_gpo_list(self):
         """Run gpo list against the server and make sure it looks accurate"""
-        (result, out, err) = self.runsubcmd("gpo", "listall", "-H", "ldap://%s" % os.environ["SERVER"])
+        (result, out, err) = self.runsubcmd("gpo", "listall", "-H", "ldap://{0!s}".format(os.environ["SERVER"]))
         self.assertCmdSuccess(result, "Ensuring gpo listall ran successfully")
 
     def test_fetchfail(self):
         """Run against a non-existent GPO, and make sure it fails (this hard-coded UUID is very unlikely to exist"""
-        (result, out, err) = self.runsubcmd("gpo", "fetch", "c25cac17-a02a-4151-835d-fae17446ee43", "-H", "ldap://%s" % os.environ["SERVER"])
+        (result, out, err) = self.runsubcmd("gpo", "fetch", "c25cac17-a02a-4151-835d-fae17446ee43", "-H", "ldap://{0!s}".format(os.environ["SERVER"]))
         self.assertEquals(result, -1, "check for result code")
 
     def test_fetch(self):
         """Run against a real GPO, and make sure it passes"""
-        (result, out, err) = self.runsubcmd("gpo", "fetch", self.gpo_guid, "-H", "ldap://%s" % os.environ["SERVER"], "--tmpdir", self.tempdir)
+        (result, out, err) = self.runsubcmd("gpo", "fetch", self.gpo_guid, "-H", "ldap://{0!s}".format(os.environ["SERVER"]), "--tmpdir", self.tempdir)
         self.assertCmdSuccess(result, "Ensuring gpo fetched successfully")
         shutil.rmtree(os.path.join(self.tempdir, "policy"))
 
     def test_show(self):
         """Show a real GPO, and make sure it passes"""
-        (result, out, err) = self.runsubcmd("gpo", "show", self.gpo_guid, "-H", "ldap://%s" % os.environ["SERVER"])
+        (result, out, err) = self.runsubcmd("gpo", "show", self.gpo_guid, "-H", "ldap://{0!s}".format(os.environ["SERVER"]))
         self.assertCmdSuccess(result, "Ensuring gpo fetched successfully")
 
     def test_show_as_admin(self):
         """Show a real GPO, and make sure it passes"""
-        (result, out, err) = self.runsubcmd("gpo", "show", self.gpo_guid, "-H", "ldap://%s" % os.environ["SERVER"], "-U%s%%%s" % (os.environ["USERNAME"], os.environ["PASSWORD"]))
+        (result, out, err) = self.runsubcmd("gpo", "show", self.gpo_guid, "-H", "ldap://{0!s}".format(os.environ["SERVER"]), "-U{0!s}%{1!s}".format(os.environ["USERNAME"], os.environ["PASSWORD"]))
         self.assertCmdSuccess(result, "Ensuring gpo fetched successfully")
 
     def test_aclcheck(self):
         """Check all the GPOs on the remote server have correct ACLs"""
-        (result, out, err) = self.runsubcmd("gpo", "aclcheck", "-H", "ldap://%s" % os.environ["SERVER"], "-U%s%%%s" % (os.environ["USERNAME"], os.environ["PASSWORD"]))
+        (result, out, err) = self.runsubcmd("gpo", "aclcheck", "-H", "ldap://{0!s}".format(os.environ["SERVER"]), "-U{0!s}%{1!s}".format(os.environ["USERNAME"], os.environ["PASSWORD"]))
         self.assertCmdSuccess(result, "Ensuring gpo checked successfully")
 
     def setUp(self):
         """set up a temporary GPO to work with"""
         super(GpoCmdTestCase, self).setUp()
         (result, out, err) = self.runsubcmd("gpo", "create", self.gpo_name,
-                                            "-H", "ldap://%s" % os.environ["SERVER"],
-                                            "-U%s%%%s" % (os.environ["USERNAME"], os.environ["PASSWORD"]),
+                                            "-H", "ldap://{0!s}".format(os.environ["SERVER"]),
+                                            "-U{0!s}%{1!s}".format(os.environ["USERNAME"], os.environ["PASSWORD"]),
                                             "--tmpdir", self.tempdir)
         shutil.rmtree(os.path.join(self.tempdir, "policy"))
         self.assertCmdSuccess(result, "Ensuring gpo created successfully")
         try:
-            self.gpo_guid = "{%s}" % out.split("{")[1].split("}")[0]
+            self.gpo_guid = "{{{0!s}}}".format(out.split("{")[1].split("}")[0])
         except IndexError:
-            self.fail("Failed to find GUID in output: %s" % out)
+            self.fail("Failed to find GUID in output: {0!s}".format(out))
 
     def tearDown(self):
         """remove the temporary GPO to work with"""
-        (result, out, err) = self.runsubcmd("gpo", "del", self.gpo_guid, "-H", "ldap://%s" % os.environ["SERVER"], "-U%s%%%s" % (os.environ["USERNAME"], os.environ["PASSWORD"]))
+        (result, out, err) = self.runsubcmd("gpo", "del", self.gpo_guid, "-H", "ldap://{0!s}".format(os.environ["SERVER"]), "-U{0!s}%{1!s}".format(os.environ["USERNAME"], os.environ["PASSWORD"]))
         self.assertCmdSuccess(result, "Ensuring gpo deleted successfully")
         super(GpoCmdTestCase, self).tearDown()

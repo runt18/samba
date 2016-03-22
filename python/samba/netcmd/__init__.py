@@ -104,19 +104,19 @@ class Command(object):
 
         if isinstance(inner_exception, LdbError):
             (ldb_ecode, ldb_emsg) = inner_exception
-            self.errf.write("ERROR(ldb): %s - %s\n" % (message, ldb_emsg))
+            self.errf.write("ERROR(ldb): {0!s} - {1!s}\n".format(message, ldb_emsg))
         elif isinstance(inner_exception, AssertionError):
-            self.errf.write("ERROR(assert): %s\n" % message)
+            self.errf.write("ERROR(assert): {0!s}\n".format(message))
             force_traceback = True
         elif isinstance(inner_exception, RuntimeError):
-            self.errf.write("ERROR(runtime): %s - %s\n" % (message, evalue))
+            self.errf.write("ERROR(runtime): {0!s} - {1!s}\n".format(message, evalue))
         elif type(inner_exception) is Exception:
-            self.errf.write("ERROR(exception): %s - %s\n" % (message, evalue))
+            self.errf.write("ERROR(exception): {0!s} - {1!s}\n".format(message, evalue))
             force_traceback = True
         elif inner_exception is None:
-            self.errf.write("ERROR: %s\n" % (message))
+            self.errf.write("ERROR: {0!s}\n".format((message)))
         else:
-            self.errf.write("ERROR(%s): %s - %s\n" % (str(etype), message, evalue))
+            self.errf.write("ERROR({0!s}): {1!s} - {2!s}\n".format(str(etype), message, evalue))
             force_traceback = True
 
         if force_traceback or samba.get_debug_level() >= 3:
@@ -199,7 +199,7 @@ class SuperCommand(Command):
     def _run(self, myname, subcommand=None, *args):
         if subcommand in self.subcommands:
             return self.subcommands[subcommand]._run(
-                "%s %s" % (myname, subcommand), *args)
+                "{0!s} {1!s}".format(myname, subcommand), *args)
 
         epilog = "\nAvailable subcommands:\n"
         subcmds = self.subcommands.keys()
@@ -210,7 +210,7 @@ class SuperCommand(Command):
             if not cmd.hidden:
                 epilog += "  %*s  - %s\n" % (
                     -max_length, cmd_name, cmd.short_description)
-        epilog += "For more help on a specific subcommand, please type: %s <subcommand> (-h|--help)\n" % myname
+        epilog += "For more help on a specific subcommand, please type: {0!s} <subcommand> (-h|--help)\n".format(myname)
 
         parser, optiongroups = self._create_parser(myname, epilog=epilog)
         args_list = list(args)

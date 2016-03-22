@@ -90,7 +90,7 @@ if __name__ == "__main__":
     elif len(args) >= 8:
         pass
     else:
-        parser.error("more arguments required - given=%d" % (len(args)))
+        parser.error("more arguments required - given={0:d}".format((len(args))))
 
     server = args[0]
     dn = args[1]
@@ -153,7 +153,7 @@ if __name__ == "__main__":
        store_hwm.highest_usn      = 0
        store_utdv = None
 
-    binding_str = "ncacn_ip_tcp:%s[spnego,seal]" % server
+    binding_str = "ncacn_ip_tcp:{0!s}[spnego,seal]".format(server)
 
     drs_conn = drsuapi.drsuapi(binding_str, lp, creds)
 
@@ -232,12 +232,12 @@ if __name__ == "__main__":
 
     user_session_key = drs_conn.user_session_key
 
-    print "# starting at usn[%d]" % (highwatermark.highest_usn)
+    print "# starting at usn[{0:d}]".format((highwatermark.highest_usn))
 
     while True:
         (level, ctr) = drs_conn.DsGetNCChanges(drs_handle, 8, req8)
         if ctr.first_object == None and ctr.object_count != 0:
-            raise RuntimeError("DsGetNCChanges: NULL first_object with object_count=%u" % (ctr.object_count))
+            raise RuntimeError("DsGetNCChanges: NULL first_object with object_count={0:d}".format((ctr.object_count)))
 
         obj_item = ctr.first_object
         while obj_item is not None:
@@ -274,7 +274,7 @@ if __name__ == "__main__":
                         elif attmode == "raw":
                             val = val_raw
                         else:
-                            assert False, "attmode[%s]" % attmode
+                            assert False, "attmode[{0!s}]".format(attmode)
                         attvals.append(val)
                 if not attid_equal(attr.attid, drsuapi.DRSUAPI_ATTID_supplementalCredentials):
                     continue
@@ -303,7 +303,7 @@ if __name__ == "__main__":
             (crc32_v) = struct.unpack("<L", plain_buffer[0:4])
             attr_val = plain_buffer[4:]
             crc32_c = binascii.crc32(attr_val) & 0xffffffff
-            assert int(crc32_v[0]) == int(crc32_c), "CRC32 0x%08X != 0x%08X" % (crc32_v[0], crc32_c)
+            assert int(crc32_v[0]) == int(crc32_c), "CRC32 0x{0:08X} != 0x{1:08X}".format(crc32_v[0], crc32_c)
 
             spl = ndr_unpack(drsblobs.supplementalCredentialsBlob, attr_val)
 
@@ -397,13 +397,13 @@ if __name__ == "__main__":
                                      len(store_utdv_blob), utdv_ofs) + \
                                      dn + store_hwm_blob + store_utdv_blob
 
-            tmp_file = "%s.tmp" % cookie_file
+            tmp_file = "{0!s}.tmp".format(cookie_file)
             f = open(tmp_file, 'wb')
             f.write(store_blob)
             f.close()
             os.rename(tmp_file, cookie_file)
 
-            print "# up to usn[%d]" % (ctr.new_highwatermark.highest_usn)
+            print "# up to usn[{0:d}]".format((ctr.new_highwatermark.highest_usn))
             break
-        print "# up to tmp_usn[%d]" % (ctr.new_highwatermark.highest_usn)
+        print "# up to tmp_usn[{0:d}]".format((ctr.new_highwatermark.highest_usn))
         req8.highwatermark = ctr.new_highwatermark

@@ -28,10 +28,10 @@ class ImportTest(comfychair.TestCase):
                           'srvsvc', 'tdb', 'smb', 'tdbpack']
         for m in python_modules:
             try:
-                __import__('samba.%s' % m)
+                __import__('samba.{0!s}'.format(m))
             except ImportError, msg:
                 self.log(str(msg))
-                self.fail('error importing %s module' % m)
+                self.fail('error importing {0!s} module'.format(m))
 
 tests = [ImportTest]
 
@@ -40,7 +40,6 @@ if __name__ == '__main__':
     # objects we have built and not previously installed stuff.
     from distutils.util import get_platform
     from os import getcwd
-    sys.path.insert(0, '%s/build/lib.%s-%s' %
-                    (getcwd(), get_platform(), sys.version[0:3]))
+    sys.path.insert(0, '{0!s}/build/lib.{1!s}-{2!s}'.format(getcwd(), get_platform(), sys.version[0:3]))
 
     comfychair.main(tests)

@@ -30,10 +30,10 @@ class valac_task(Task.Task):
 			cmd.append('--thread')
 
 		if self.profile:
-			cmd.append('--profile=%s' % self.profile)
+			cmd.append('--profile={0!s}'.format(self.profile))
 
 		if self.target_glib:
-			cmd.append('--target-glib=%s' % self.target_glib)
+			cmd.append('--target-glib={0!s}'.format(self.target_glib))
 
 		features = self.generator.features
 
@@ -47,20 +47,20 @@ class valac_task(Task.Task):
 			cmd.append('--basedir ' + top_src)
 			cmd.append('-d ' + top_bld)
 			if env['VALAC_VERSION'] > (0, 7, 2) and hasattr(self, 'gir'):
-				cmd.append('--gir=%s.gir' % self.gir)
+				cmd.append('--gir={0!s}.gir'.format(self.gir))
 
 		else:
 			output_dir = self.outputs[0].bld_dir(env)
-			cmd.append('-d %s' % output_dir)
+			cmd.append('-d {0!s}'.format(output_dir))
 
 		for vapi_dir in self.vapi_dirs:
-			cmd.append('--vapidir=%s' % vapi_dir)
+			cmd.append('--vapidir={0!s}'.format(vapi_dir))
 
 		for package in self.packages:
-			cmd.append('--pkg %s' % package)
+			cmd.append('--pkg {0!s}'.format(package))
 
 		for package in self.packages_private:
-			cmd.append('--pkg %s' % package)
+			cmd.append('--pkg {0!s}'.format(package))
 
 		cmd.append(" ".join(inputs))
 		result = self.generator.bld.exec_command(" ".join(cmd))
@@ -68,22 +68,22 @@ class valac_task(Task.Task):
 		if not 'cprogram' in features:
 			# generate the .deps file
 			if self.packages:
-				filename = os.path.join(self.generator.path.abspath(env), "%s.deps" % self.target)
+				filename = os.path.join(self.generator.path.abspath(env), "{0!s}.deps".format(self.target))
 				deps = open(filename, 'w')
 				for package in self.packages:
 					deps.write(package + '\n')
 				deps.close()
 
 			# handle vala 0.1.6 who doesn't honor --directory for the generated .vapi
-			self._fix_output("../%s.vapi" % self.target)
+			self._fix_output("../{0!s}.vapi".format(self.target))
 			# handle vala >= 0.1.7 who has a weid definition for --directory
-			self._fix_output("%s.vapi" % self.target)
+			self._fix_output("{0!s}.vapi".format(self.target))
 			# handle vala >= 0.2.0 who doesn't honor --directory for the generated .gidl
-			self._fix_output("%s.gidl" % self.target)
+			self._fix_output("{0!s}.gidl".format(self.target))
 			# handle vala >= 0.3.6 who doesn't honor --directory for the generated .gir
-			self._fix_output("%s.gir" % self.target)
+			self._fix_output("{0!s}.gir".format(self.target))
 			if hasattr(self, 'gir'):
-				self._fix_output("%s.gir" % self.gir)
+				self._fix_output("{0!s}.gir".format(self.gir))
 
 		first = None
 		for node in self.outputs:
@@ -116,7 +116,7 @@ class valac_task(Task.Task):
 						api_version = "0." + version[1]
 					else:
 						api_version = version[0] + ".0"
-				install_path = '${INCLUDEDIR}/%s-%s/%s' % (package, api_version, header.relpath_gen(top_src))
+				install_path = '${{INCLUDEDIR}}/{0!s}-{1!s}/{2!s}'.format(package, api_version, header.relpath_gen(top_src))
 				bld.install_as(install_path, header, self.env)
 			bld.install_files('${DATAROOTDIR}/vala/vapi', vapi_list, self.env)
 			bld.install_files('${DATAROOTDIR}/gir-1.0', gir_list, self.env)
@@ -164,7 +164,7 @@ def vala_file(self, node):
 				# check if the package exists
 				package_obj = self.name_to_obj(package)
 				if not package_obj:
-					raise Utils.WafError("object '%s' was not found in uselib_local (required by '%s')" % (package, self.name))
+					raise Utils.WafError("object '{0!s}' was not found in uselib_local (required by '{1!s}')".format(package, self.name))
 
 				package_name = package_obj.target
 				package_node = package_obj.path
@@ -192,7 +192,7 @@ def vala_file(self, node):
 				valatask.vapi_dirs.append(self.path.find_dir(vapi_dir).abspath())
 				valatask.vapi_dirs.append(self.path.find_dir(vapi_dir).abspath(self.env))
 			except AttributeError:
-				Logs.warn("Unable to locate Vala API directory: '%s'" % vapi_dir)
+				Logs.warn("Unable to locate Vala API directory: '{0!s}'".format(vapi_dir))
 
 		self.includes.append(node.bld.srcnode.abspath())
 		self.includes.append(node.bld.srcnode.abspath(self.env))
@@ -201,7 +201,7 @@ def vala_file(self, node):
 				self.includes.append(self.path.find_dir(include).abspath())
 				self.includes.append(self.path.find_dir(include).abspath(self.env))
 			except AttributeError:
-				Logs.warn("Unable to locate include directory: '%s'" % include)
+				Logs.warn("Unable to locate include directory: '{0!s}'".format(include))
 
 		if valatask.profile == 'gobject':
 			if hasattr(self, 'target_glib'):
@@ -220,7 +220,7 @@ def vala_file(self, node):
 					self.uselib.append('GTHREAD')
 			else:
 				#Vala doesn't have threading support for dova nor posix
-				Logs.warn("Profile %s does not have threading support" % valatask.profile)
+				Logs.warn("Profile {0!s} does not have threading support".format(valatask.profile))
 
 		if hasattr(self, 'gir'):
 			valatask.gir = self.gir
@@ -237,26 +237,26 @@ def vala_file(self, node):
 		output_nodes.append(node.change_ext('.h'))
 	else:
 		if not 'cprogram' in self.features:
-			output_nodes.append(self.path.find_or_declare('%s.h' % self.target))
+			output_nodes.append(self.path.find_or_declare('{0!s}.h'.format(self.target)))
 
 	if not 'cprogram' in self.features:
-		output_nodes.append(self.path.find_or_declare('%s.vapi' % self.target))
+		output_nodes.append(self.path.find_or_declare('{0!s}.vapi'.format(self.target)))
 		if env['VALAC_VERSION'] > (0, 7, 2):
 			if hasattr(self, 'gir'):
-				output_nodes.append(self.path.find_or_declare('%s.gir' % self.gir))
+				output_nodes.append(self.path.find_or_declare('{0!s}.gir'.format(self.gir)))
 		elif env['VALAC_VERSION'] > (0, 3, 5):
-			output_nodes.append(self.path.find_or_declare('%s.gir' % self.target))
+			output_nodes.append(self.path.find_or_declare('{0!s}.gir'.format(self.target)))
 		elif env['VALAC_VERSION'] > (0, 1, 7):
-			output_nodes.append(self.path.find_or_declare('%s.gidl' % self.target))
+			output_nodes.append(self.path.find_or_declare('{0!s}.gidl'.format(self.target)))
 		if valatask.packages:
-			output_nodes.append(self.path.find_or_declare('%s.deps' % self.target))
+			output_nodes.append(self.path.find_or_declare('{0!s}.deps'.format(self.target)))
 
 	valatask.inputs.append(node)
 	valatask.outputs.extend(output_nodes)
 
 def detect(conf):
 	min_version = (0, 1, 6)
-	min_version_str = "%d.%d.%d" % min_version
+	min_version_str = "{0:d}.{1:d}.{2:d}".format(*min_version)
 
 	valac = conf.find_program('valac', var='VALAC', mandatory=True)
 
@@ -289,7 +289,7 @@ def detect(conf):
 	conf.check_message('program version',
 			'valac >= ' + min_version_str,
 			valac_version >= min_version,
-			"%d.%d.%d" % valac_version)
+			"{0:d}.{1:d}.{2:d}".format(*valac_version))
 
 	conf.check_tool('gnu_dirs')
 

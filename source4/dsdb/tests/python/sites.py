@@ -53,7 +53,7 @@ if len(args) < 1:
 
 host = args[0]
 if not "://" in host:
-    ldaphost = "ldap://%s" % host
+    ldaphost = "ldap://{0!s}".format(host)
 else:
     ldaphost = host
 
@@ -75,7 +75,7 @@ class SitesBaseTests(samba.tests.TestCase):
         self.configuration_dn = self.ldb.get_config_basedn().get_linearized()
 
     def get_user_dn(self, name):
-        return "CN=%s,CN=Users,%s" % (name, self.base_dn)
+        return "CN={0!s},CN=Users,{1!s}".format(name, self.base_dn)
 
 
 #tests on sites
@@ -143,9 +143,9 @@ class SimpleSubnetTests(SitesBaseTests):
         subnets.delete_subnet(self.ldb, basedn, cidr)
 
         ret = self.ldb.search(base=basedn, scope=SCOPE_SUBTREE,
-                              expression='(&(objectclass=subnet)(cn=%s))' % cidr)
+                              expression='(&(objectclass=subnet)(cn={0!s}))'.format(cidr))
 
-        self.assertEqual(len(ret), 0, 'Failed to delete subnet %s' % cidr)
+        self.assertEqual(len(ret), 0, 'Failed to delete subnet {0!s}'.format(cidr))
 
     def test_create_shift_delete(self):
         """Create a subnet, shift it to another site, then delete it."""
@@ -157,12 +157,12 @@ class SimpleSubnetTests(SitesBaseTests):
         subnets.set_subnet_site(self.ldb, basedn, cidr, self.sitename2)
 
         ret = self.ldb.search(base=basedn, scope=SCOPE_SUBTREE,
-                              expression='(&(objectclass=subnet)(cn=%s))' % cidr)
+                              expression='(&(objectclass=subnet)(cn={0!s}))'.format(cidr))
 
         sites = ret[0]['siteObject']
         self.assertEqual(len(sites), 1)
         self.assertEqual(sites[0],
-                         'CN=testsite2,CN=Sites,%s' % self.ldb.get_config_basedn())
+                         'CN=testsite2,CN=Sites,{0!s}'.format(self.ldb.get_config_basedn()))
 
         self.assertRaises(subnets.SubnetAlreadyExists,
                           subnets.create_subnet, self.ldb, basedn, cidr,
@@ -171,9 +171,9 @@ class SimpleSubnetTests(SitesBaseTests):
         subnets.delete_subnet(self.ldb, basedn, cidr)
 
         ret = self.ldb.search(base=basedn, scope=SCOPE_SUBTREE,
-                              expression='(&(objectclass=subnet)(cn=%s))' % cidr)
+                              expression='(&(objectclass=subnet)(cn={0!s}))'.format(cidr))
 
-        self.assertEqual(len(ret), 0, 'Failed to delete subnet %s' % cidr)
+        self.assertEqual(len(ret), 0, 'Failed to delete subnet {0!s}'.format(cidr))
 
     def test_delete_subnet_that_does_not_exist(self):
         """Ensure we can't delete a site that isn't there."""
@@ -342,18 +342,18 @@ class SimpleSubnetTests(SitesBaseTests):
             try:
                 subnets.create_subnet(self.ldb, basedn, cidr, self.sitename)
             except subnets.SubnetInvalid:
-                print >> sys.stderr, "%s fails properly" % (cidr,)
+                print >> sys.stderr, "{0!s} fails properly".format(cidr)
                 continue
 
             # we are here because it succeeded when it shouldn't have.
-            print >> sys.stderr, "CIDR %s fails to fail" % (cidr,)
+            print >> sys.stderr, "CIDR {0!s} fails to fail".format(cidr)
             failures.append(cidr)
             subnets.delete_subnet(self.ldb, basedn, cidr)
 
         if failures:
             print "These bad subnet names were accepted:"
             for cidr in failures:
-                print "    %s" % cidr
+                print "    {0!s}".format(cidr)
             self.fail()
 
     def test_create_good_ranges(self):
@@ -487,11 +487,11 @@ class SimpleSubnetTests(SitesBaseTests):
                 continue
 
             ret = self.ldb.search(base=basedn, scope=SCOPE_SUBTREE,
-                                  expression=('(&(objectclass=subnet)(cn=%s))' %
-                                              cidr))
+                                  expression=('(&(objectclass=subnet)(cn={0!s}))'.format(
+                                              cidr)))
 
             if len(ret) != 1:
-                print "%s was not created" % cidr
+                print "{0!s} was not created".format(cidr)
                 failures.append(cidr)
                 continue
             subnets.delete_subnet(self.ldb, basedn, cidr)
@@ -499,7 +499,7 @@ class SimpleSubnetTests(SitesBaseTests):
         if failures:
             print "These good subnet names were not accepted:"
             for cidr in failures:
-                print "    %s" % cidr
+                print "    {0!s}".format(cidr)
             self.fail()
 
 

@@ -36,6 +36,6 @@ def tdb_copy(file1, file2):
     status = subprocess.call(tdbbackup_cmd, close_fds=True, shell=False)
 
     if status == 0:
-        os.rename("%s.copy.tdb" % file1, file2)
+        os.rename("{0!s}.copy.tdb".format(file1), file2)
     else:
-        raise Exception("Error copying %s" % file1)
+        raise Exception("Error copying {0!s}".format(file1))

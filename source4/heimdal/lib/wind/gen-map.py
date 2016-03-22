@@ -45,7 +45,7 @@ import stringprep
 import util
 
 if len(sys.argv) != 3:
-    print "usage: %s rfc3454.txt out-dir" % sys.argv[0]
+    print "usage: {0!s} rfc3454.txt out-dir".format(sys.argv[0])
     sys.exit(1)
 
 tables = rfc3454.read(sys.argv[1])
@@ -56,9 +56,9 @@ for x in t2.iterkeys():
 
 map_list = stringprep.get_maplist()
 
-map_h = generate.Header('%s/map_table.h' % sys.argv[2])
+map_h = generate.Header('{0!s}/map_table.h'.format(sys.argv[2]))
 
-map_c = generate.Implementation('%s/map_table.c' % sys.argv[2])
+map_c = generate.Implementation('{0!s}/map_table.c'.format(sys.argv[2]))
 
 map_h.file.write(
 '''
@@ -114,7 +114,7 @@ trans = stringprep.sort_merge_trans(trans)
 
 for x in trans:
     if x[0] == 0xad:
-        print "fooresult %s" % ",".join(x[3])
+        print "fooresult {0!s}".format(",".join(x[3]))
 
 for x in trans:
     (key, value, description, table) = x
@@ -130,11 +130,10 @@ for x in trans:
     (key, value, description, tables) = x
     symbols = stringprep.symbols(map_list, tables)
     if len(symbols) == 0:
-        print "no symbol for %s %s (%s)" % (key, description, tables)
+        print "no symbol for {0!s} {1!s} ({2!s})".format(key, description, tables)
         sys.exit(1)
     v = value.split()
-    map_c.file.write("  {0x%x, %u, %u, %s}, /* %s: %s */\n"
-                % (key, len(v), offsetTable[key], symbols, ",".join(tables), description))
+    map_c.file.write("  {{0x{0:x}, {1:d}, {2:d}, {3!s}}}, /* {4!s}: {5!s} */\n".format(key, len(v), offsetTable[key], symbols, ",".join(tables), description))
 
 map_c.file.write(
 '''
@@ -143,13 +142,13 @@ map_c.file.write(
 ''')
 
 map_c.file.write(
-    "const size_t _wind_map_table_size = %u;\n\n" % len(trans))
+    "const size_t _wind_map_table_size = {0:d};\n\n".format(len(trans)))
 
 map_c.file.write(
     "const uint32_t _wind_map_table_val[] = {\n")
 
 for x in valTable:
-    map_c.file.write("  0x%s,\n" % x)
+    map_c.file.write("  0x{0!s},\n".format(x))
 
 map_c.file.write(
     "};\n\n")

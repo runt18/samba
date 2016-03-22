@@ -46,12 +46,12 @@ def drsuapi_connect(server, lp, creds):
     binding_options = "seal"
     if int(lp.get("log level")) >= 5:
         binding_options += ",print"
-    binding_string = "ncacn_ip_tcp:%s[%s]" % (server, binding_options)
+    binding_string = "ncacn_ip_tcp:{0!s}[{1!s}]".format(server, binding_options)
     try:
         drsuapiBind = drsuapi.drsuapi(binding_string, lp, creds)
         (drsuapiHandle, bindSupportedExtensions) = drs_DsBind(drsuapiBind)
     except Exception, e:
-        raise drsException("DRS connection to %s failed: %s" % (server, e))
+        raise drsException("DRS connection to {0!s} failed: {1!s}".format(server, e))
 
     return (drsuapiBind, drsuapiHandle, bindSupportedExtensions)
 
@@ -80,7 +80,7 @@ def sendDsReplicaSync(drsuapiBind, drsuapi_handle, source_dsa_guid,
     try:
         drsuapiBind.DsReplicaSync(drsuapi_handle, 1, req1)
     except Exception, estr:
-        raise drsException("DsReplicaSync failed %s" % estr)
+        raise drsException("DsReplicaSync failed {0!s}".format(estr))
 
 
 def sendRemoveDsServer(drsuapiBind, drsuapi_handle, server_dsa_dn, domain):
@@ -103,7 +103,7 @@ def sendRemoveDsServer(drsuapiBind, drsuapi_handle, server_dsa_dn, domain):
 
         drsuapiBind.DsRemoveDSServer(drsuapi_handle, 1, req1)
     except Exception, estr:
-        raise drsException("DsRemoveDSServer failed %s" % estr)
+        raise drsException("DsRemoveDSServer failed {0!s}".format(estr))
 
 
 def drs_DsBind(drs):
@@ -252,7 +252,7 @@ class drs_Replicate(object):
         while True:
             (level, ctr) = self.drs.DsGetNCChanges(self.drs_handle, req_level, req)
             if ctr.first_object is None and ctr.object_count != 0:
-                raise RuntimeError("DsGetNCChanges: NULL first_object with object_count=%u" % (ctr.object_count))
+                raise RuntimeError("DsGetNCChanges: NULL first_object with object_count={0:d}".format((ctr.object_count)))
             self.net.replicate_chunk(self.replication_state, level, ctr,
                 schema=schema, req_level=req_level, req=req)
             if ctr.more_data == 0:

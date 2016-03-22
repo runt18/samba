@@ -41,7 +41,7 @@ class PX(dns.rdata.Rdata):
     def to_text(self, origin=None, relativize=True, **kw):
         map822 = self.map822.choose_relativity(origin, relativize)
         mapx400 = self.mapx400.choose_relativity(origin, relativize)
-        return '%d %s %s' % (self.preference, map822, mapx400)
+        return '{0:d} {1!s} {2!s}'.format(self.preference, map822, mapx400)
 
     def from_text(cls, rdclass, rdtype, tok, origin = None, relativize = True):
         preference = tok.get_uint16()

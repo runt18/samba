@@ -87,12 +87,12 @@ class IDmapDB(samba.Ldb):
             return
 
         mod = """
-dn: CN=%s
-xidNumber: %s
-objectSid: %s
+dn: CN={0!s}
+xidNumber: {1!s}
+objectSid: {2!s}
 objectClass: sidMap
-type: %s
-cn: %s
+type: {3!s}
+cn: {4!s}
 
-""" % (sid, unixid, sid, type_string, sid)
+""".format(sid, unixid, sid, type_string, sid)
         self.add(self.parse_ldif(mod).next()[1])

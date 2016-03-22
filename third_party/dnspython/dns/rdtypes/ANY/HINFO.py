@@ -34,7 +34,7 @@ class HINFO(dns.rdata.Rdata):
         self.os = os
 
     def to_text(self, origin=None, relativize=True, **kw):
-        return '"%s" "%s"' % (dns.rdata._escapify(self.cpu),
+        return '"{0!s}" "{1!s}"'.format(dns.rdata._escapify(self.cpu),
                               dns.rdata._escapify(self.os))
 
     def from_text(cls, rdclass, rdtype, tok, origin = None, relativize = True):

@@ -42,7 +42,7 @@ class DSBase(dns.rdata.Rdata):
         self.digest = digest
 
     def to_text(self, origin=None, relativize=True, **kw):
-        return '%d %d %d %s' % (self.key_tag, self.algorithm,
+        return '{0:d} {1:d} {2:d} {3!s}'.format(self.key_tag, self.algorithm,
                                 self.digest_type,
                                 dns.rdata._hexify(self.digest,
                                                   chunksize=128))

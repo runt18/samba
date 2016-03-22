@@ -17,7 +17,7 @@ from Constants import *
 #random.seed(100)
 
 def set_options(opt):
-	opt.add_option('--dtitle', action='store', default='Parallel build representation for %r' % ' '.join(sys.argv),
+	opt.add_option('--dtitle', action='store', default='Parallel build representation for {0!r}'.format(' '.join(sys.argv)),
 		help='title for the svg diagram', dest='dtitle')
 	opt.add_option('--dwidth', action='store', type='int', help='diagram width', default=1000, dest='dwidth')
 	opt.add_option('--dtime', action='store', type='float', help='recording interval in seconds', default=0.009, dest='dtime')
@@ -114,7 +114,7 @@ def process_colors(producer):
 	acc = []
 	for x in tmp:
 		thread_count += x[6]
-		acc.append("%d %d %f %r %d %d %d" % (x[0], x[1], x[2] - ini, x[3], x[4], x[5], thread_count))
+		acc.append("{0:d} {1:d} {2:f} {3!r} {4:d} {5:d} {6:d}".format(x[0], x[1], x[2] - ini, x[3], x[4], x[5], thread_count))
 	f = open('pdebug.dat', 'w')
 	#Utils.write('\n'.join(acc))
 	f.write('\n'.join(acc))
@@ -178,72 +178,72 @@ def process_colors(producer):
 <!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.0//EN\"
 \"http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd\">
 <svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" version=\"1.0\"
-   x=\"%r\" y=\"%r\" width=\"%r\" height=\"%r\"
+   x=\"{0!r}\" y=\"{1!r}\" width=\"{2!r}\" height=\"{3!r}\"
    id=\"svg602\" xml:space=\"preserve\">
 
 <style type='text/css' media='screen'>
-    g.over rect  { stroke:#FF0000; fill-opacity:0.4 }
+    g.over rect  {{ stroke:#FF0000; fill-opacity:0.4 }}
 </style>
 
 <script type='text/javascript'><![CDATA[
     var svg  = document.getElementsByTagName('svg')[0];
     var svgNS = svg.getAttribute('xmlns');
-    svg.addEventListener('mouseover',function(e){
+    svg.addEventListener('mouseover',function(e){{
       var g = e.target.parentNode;
       var x = document.getElementById('r_'+g.id);
-      if (x) {
+      if (x) {{
          g.setAttribute('class', g.getAttribute('class')+' over');
          x.setAttribute('class', x.getAttribute('class')+' over');
          showInfo(e, g.id);
-      }
-    },false);
-    svg.addEventListener('mouseout',function(e){
+      }}
+    }},false);
+    svg.addEventListener('mouseout',function(e){{
       var g = e.target.parentNode;
       var x = document.getElementById('r_'+g.id);
-      if (x) {
+      if (x) {{
          g.setAttribute('class',g.getAttribute('class').replace(' over',''));
          x.setAttribute('class',x.getAttribute('class').replace(' over',''));
          hideInfo(e);
-      }
-    },false);
+      }}
+    }},false);
 
-function showInfo(evt, txt) {
+function showInfo(evt, txt) {{
     tooltip = document.getElementById('tooltip');
 
     var t = document.getElementById('tooltiptext');
     t.firstChild.data = txt;
 
     var x = evt.clientX+10;
-    if (x > 200) { x -= t.getComputedTextLength() + 16; }
+    if (x > 200) {{ x -= t.getComputedTextLength() + 16; }}
     var y = evt.clientY+30;
     tooltip.setAttribute("transform", "translate(" + x + "," + y + ")");
     tooltip.setAttributeNS(null,"visibility","visible");
 
     var r = document.getElementById('tooltiprect');
     r.setAttribute('width', t.getComputedTextLength()+6)
-}
+}}
 
 
-function hideInfo(evt) {
+function hideInfo(evt) {{
     tooltip = document.getElementById('tooltip');
     tooltip.setAttributeNS(null,"visibility","hidden");
-}
+}}
 
 ]]></script>
 
 <!-- inkscape requires a big rectangle or it will not export the pictures properly -->
 <rect
-   x='%r' y='%r'
-   width='%r' height='%r' z-index='10'
+   x='{4!r}' y='{5!r}'
+   width='{6!r}' height='{7!r}' z-index='10'
    style=\"font-size:10;fill:#ffffff;fill-opacity:0.01;fill-rule:evenodd;stroke:#ffffff;\"
    />\n
 
-""" % (0, 0, gwidth + 4, gheight + 4,   0, 0, gwidth + 4, gheight + 4))
+""".format(0, 0, gwidth + 4, gheight + 4, 0, 0, gwidth + 4, gheight + 4))
 
 	# main title
 	if Options.options.dtitle:
-		out.append("""<text x="%d" y="%d" style="font-size:15px; text-anchor:middle; font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans">%s</text>
-""" % (gwidth/2, gheight - 5, Options.options.dtitle))
+		out.append("""<text x="{0:d}" y="{1:d}" style="font-size:15px; text-anchor:middle; font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans">{2!s}</text>
+""".format(gwidth/2, gheight - 5, Options.options.dtitle))
 
 	# the rectangles
 	groups = {}
@@ -255,14 +255,14 @@ function hideInfo(evt) {
 
 	for cls in groups:
 
-		out.append("<g id='%s'>\n" % name2class(cls))
+		out.append("<g id='{0!s}'>\n".format(name2class(cls)))
 
 		for (x, y, w, h) in groups[cls]:
 			out.append("""   <rect
-   x='%r' y='%r'
-   width='%r' height='%r' z-index='11'
-   style=\"font-size:10;fill:%s;fill-rule:evenodd;stroke:#000000;stroke-width:0.2px;\"
-   />\n""" % (2 + x*ratio, 2 + y, w*ratio, h, map_to_color(cls)))
+   x='{0!r}' y='{1!r}'
+   width='{2!r}' height='{3!r}' z-index='11'
+   style=\"font-size:10;fill:{4!s};fill-rule:evenodd;stroke:#000000;stroke-width:0.2px;\"
+   />\n""".format(2 + x*ratio, 2 + y, w*ratio, h, map_to_color(cls)))
 
 		out.append("</g>\n")
 
@@ -272,16 +272,16 @@ function hideInfo(evt) {
 	for (text, color) in info:
 		# caption box
 		b = BAND/2
-		out.append("""<g id='r_%s'><rect
-		x='%r' y='%r'
-		width='%r' height='%r'
-		style=\"font-size:10;fill:%s;fill-rule:evenodd;stroke:#000000;stroke-width:0.2px;\"
-  />\n""" %                       (name2class(text), 2 + BAND,     5 + (cnt + 0.5) * BAND, b, b, color))
+		out.append("""<g id='r_{0!s}'><rect
+		x='{1!r}' y='{2!r}'
+		width='{3!r}' height='{4!r}'
+		style=\"font-size:10;fill:{5!s};fill-rule:evenodd;stroke:#000000;stroke-width:0.2px;\"
+  />\n""".format(name2class(text), 2 + BAND, 5 + (cnt + 0.5) * BAND, b, b, color))
 
 		# caption text
 		out.append("""<text
    style="font-size:12px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
-   x="%r" y="%d">%s</text></g>\n""" % (2 + 2 * BAND, 5 + (cnt + 0.5) * BAND + 10, text))
+   x="{0!r}" y="{1:d}">{2!s}</text></g>\n""".format(2 + 2 * BAND, 5 + (cnt + 0.5) * BAND + 10, text))
 		cnt += 1
 
 	out.append("""

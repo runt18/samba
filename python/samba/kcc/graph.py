@@ -180,11 +180,11 @@ def get_spanning_tree_edges(graph, my_site, label=None, verify=False,
             graph_nodes = [v.site.site_dnstr for v in graph.vertices]
 
             if dot_file_dir is not None:
-                write_dot_file('edgeset_%s' % (edgeType,), graph_edges,
+                write_dot_file('edgeset_{0!s}'.format(edgeType), graph_edges,
                                vertices=graph_nodes, label=label)
 
             if verify:
-                verify_graph('spanning tree edge set %s' % edgeType,
+                verify_graph('spanning tree edge set {0!s}'.format(edgeType),
                              graph_edges, vertices=graph_nodes,
                              properties=('complete', 'connected'),
                              debug=DEBUG)
@@ -488,7 +488,7 @@ def process_edge(graph, examine, internal_edges):
         # Append a 4-tuple of color, repl cost, guid and vertex
         vertices.append((v.color, v.repl_info.cost, v.ndrpacked_guid, v))
     # Sort by color, lower
-    DEBUG("vertices is %s" % vertices)
+    DEBUG("vertices is {0!s}".format(vertices))
     vertices.sort()
 
     color, cost, guid, bestv = vertices[0]

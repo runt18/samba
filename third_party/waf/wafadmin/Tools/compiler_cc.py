@@ -40,7 +40,7 @@ def detect(conf):
 		try:
 			conf.check_tool(compiler)
 		except Configure.ConfigurationError, e:
-			debug('compiler_cc: %r' % e)
+			debug('compiler_cc: {0!r}'.format(e))
 		else:
 			if conf.env['CC']:
 				orig.table = conf.env.get_merged_dict()
@@ -58,9 +58,9 @@ def set_options(opt):
 	possible_compiler_list = __list_possible_compiler(build_platform)
 	test_for_compiler = ' '.join(possible_compiler_list)
 	cc_compiler_opts = opt.add_option_group("C Compiler Options")
-	cc_compiler_opts.add_option('--check-c-compiler', default="%s" % test_for_compiler,
-		help='On this platform (%s) the following C-Compiler will be checked by default: "%s"' % (build_platform, test_for_compiler),
+	cc_compiler_opts.add_option('--check-c-compiler', default="{0!s}".format(test_for_compiler),
+		help='On this platform ({0!s}) the following C-Compiler will be checked by default: "{1!s}"'.format(build_platform, test_for_compiler),
 		dest="check_c_compiler")
 
 	for c_compiler in test_for_compiler.split():
-		opt.tool_options('%s' % c_compiler, option_group=cc_compiler_opts)
+		opt.tool_options('{0!s}'.format(c_compiler), option_group=cc_compiler_opts)

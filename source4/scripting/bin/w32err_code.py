@@ -87,7 +87,7 @@ class WerrorHtmlParser(object):
             # do some checking
             if not err_hex.startswith('0x'):    continue
             if not self._is_error_code_name(err_name):
-                self._errors_skipped.append("%s - %s - %d" % (err_name, err_hex, int(err_hex, 16)))
+                self._errors_skipped.append("{0!s} - {1!s} - {2:d}".format(err_name, err_hex, int(err_hex, 16)))
                 continue
             # create entry
             err_name = self._make_werr_name(err_name)
@@ -167,7 +167,7 @@ class WerrorGenerator(object):
         for err_code in sorted(errors.keys()):
             err_name = errors[err_code]['err_name']
             err_hex = errors[err_code]['err_hex']
-            fp.write('#define %s\tW_ERROR(%s)' % (err_name, err_hex))
+            fp.write('#define {0!s}\tW_ERROR({1!s})'.format(err_name, err_hex))
             fp.write("\n")
         fp.close()
 
@@ -177,7 +177,7 @@ class WerrorGenerator(object):
         fp = self._open_out_file(self.FNAME_DOSERR_DEFS)
         for err_code in sorted(errors.keys()):
             err_name = errors[err_code]['err_name']
-            fp.write('\t{ "%s", %s },' % (err_name, err_name))
+            fp.write('\t{{ "{0!s}", {1!s} }},'.format(err_name, err_name))
             fp.write("\n")
         fp.close()
 
@@ -187,7 +187,7 @@ class WerrorGenerator(object):
         fp = self._open_out_file(self.FNAME_DOSERR_DESC)
         for err_code in sorted(errors.keys()):
             err_name = errors[err_code]['err_name']
-            fp.write('\t{ %s, "%s" },' % (err_name, errors[err_code]['err_desc']))
+            fp.write('\t{{ {0!s}, "{1!s}" }},'.format(err_name, errors[err_code]['err_desc']))
             fp.write("\n")
         fp.close()
 
@@ -243,7 +243,7 @@ class WerrorGenerator(object):
         (defined_errors,
          no_value_errors) = werr_parser.load_err_codes(self.opt.werror_file)
         if not defined_errors:
-            print "\nUnable to load existing errors file: %s" % self.opt.werror_file
+            print "\nUnable to load existing errors file: {0!s}".format(self.opt.werror_file)
             sys.exit(1)
         if self.opt.verbose and len(no_value_errors):
             print "\nWarning: there are errors defines using macro value:"
@@ -254,14 +254,12 @@ class WerrorGenerator(object):
          diff_code_errors,
          diff_name_errors) = self._filter_errors(errors, defined_errors)
         if diff_code_errors:
-            print("\nFound %d errors with same names but different error values! Aborting."
-                  % len(diff_code_errors))
+            print("\nFound {0:d} errors with same names but different error values! Aborting.".format(len(diff_code_errors)))
             pprint.pprint(diff_code_errors)
             sys.exit(2)
 
         if diff_name_errors:
-            print("\nFound %d errors with same values but different names (should be normal)"
-                  % len(diff_name_errors))
+            print("\nFound {0:d} errors with same values but different names (should be normal)".format(len(diff_name_errors)))
             pprint.pprint(diff_name_errors)
 
         # finally generate output files
@@ -294,7 +292,7 @@ class WerrorParser(object):
             self.err_no_values.append(line)
             return None
         return {'err_name': str(m.group(1)),
-                'err_hex': "0x%08X" % err_code,
+                'err_hex': "0x{0:08X}".format(err_code),
                 'code': err_code}
         pass
 

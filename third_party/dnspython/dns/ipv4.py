@@ -22,7 +22,7 @@ import dns.exception
 def inet_ntoa(address):
     if len(address) != 4:
         raise dns.exception.SyntaxError
-    return '%u.%u.%u.%u' % (ord(address[0]), ord(address[1]),
+    return '{0:d}.{1:d}.{2:d}.{3:d}'.format(ord(address[0]), ord(address[1]),
                             ord(address[2]), ord(address[3]))
 
 def inet_aton(text):

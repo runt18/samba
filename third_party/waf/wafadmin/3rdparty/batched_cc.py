@@ -43,7 +43,7 @@ class batch_task(Task.Task):
 	before = 'cc_link cxx_link static_link'
 
 	def __str__(self):
-		return '(batch compilation for %d slaves)\n' % len(self.slaves)
+		return '(batch compilation for {0:d} slaves)\n'.format(len(self.slaves))
 
 	def __init__(self, *k, **kw):
 		Task.Task.__init__(self, *k, **kw)

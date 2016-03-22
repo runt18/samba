@@ -126,8 +126,8 @@ Example3 adds a new RFC2307 enabled group for NIS domain samdom and GID 12345 (b
                           gidnumber=gid_number, nisdomain=nis_domain)
         except Exception, e:
             # FIXME: catch more specific exception
-            raise CommandError('Failed to create group "%s"' % groupname, e)
-        self.outf.write("Added group %s\n" % groupname)
+            raise CommandError('Failed to create group "{0!s}"'.format(groupname), e)
+        self.outf.write("Added group {0!s}\n".format(groupname))
 
 
 class cmd_group_delete(Command):
@@ -176,8 +176,8 @@ Example2 deletes group Group2 from the local server.  The command is run under r
             samdb.deletegroup(groupname)
         except Exception, e:
             # FIXME: catch more specific exception
-            raise CommandError('Failed to remove group "%s"' % groupname, e)
-        self.outf.write("Deleted group %s\n" % groupname)
+            raise CommandError('Failed to remove group "{0!s}"'.format(groupname), e)
+        self.outf.write("Deleted group {0!s}\n".format(groupname))
 
 
 class cmd_group_add_members(Command):
@@ -227,9 +227,9 @@ Example2 shows how to add a single user account, User2, to the supergroup AD gro
                     add_members_operation=True)
         except Exception, e:
             # FIXME: catch more specific exception
-            raise CommandError('Failed to add members "%s" to group "%s"' % (
+            raise CommandError('Failed to add members "{0!s}" to group "{1!s}"'.format(
                 listofmembers, groupname), e)
-        self.outf.write("Added members to group %s\n" % groupname)
+        self.outf.write("Added members to group {0!s}\n".format(groupname))
 
 
 class cmd_group_remove_members(Command):
@@ -278,8 +278,8 @@ Example2 shows how to remove a single user account, User2, from the supergroup A
                     add_members_operation=False)
         except Exception, e:
             # FIXME: Catch more specific exception
-            raise CommandError('Failed to remove members "%s" from group "%s"' % (listofmembers, groupname), e)
-        self.outf.write("Removed members from group %s\n" % groupname)
+            raise CommandError('Failed to remove members "{0!s}" from group "{1!s}"'.format(listofmembers, groupname), e)
+        self.outf.write("Removed members from group {0!s}\n".format(groupname))
 
 
 class cmd_group_list(Command):
@@ -322,8 +322,8 @@ class cmd_group_list(Command):
             self.outf.write("-----------------------------------------------------------------------------\n")
 
             for msg in res:
-                self.outf.write("%-44s" % msg.get("samaccountname", idx=0))
-                hgtype = hex(int("%s" % msg["grouptype"]) & 0x00000000FFFFFFFF)
+                self.outf.write("{0:<44!s}".format(msg.get("samaccountname", idx=0)))
+                hgtype = hex(int("{0!s}".format(msg["grouptype"])) & 0x00000000FFFFFFFF)
                 if (hgtype == hex(int(security_group.get("Builtin")))):
                     self.outf.write("Security         Builtin\n")
                 elif (hgtype == hex(int(security_group.get("Domain")))):
@@ -342,7 +342,7 @@ class cmd_group_list(Command):
                     self.outf.write("\n")
         else:
             for msg in res:
-                self.outf.write("%s\n" % msg.get("samaccountname", idx=0))
+                self.outf.write("{0!s}\n".format(msg.get("samaccountname", idx=0)))
 
 class cmd_group_list_members(Command):
     """List all members of an AD group.
@@ -376,7 +376,7 @@ samba-tool group listmembers \"Domain Users\" -H ldap://samba.samdom.example.com
             samdb = SamDB(url=H, session_info=system_session(),
                           credentials=creds, lp=lp)
 
-            search_filter = "(&(objectClass=group)(samaccountname=%s))" % groupname
+            search_filter = "(&(objectClass=group)(samaccountname={0!s}))".format(groupname)
             res = samdb.search(samdb.domain_dn(), scope=ldb.SCOPE_SUBTREE,
                                expression=(search_filter),
                                attrs=["objectSid"])
@@ -390,7 +390,7 @@ samba-tool group listmembers \"Domain Users\" -H ldap://samba.samdom.example.com
             object_sid = ndr_unpack(security.dom_sid, object_sid)
             (group_dom_sid, rid) = object_sid.split()
 
-            search_filter = "(|(primaryGroupID=%s)(memberOf=%s))" % (rid, group_dn)
+            search_filter = "(|(primaryGroupID={0!s})(memberOf={1!s}))".format(rid, group_dn)
             res = samdb.search(samdb.domain_dn(), scope=ldb.SCOPE_SUBTREE,
                                expression=(search_filter),
                                attrs=["samAccountName", "cn"])
@@ -402,10 +402,10 @@ samba-tool group listmembers \"Domain Users\" -H ldap://samba.samdom.example.com
                 member_name = msg.get("samAccountName", idx=0)
                 if member_name is None:
                     member_name = msg.get("cn", idx=0)
-                self.outf.write("%s\n" % member_name)
+                self.outf.write("{0!s}\n".format(member_name))
 
         except Exception, e:
-            raise CommandError('Failed to list members of "%s" group ' % groupname, e)
+            raise CommandError('Failed to list members of "{0!s}" group '.format(groupname), e)
 
 
 class cmd_group(SuperCommand):

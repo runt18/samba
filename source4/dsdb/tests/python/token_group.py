@@ -66,7 +66,7 @@ class StaticTokenTest(samba.tests.TestCase):
         res = self.ldb.search("", scope=ldb.SCOPE_BASE, attrs=["tokenGroups"])
         self.assertEquals(len(res), 1)
 
-        self.user_sid_dn = "<SID=%s>" % str(ndr_unpack(samba.dcerpc.security.dom_sid, res[0]["tokenGroups"][0]))
+        self.user_sid_dn = "<SID={0!s}>".format(str(ndr_unpack(samba.dcerpc.security.dom_sid, res[0]["tokenGroups"][0])))
 
         session_info_flags = ( AUTH_SESSION_INFO_DEFAULT_GROUPS |
                                AUTH_SESSION_INFO_AUTHENTICATED |
@@ -96,9 +96,9 @@ class StaticTokenTest(samba.tests.TestCase):
         sidset2 = set(self.user_sids)
         if len(sidset1.difference(sidset2)):
             print("token sids don't match")
-            print("tokengroups: %s" % tokengroups)
-            print("calculated : %s" % self.user_sids)
-            print("difference : %s" % sidset1.difference(sidset2))
+            print("tokengroups: {0!s}".format(tokengroups))
+            print("calculated : {0!s}".format(self.user_sids))
+            print("difference : {0!s}".format(sidset1.difference(sidset2)))
             self.fail(msg="calculated groups don't match against rootDSE tokenGroups")
 
     def test_dn_tokenGroups(self):
@@ -114,7 +114,7 @@ class StaticTokenTest(samba.tests.TestCase):
         sidset2 = set(self.user_sids)
         if len(sidset1.difference(sidset2)):
             print("token sids don't match")
-            print("difference : %s" % sidset1.difference(sidset2))
+            print("difference : {0!s}".format(sidset1.difference(sidset2)))
             self.fail(msg="calculated groups don't match against user DN tokenGroups")
 
     def test_pac_groups(self):
@@ -162,7 +162,7 @@ class StaticTokenTest(samba.tests.TestCase):
         sidset2 = set(self.user_sids)
         if len(sidset1.difference(sidset2)):
             print("token sids don't match")
-            print("difference : %s" % sidset1.difference(sidset2))
+            print("difference : {0!s}".format(sidset1.difference(sidset2)))
             self.fail(msg="calculated groups don't match against user PAC tokenGroups")
 
 class DynamicTokenTest(samba.tests.TestCase):
@@ -194,7 +194,7 @@ class DynamicTokenTest(samba.tests.TestCase):
         self.admin_ldb.newuser(self.test_user, self.test_user_pass)
         self.test_group0 = "tokengroups_group0"
         self.admin_ldb.newgroup(self.test_group0, grouptype=dsdb.GTYPE_SECURITY_DOMAIN_LOCAL_GROUP)
-        res = self.admin_ldb.search(base="cn=%s,cn=users,%s" % (self.test_group0, self.base_dn),
+        res = self.admin_ldb.search(base="cn={0!s},cn=users,{1!s}".format(self.test_group0, self.base_dn),
                                     attrs=["objectSid"], scope=ldb.SCOPE_BASE)
         self.test_group0_sid = ndr_unpack(samba.dcerpc.security.dom_sid, res[0]["objectSid"][0])
 
@@ -203,7 +203,7 @@ class DynamicTokenTest(samba.tests.TestCase):
 
         self.test_group1 = "tokengroups_group1"
         self.admin_ldb.newgroup(self.test_group1, grouptype=dsdb.GTYPE_SECURITY_GLOBAL_GROUP)
-        res = self.admin_ldb.search(base="cn=%s,cn=users,%s" % (self.test_group1, self.base_dn),
+        res = self.admin_ldb.search(base="cn={0!s},cn=users,{1!s}".format(self.test_group1, self.base_dn),
                                     attrs=["objectSid"], scope=ldb.SCOPE_BASE)
         self.test_group1_sid = ndr_unpack(samba.dcerpc.security.dom_sid, res[0]["objectSid"][0])
 
@@ -213,7 +213,7 @@ class DynamicTokenTest(samba.tests.TestCase):
         self.test_group2 = "tokengroups_group2"
         self.admin_ldb.newgroup(self.test_group2, grouptype=dsdb.GTYPE_SECURITY_UNIVERSAL_GROUP)
 
-        res = self.admin_ldb.search(base="cn=%s,cn=users,%s" % (self.test_group2, self.base_dn),
+        res = self.admin_ldb.search(base="cn={0!s},cn=users,{1!s}".format(self.test_group2, self.base_dn),
                                     attrs=["objectSid"], scope=ldb.SCOPE_BASE)
         self.test_group2_sid = ndr_unpack(samba.dcerpc.security.dom_sid, res[0]["objectSid"][0])
 
@@ -225,7 +225,7 @@ class DynamicTokenTest(samba.tests.TestCase):
         res = self.ldb.search("", scope=ldb.SCOPE_BASE, attrs=["tokenGroups"])
         self.assertEquals(len(res), 1)
 
-        self.user_sid_dn = "<SID=%s>" % str(ndr_unpack(samba.dcerpc.security.dom_sid, res[0]["tokenGroups"][0]))
+        self.user_sid_dn = "<SID={0!s}>".format(str(ndr_unpack(samba.dcerpc.security.dom_sid, res[0]["tokenGroups"][0])))
 
         res = self.ldb.search(self.user_sid_dn, scope=ldb.SCOPE_BASE, attrs=[])
         self.assertEquals(len(res), 1)
@@ -245,14 +245,10 @@ class DynamicTokenTest(samba.tests.TestCase):
 
     def tearDown(self):
         super(DynamicTokenTest, self).tearDown()
-        delete_force(self.admin_ldb, "CN=%s,%s,%s" %
-                          (self.test_user, "cn=users", self.base_dn))
-        delete_force(self.admin_ldb, "CN=%s,%s,%s" %
-                          (self.test_group0, "cn=users", self.base_dn))
-        delete_force(self.admin_ldb, "CN=%s,%s,%s" %
-                          (self.test_group1, "cn=users", self.base_dn))
-        delete_force(self.admin_ldb, "CN=%s,%s,%s" %
-                          (self.test_group2, "cn=users", self.base_dn))
+        delete_force(self.admin_ldb, "CN={0!s},{1!s},{2!s}".format(self.test_user, "cn=users", self.base_dn))
+        delete_force(self.admin_ldb, "CN={0!s},{1!s},{2!s}".format(self.test_group0, "cn=users", self.base_dn))
+        delete_force(self.admin_ldb, "CN={0!s},{1!s},{2!s}".format(self.test_group1, "cn=users", self.base_dn))
+        delete_force(self.admin_ldb, "CN={0!s},{1!s},{2!s}".format(self.test_group2, "cn=users", self.base_dn))
 
     def test_rootDSE_tokenGroups(self):
         """Testing rootDSE tokengroups against internal calculation"""
@@ -271,9 +267,9 @@ class DynamicTokenTest(samba.tests.TestCase):
         sidset2 = set(self.user_sids)
         if len(sidset1.difference(sidset2)):
             print("token sids don't match")
-            print("tokengroups: %s" % tokengroups)
-            print("calculated : %s" % self.user_sids)
-            print("difference : %s" % sidset1.difference(sidset2))
+            print("tokengroups: {0!s}".format(tokengroups))
+            print("calculated : {0!s}".format(self.user_sids))
+            print("difference : {0!s}".format(sidset1.difference(sidset2)))
             self.fail(msg="calculated groups don't match against rootDSE tokenGroups")
 
     def test_dn_tokenGroups(self):
@@ -289,7 +285,7 @@ class DynamicTokenTest(samba.tests.TestCase):
         sidset2 = set(self.user_sids)
         if len(sidset1.difference(sidset2)):
             print("token sids don't match")
-            print("difference : %s" % sidset1.difference(sidset2))
+            print("difference : {0!s}".format(sidset1.difference(sidset2)))
             self.fail(msg="calculated groups don't match against user DN tokenGroups")
 
     def test_pac_groups(self):
@@ -337,7 +333,7 @@ class DynamicTokenTest(samba.tests.TestCase):
         sidset2 = set(self.user_sids)
         if len(sidset1.difference(sidset2)):
             print("token sids don't match")
-            print("difference : %s" % sidset1.difference(sidset2))
+            print("difference : {0!s}".format(sidset1.difference(sidset2)))
             self.fail(msg="calculated groups don't match against user PAC tokenGroups")
 
 
@@ -365,8 +361,8 @@ class DynamicTokenTest(samba.tests.TestCase):
                                     attrs=["primaryGroupID"])
         for obj in res:
             if "primaryGroupID" in obj:
-                sid = "%s-%d" % (self.admin_ldb.get_domain_sid(), int(obj["primaryGroupID"][0]))
-                res2 = self.admin_ldb.search(base="<SID=%s>" % sid, scope=ldb.SCOPE_BASE,
+                sid = "{0!s}-{1:d}".format(self.admin_ldb.get_domain_sid(), int(obj["primaryGroupID"][0]))
+                res2 = self.admin_ldb.search(base="<SID={0!s}>".format(sid), scope=ldb.SCOPE_BASE,
                                              attrs=[])
                 first = obj.dn.get_casefold()
                 second = res2[0].dn.get_casefold()
@@ -389,15 +385,15 @@ class DynamicTokenTest(samba.tests.TestCase):
         dn_tokengroups = []
         for sid in res[0]['tokenGroups']:
             sid = ndr_unpack(samba.dcerpc.security.dom_sid, sid)
-            res3 = self.admin_ldb.search(base="<SID=%s>" % sid, scope=ldb.SCOPE_BASE,
+            res3 = self.admin_ldb.search(base="<SID={0!s}>".format(sid), scope=ldb.SCOPE_BASE,
                                          attrs=[])
             tokenGroupsSet.add(res3[0].dn.get_casefold())
 
         if len(wSet.difference(tokenGroupsSet)):
-            self.fail(msg="additional calculated: %s" % wSet.difference(tokenGroupsSet))
+            self.fail(msg="additional calculated: {0!s}".format(wSet.difference(tokenGroupsSet)))
 
         if len(tokenGroupsSet.difference(wSet)):
-            self.fail(msg="additional tokenGroups: %s" % tokenGroupsSet.difference(wSet))
+            self.fail(msg="additional tokenGroups: {0!s}".format(tokenGroupsSet.difference(wSet)))
 
 
     def filtered_closure(self, wSet, filter_grouptype):
@@ -423,8 +419,8 @@ class DynamicTokenTest(samba.tests.TestCase):
                                     attrs=["primaryGroupID"])
         for obj in res:
             if "primaryGroupID" in obj:
-                sid = "%s-%d" % (self.admin_ldb.get_domain_sid(), int(obj["primaryGroupID"][0]))
-                res2 = self.admin_ldb.search(base="<SID=%s>" % sid, scope=ldb.SCOPE_BASE,
+                sid = "{0!s}-{1:d}".format(self.admin_ldb.get_domain_sid(), int(obj["primaryGroupID"][0]))
+                res2 = self.admin_ldb.search(base="<SID={0!s}>".format(sid), scope=ldb.SCOPE_BASE,
                                              attrs=[])
                 first = obj.dn.get_casefold()
                 second = res2[0].dn.get_casefold()
@@ -478,20 +474,20 @@ class DynamicTokenTest(samba.tests.TestCase):
         dn_tokengroups = []
         for sid in res[0]['tokenGroupsGlobalAndUniversal']:
             sid = ndr_unpack(samba.dcerpc.security.dom_sid, sid)
-            res3 = self.admin_ldb.search(base="<SID=%s>" % sid, scope=ldb.SCOPE_BASE,
+            res3 = self.admin_ldb.search(base="<SID={0!s}>".format(sid), scope=ldb.SCOPE_BASE,
                                          attrs=[])
             tokenGroupsSet.add(res3[0].dn.get_casefold())
 
         if len(T.difference(tokenGroupsSet)):
-            self.fail(msg="additional calculated: %s" % T.difference(tokenGroupsSet))
+            self.fail(msg="additional calculated: {0!s}".format(T.difference(tokenGroupsSet)))
 
         if len(tokenGroupsSet.difference(T)):
-            self.fail(msg="additional tokenGroupsGlobalAndUniversal: %s" % tokenGroupsSet.difference(T))
+            self.fail(msg="additional tokenGroupsGlobalAndUniversal: {0!s}".format(tokenGroupsSet.difference(T)))
 
 if not "://" in url:
     if os.path.isfile(url):
-        url = "tdb://%s" % url
+        url = "tdb://{0!s}".format(url)
     else:
-        url = "ldap://%s" % url
+        url = "ldap://{0!s}".format(url)
 
 TestProgram(module=__name__, opts=subunitopts)

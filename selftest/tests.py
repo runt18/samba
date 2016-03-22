@@ -69,32 +69,32 @@ planpythontestsuite(
                 os.path.join(samba4srcdir, "..", "third_party", "waf", "wafadmin")])
 plantestsuite(
     "samba4.blackbox.demote-saveddb", "none",
-    ["PYTHON=%s" % python, os.path.join(bbdir, "demote-saveddb.sh"),
+    ["PYTHON={0!s}".format(python), os.path.join(bbdir, "demote-saveddb.sh"),
      '$PREFIX_ABS/demote', configuration])
 plantestsuite(
     "samba4.blackbox.dbcheck.alpha13", "none",
-    ["PYTHON=%s" % python, os.path.join(bbdir, "dbcheck-oldrelease.sh"),
+    ["PYTHON={0!s}".format(python), os.path.join(bbdir, "dbcheck-oldrelease.sh"),
      '$PREFIX_ABS/provision', 'alpha13', configuration])
 plantestsuite(
     "samba4.blackbox.dbcheck.release-4-0-0", "none",
-    ["PYTHON=%s" % python, os.path.join(bbdir, "dbcheck-oldrelease.sh"),
+    ["PYTHON={0!s}".format(python), os.path.join(bbdir, "dbcheck-oldrelease.sh"),
      '$PREFIX_ABS/provision', 'release-4-0-0', configuration])
 plantestsuite(
     "samba4.blackbox.dbcheck.release-4-1-0rc3", "none",
-    ["PYTHON=%s" % python, os.path.join(bbdir, "dbcheck-oldrelease.sh"),
+    ["PYTHON={0!s}".format(python), os.path.join(bbdir, "dbcheck-oldrelease.sh"),
      '$PREFIX_ABS/provision', 'release-4-1-0rc3', configuration])
 plantestsuite(
     "samba4.blackbox.dbcheck.release-4-1-6-partial-object", "none",
-    ["PYTHON=%s" % python, os.path.join(bbdir, "dbcheck-oldrelease.sh"),
+    ["PYTHON={0!s}".format(python), os.path.join(bbdir, "dbcheck-oldrelease.sh"),
      '$PREFIX_ABS/provision', 'release-4-1-6-partial-object', configuration])
 plantestsuite(
     "samba4.blackbox.upgradeprovision.alpha13", "none",
-    ["PYTHON=%s" % python,
+    ["PYTHON={0!s}".format(python),
      os.path.join(bbdir, "upgradeprovision-oldrelease.sh"),
      '$PREFIX_ABS/provision', 'alpha13', configuration])
 plantestsuite(
     "samba4.blackbox.upgradeprovision.release-4-0-0", "none",
-    ["PYTHON=%s" % python,
+    ["PYTHON={0!s}".format(python),
      os.path.join(bbdir, "upgradeprovision-oldrelease.sh"),
      '$PREFIX_ABS/provision', 'release-4-0-0', configuration])
 planpythontestsuite("none", "samba.tests.upgradeprovision")

@@ -40,23 +40,23 @@ def drsuapi_connect(ctx):
     try:
         (ctx.drsuapi, ctx.drsuapi_handle, ctx.bind_supported_extensions) = drs_utils.drsuapi_connect(ctx.server, ctx.lp, ctx.creds)
     except Exception, e:
-        raise CommandError("DRS connection to %s failed" % ctx.server, e)
+        raise CommandError("DRS connection to {0!s} failed".format(ctx.server), e)
 
 def samdb_connect(ctx):
     '''make a ldap connection to the server'''
     try:
-        ctx.samdb = SamDB(url="ldap://%s" % ctx.server,
+        ctx.samdb = SamDB(url="ldap://{0!s}".format(ctx.server),
                           session_info=system_session(),
                           credentials=ctx.creds, lp=ctx.lp)
     except Exception, e:
-        raise CommandError("LDAP connection to %s failed" % ctx.server, e)
+        raise CommandError("LDAP connection to {0!s} failed".format(ctx.server), e)
 
 def drs_errmsg(werr):
     '''return "was successful" or an error string'''
     (ecode, estring) = werr
     if ecode == 0:
         return "was successful"
-    return "failed, result %u (%s)" % (ecode, estring)
+    return "failed, result {0:d} ({1!s})".format(ecode, estring)
 
 
 
@@ -72,7 +72,7 @@ def drs_parse_ntds_dn(ntds_dn):
     '''parse a NTDS DN returning a site and server'''
     a = ntds_dn.split(',')
     if a[0] != "CN=NTDS Settings" or a[2] != "CN=Servers" or a[4] != 'CN=Sites':
-        raise RuntimeError("bad NTDS DN %s" % ntds_dn)
+        raise RuntimeError("bad NTDS DN {0!s}".format(ntds_dn))
     server = a[1].split('=')[1]
     site   = a[3].split('=')[1]
     return (site, server)
@@ -96,17 +96,17 @@ class cmd_drs_showrepl(Command):
 
     def print_neighbour(self, n):
         '''print one set of neighbour information'''
-        self.message("%s" % n.naming_context_dn)
+        self.message("{0!s}".format(n.naming_context_dn))
         try:
             (site, server) = drs_parse_ntds_dn(n.source_dsa_obj_dn)
-            self.message("\t%s\%s via RPC" % (site, server))
+            self.message("\t{0!s}\{1!s} via RPC".format(site, server))
         except RuntimeError:
-            self.message("\tNTDS DN: %s" % n.source_dsa_obj_dn)
-        self.message("\t\tDSA object GUID: %s" % n.source_dsa_obj_guid)
-        self.message("\t\tLast attempt @ %s %s" % (nttime2string(n.last_attempt),
+            self.message("\tNTDS DN: {0!s}".format(n.source_dsa_obj_dn))
+        self.message("\t\tDSA object GUID: {0!s}".format(n.source_dsa_obj_guid))
+        self.message("\t\tLast attempt @ {0!s} {1!s}".format(nttime2string(n.last_attempt),
                                                    drs_errmsg(n.result_last_attempt)))
-        self.message("\t\t%u consecutive failure(s)." % n.consecutive_sync_failures)
-        self.message("\t\tLast success @ %s" % nttime2string(n.last_success))
+        self.message("\t\t{0:d} consecutive failure(s).".format(n.consecutive_sync_failures))
+        self.message("\t\tLast success @ {0!s}".format(nttime2string(n.last_success)))
         self.message("")
 
     def drsuapi_ReplicaInfo(ctx, info_type):
@@ -117,7 +117,7 @@ class cmd_drs_showrepl(Command):
         try:
             (info_type, info) = ctx.drsuapi.DsReplicaGetInfo(ctx.drsuapi_handle, 1, req1)
         except Exception, e:
-            raise CommandError("DsReplicaGetInfo of type %u failed" % info_type, e)
+            raise CommandError("DsReplicaGetInfo of type {0:d} failed".format(info_type), e)
         return (info_type, info)
 
     def run(self, DC=None, sambaopts=None,
@@ -140,13 +140,13 @@ class cmd_drs_showrepl(Command):
         try:
             ntds = self.samdb.search(base=ntds_dn, scope=ldb.SCOPE_BASE, attrs=['options', 'objectGUID', 'invocationId'])
         except Exception, e:
-            raise CommandError("Failed to search NTDS DN %s" % ntds_dn)
+            raise CommandError("Failed to search NTDS DN {0!s}".format(ntds_dn))
         conn = self.samdb.search(base=ntds_dn, expression="(objectClass=nTDSConnection)")
 
-        self.message("%s\\%s" % (site, server))
-        self.message("DSA Options: 0x%08x" % int(attr_default(ntds[0], "options", 0)))
-        self.message("DSA object GUID: %s" % self.samdb.schema_format_value("objectGUID", ntds[0]["objectGUID"][0]))
-        self.message("DSA invocationId: %s\n" % self.samdb.schema_format_value("objectGUID", ntds[0]["invocationId"][0]))
+        self.message("{0!s}\\{1!s}".format(site, server))
+        self.message("DSA Options: 0x{0:08x}".format(int(attr_default(ntds[0], "options", 0))))
+        self.message("DSA object GUID: {0!s}".format(self.samdb.schema_format_value("objectGUID", ntds[0]["objectGUID"][0])))
+        self.message("DSA invocationId: {0!s}\n".format(self.samdb.schema_format_value("objectGUID", ntds[0]["invocationId"][0])))
 
         self.message("==== INBOUND NEIGHBORS ====\n")
         (info_type, info) = self.drsuapi_ReplicaInfo(drsuapi.DRSUAPI_DS_REPLICA_INFO_NEIGHBORS)
@@ -185,22 +185,22 @@ class cmd_drs_showrepl(Command):
             except KeyError:
                 c_server_dns = ""
 
-            self.message("\tConnection name: %s" % c['name'][0])
-            self.message("\tEnabled        : %s" % attr_default(c, 'enabledConnection', 'TRUE'))
-            self.message("\tServer DNS name : %s" % c_server_dns)
-            self.message("\tServer DN name  : %s" % c['fromServer'][0])
+            self.message("\tConnection name: {0!s}".format(c['name'][0]))
+            self.message("\tEnabled        : {0!s}".format(attr_default(c, 'enabledConnection', 'TRUE')))
+            self.message("\tServer DNS name : {0!s}".format(c_server_dns))
+            self.message("\tServer DN name  : {0!s}".format(c['fromServer'][0]))
             self.message("\t\tTransportType: RPC")
-            self.message("\t\toptions: 0x%08X" % int(attr_default(c, 'options', 0)))
+            self.message("\t\toptions: 0x{0:08X}".format(int(attr_default(c, 'options', 0))))
             if not 'mS-DS-ReplicatesNCReason' in c:
                 self.message("Warning: No NC replicated for Connection!")
                 continue
             for r in c['mS-DS-ReplicatesNCReason']:
                 a = str(r).split(':')
-                self.message("\t\tReplicatesNC: %s" % a[3])
-                self.message("\t\tReason: 0x%08x" % int(a[2]))
+                self.message("\t\tReplicatesNC: {0!s}".format(a[3]))
+                self.message("\t\tReason: 0x{0:08x}".format(int(a[2])))
                 for s in reasons:
                     if getattr(dsdb, s, 0) & int(a[2]):
-                        self.message("\t\t\t%s" % s)
+                        self.message("\t\t\t{0!s}".format(s))
 
 
 
@@ -234,7 +234,7 @@ class cmd_drs_kcc(Command):
             self.drsuapi.DsExecuteKCC(self.drsuapi_handle, 1, req1)
         except Exception, e:
             raise CommandError("DsExecuteKCC failed", e)
-        self.message("Consistency check on %s successful." % DC)
+        self.message("Consistency check on {0!s} successful.".format(DC))
 
 
 
@@ -247,7 +247,7 @@ def drs_local_replicate(self, SOURCE_DC, NC):
     self.local_samdb = SamDB(session_info=system_session(), url=None,
                              credentials=self.creds, lp=self.lp)
 
-    self.samdb = SamDB(url="ldap://%s" % self.server,
+    self.samdb = SamDB(url="ldap://{0!s}".format(self.server),
                        session_info=system_session(),
                        credentials=self.creds, lp=self.lp)
 
@@ -264,7 +264,7 @@ def drs_local_replicate(self, SOURCE_DC, NC):
     destination_dsa_guid = self.ntds_guid
 
     self.samdb.transaction_start()
-    repl = drs_utils.drs_Replicate("ncacn_ip_tcp:%s[seal]" % self.server, self.lp,
+    repl = drs_utils.drs_Replicate("ncacn_ip_tcp:{0!s}[seal]".format(self.server), self.lp,
                                    self.creds, self.local_samdb, dest_dsa_invocation_id)
 
     # Work out if we are an RODC, so that a forced local replicate
@@ -273,7 +273,7 @@ def drs_local_replicate(self, SOURCE_DC, NC):
     try:
         repl.replicate(NC, source_dsa_invocation_id, destination_dsa_guid, rodc=rodc)
     except Exception, e:
-        raise CommandError("Error replicating DN %s" % NC, e)
+        raise CommandError("Error replicating DN {0!s}".format(NC), e)
     self.samdb.transaction_commit()
 
 
@@ -317,19 +317,19 @@ class cmd_drs_replicate(Command):
 
         # we need to find the NTDS GUID of the source DC
         msg = self.samdb.search(base=self.samdb.get_config_basedn(),
-                                expression="(&(objectCategory=server)(|(name=%s)(dNSHostName=%s)))" % (
+                                expression="(&(objectCategory=server)(|(name={0!s})(dNSHostName={1!s})))".format(
             ldb.binary_encode(SOURCE_DC),
             ldb.binary_encode(SOURCE_DC)),
                                 attrs=[])
         if len(msg) == 0:
-            raise CommandError("Failed to find source DC %s" % SOURCE_DC)
+            raise CommandError("Failed to find source DC {0!s}".format(SOURCE_DC))
         server_dn = msg[0]['dn']
 
         msg = self.samdb.search(base=server_dn, scope=ldb.SCOPE_ONELEVEL,
                                 expression="(|(objectCategory=nTDSDSA)(objectCategory=nTDSDSARO))",
                                 attrs=['objectGUID', 'options'])
         if len(msg) == 0:
-            raise CommandError("Failed to find source NTDS DN %s" % SOURCE_DC)
+            raise CommandError("Failed to find source NTDS DN {0!s}".format(SOURCE_DC))
         source_dsa_guid = msg[0]['objectGUID'][0]
         dsa_options = int(attr_default(msg, 'options', 0))
 
@@ -350,7 +350,7 @@ class cmd_drs_replicate(Command):
             drs_utils.sendDsReplicaSync(self.drsuapi, self.drsuapi_handle, source_dsa_guid, NC, req_options)
         except drs_utils.drsException, estr:
             raise CommandError("DsReplicaSync failed", estr)
-        self.message("Replicate from %s to %s was successful." % (SOURCE_DC, DEST_DC))
+        self.message("Replicate from {0!s} to {1!s} was successful.".format(SOURCE_DC, DEST_DC))
 
 
 
@@ -425,7 +425,7 @@ class cmd_drs_bind(Command):
             ("DRSUAPI_SUPPORTED_EXTENSION_LH_BETA2", "DRS_EXT_LH_BETA2"),
             ("DRSUAPI_SUPPORTED_EXTENSION_RECYCLE_BIN", "DRS_EXT_RECYCLE_BIN")]
 
-        self.message("Bind to %s succeeded." % DC)
+        self.message("Bind to {0!s} succeeded.".format(DC))
         self.message("Extensions supported:")
         for (opt, str) in optmap:
             optval = getattr(drsuapi, opt, 0)
@@ -433,7 +433,7 @@ class cmd_drs_bind(Command):
                 yesno = "Yes"
             else:
                 yesno = "No "
-            self.message("  %-60s: %s (%s)" % (opt, yesno, str))
+            self.message("  {0:<60!s}: {1!s} ({2!s})".format(opt, yesno, str))
 
         if isinstance(info.info, drsuapi.DsBindInfo48):
             self.message("\nExtended Extensions supported:")
@@ -443,12 +443,12 @@ class cmd_drs_bind(Command):
                     yesno = "Yes"
                 else:
                     yesno = "No "
-                self.message("  %-60s: %s (%s)" % (opt, yesno, str))
+                self.message("  {0:<60!s}: {1!s} ({2!s})".format(opt, yesno, str))
 
-        self.message("\nSite GUID: %s" % info.info.site_guid)
-        self.message("Repl epoch: %u" % info.info.repl_epoch)
+        self.message("\nSite GUID: {0!s}".format(info.info.site_guid))
+        self.message("Repl epoch: {0:d}".format(info.info.repl_epoch))
         if isinstance(info.info, drsuapi.DsBindInfo48):
-            self.message("Forest GUID: %s" % info.info.config_dn_guid)
+            self.message("Forest GUID: {0!s}".format(info.info.config_dn_guid))
 
 
 
@@ -497,10 +497,10 @@ class cmd_drs_options(Command):
         # modify options
         if dsa_option:
             if dsa_option[:1] not in ("+", "-"):
-                raise CommandError("Unknown option %s" % dsa_option)
+                raise CommandError("Unknown option {0!s}".format(dsa_option))
             flag = dsa_option[1:]
             if flag not in self.option_map.keys():
-                raise CommandError("Unknown option %s" % dsa_option)
+                raise CommandError("Unknown option {0!s}".format(dsa_option))
             if dsa_option[:1] == "+":
                 dsa_opts |= self.option_map[flag]
             else:

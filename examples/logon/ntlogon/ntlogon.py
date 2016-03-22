@@ -180,15 +180,15 @@ def buildScript(buf, sections, group, user, ostype, machine, debug, pause):
                             varsub  = string.strip(vardef.group(2))		# and trailing spaces
 
                             if varname == '':
-                                print "Error: No substition name specified line: %d" % idx
+                                print "Error: No substition name specified line: {0:d}".format(idx)
                                 sys.exit(1)
 
                             if varsub == '':
-                                print "Error: No substitution text provided line: %d" % idx
+                                print "Error: No substitution text provided line: {0:d}".format(idx)
                                 sys.exit(1)
 
                             if macros.has_key(varname):
-                                print "Warning: macro %s redefined line: %d" % (varname, idx)
+                                print "Warning: macro {0!s} redefined line: {1:d}".format(varname, idx)
 
                             macros[varname] = varsub
                             idx = idx + 1

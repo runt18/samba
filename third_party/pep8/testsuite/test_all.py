@@ -23,18 +23,18 @@ class Pep8TestCase(unittest.TestCase):
         import doctest
         fail_d, done_d = doctest.testmod(pep8, verbose=False, report=False)
         self.assertTrue(done_d, msg='tests not found')
-        self.assertFalse(fail_d, msg='%s failure(s)' % fail_d)
+        self.assertFalse(fail_d, msg='{0!s} failure(s)'.format(fail_d))
 
     def test_selftest(self):
         fail_s, done_s = selftest(self._style.options)
         self.assertTrue(done_s, msg='tests not found')
-        self.assertFalse(fail_s, msg='%s failure(s)' % fail_s)
+        self.assertFalse(fail_s, msg='{0!s} failure(s)'.format(fail_s))
 
     def test_checkers_testsuite(self):
         init_tests(self._style)
         report = self._style.check_files()
         self.assertFalse(report.total_errors,
-                         msg='%s failure(s)' % report.total_errors)
+                         msg='{0!s} failure(s)'.format(report.total_errors))
 
     def test_own_dog_food(self):
         files = [pep8.__file__.rstrip('oc'), __file__.rstrip('oc'),
@@ -42,7 +42,7 @@ class Pep8TestCase(unittest.TestCase):
         report = self._style.init_report(pep8.StandardReport)
         report = self._style.check_files(files)
         self.assertFalse(report.total_errors,
-                         msg='Failures: %s' % report.messages)
+                         msg='Failures: {0!s}'.format(report.messages))
 
 
 def suite():

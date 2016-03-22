@@ -47,7 +47,7 @@ class cmd_rodc_preload(Command):
 
         # we accept the account in SID, accountname or DN form
         if account[0:2] == 'S-':
-            res = samdb.search(base="<SID=%s>" % account,
+            res = samdb.search(base="<SID={0!s}>".format(account),
                                expression="objectclass=user",
                                scope=ldb.SCOPE_BASE, attrs=[])
         elif account.find('=') >= 0:
@@ -55,10 +55,10 @@ class cmd_rodc_preload(Command):
                                expression="objectclass=user",
                                scope=ldb.SCOPE_BASE, attrs=[])
         else:
-            res = samdb.search(expression="(&(samAccountName=%s)(objectclass=user))" % ldb.binary_encode(account),
+            res = samdb.search(expression="(&(samAccountName={0!s})(objectclass=user))".format(ldb.binary_encode(account)),
                                scope=ldb.SCOPE_SUBTREE, attrs=[])
         if len(res) != 1:
-            raise Exception("Failed to find account '%s'" % account)
+            raise Exception("Failed to find account '{0!s}'".format(account))
         return str(res[0]["dn"])
 
 
@@ -73,7 +73,7 @@ class cmd_rodc_preload(Command):
         creds = credopts.get_credentials(lp, fallback_machine=True)
 
         # connect to the remote and local SAMs
-        samdb = SamDB(url="ldap://%s" % server,
+        samdb = SamDB(url="ldap://{0!s}".format(server),
                       session_info=system_session(),
                       credentials=creds, lp=lp)
 
@@ -86,19 +86,19 @@ class cmd_rodc_preload(Command):
         source_dsa_invocation_id = misc.GUID(local_samdb.schema_format_value("objectGUID", res[0]["invocationId"][0]))
 
         dn = self.get_dn(samdb, account)
-        self.outf.write("Replicating DN %s\n" % dn)
+        self.outf.write("Replicating DN {0!s}\n".format(dn))
 
         destination_dsa_guid = misc.GUID(local_samdb.get_ntds_GUID())
 
         local_samdb.transaction_start()
-        repl = drs_Replicate("ncacn_ip_tcp:%s[seal,print]" % server, lp, creds,
+        repl = drs_Replicate("ncacn_ip_tcp:{0!s}[seal,print]".format(server), lp, creds,
                              local_samdb, destination_dsa_guid)
         try:
             repl.replicate(dn, source_dsa_invocation_id, destination_dsa_guid,
                            exop=drsuapi.DRSUAPI_EXOP_REPL_SECRET, rodc=True)
         except Exception, e:
             local_samdb.transaction_cancel()
-            raise CommandError("Error replicating DN %s" % dn, e)
+            raise CommandError("Error replicating DN {0!s}".format(dn), e)
         local_samdb.transaction_commit()
 
 

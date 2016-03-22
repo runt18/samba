@@ -97,7 +97,7 @@ class SchemaTests(samba.tests.TestCase):
         attr_ldap_display_name = attr_name.replace("-", "")
 
         ldif = """
-dn: CN=%s,%s""" % (attr_name, self.schema_dn) + """
+dn: CN={0!s},{1!s}""".format(attr_name, self.schema_dn) + """
 objectClass: top
 objectClass: attributeSchema
 adminDescription: """ + attr_name + """
@@ -123,7 +123,7 @@ schemaUpdateNow: 1
 
         # Search for created attribute
         res = []
-        res = self.ldb.search("cn=%s,%s" % (attr_name, self.schema_dn), scope=SCOPE_BASE,
+        res = self.ldb.search("cn={0!s},{1!s}".format(attr_name, self.schema_dn), scope=SCOPE_BASE,
                               attrs=["lDAPDisplayName","schemaIDGUID"])
         self.assertEquals(len(res), 1)
         self.assertEquals(res[0]["lDAPDisplayName"][0], attr_ldap_display_name)
@@ -134,7 +134,7 @@ schemaUpdateNow: 1
 
         # First try to create a class with a wrong "defaultObjectCategory"
         ldif = """
-dn: CN=%s,%s""" % (class_name, self.schema_dn) + """
+dn: CN={0!s},{1!s}""".format(class_name, self.schema_dn) + """
 objectClass: top
 objectClass: classSchema
 defaultObjectCategory: CN=_
@@ -158,7 +158,7 @@ systemOnly: FALSE
                  self.assertEquals(num, ERR_CONSTRAINT_VIOLATION)
 
         ldif = """
-dn: CN=%s,%s""" % (class_name, self.schema_dn) + """
+dn: CN={0!s},{1!s}""".format(class_name, self.schema_dn) + """
 objectClass: top
 objectClass: classSchema
 adminDescription: """ + class_name + """
@@ -178,7 +178,7 @@ systemOnly: FALSE
 
         # Search for created objectclass
         res = []
-        res = self.ldb.search("cn=%s,%s" % (class_name, self.schema_dn), scope=SCOPE_BASE,
+        res = self.ldb.search("cn={0!s},{1!s}".format(class_name, self.schema_dn), scope=SCOPE_BASE,
                               attrs=["lDAPDisplayName", "defaultObjectCategory", "schemaIDGUID", "distinguishedName"])
         self.assertEquals(len(res), 1)
         self.assertEquals(res[0]["lDAPDisplayName"][0], class_ldap_display_name)
@@ -196,15 +196,15 @@ schemaUpdateNow: 1
         object_name = "obj" + time.strftime("%s", time.gmtime())
 
         ldif = """
-dn: CN=%s,CN=Users,%s"""% (object_name, self.base_dn) + """
+dn: CN={0!s},CN=Users,{1!s}""".format(object_name, self.base_dn) + """
 objectClass: organizationalPerson
 objectClass: person
 objectClass: """ + class_ldap_display_name + """
 objectClass: top
 cn: """ + object_name + """
 instanceType: 4
-objectCategory: CN=%s,%s"""% (class_name, self.schema_dn) + """
-distinguishedName: CN=%s,CN=Users,%s"""% (object_name, self.base_dn) + """
+objectCategory: CN={0!s},{1!s}""".format(class_name, self.schema_dn) + """
+distinguishedName: CN={0!s},CN=Users,{1!s}""".format(object_name, self.base_dn) + """
 name: """ + object_name + """
 """ + attr_ldap_display_name + """: test
 """
@@ -212,10 +212,10 @@ name: """ + object_name + """
 
         # Search for created object
         res = []
-        res = self.ldb.search("cn=%s,cn=Users,%s" % (object_name, self.base_dn), scope=SCOPE_BASE, attrs=["dn"])
+        res = self.ldb.search("cn={0!s},cn=Users,{1!s}".format(object_name, self.base_dn), scope=SCOPE_BASE, attrs=["dn"])
         self.assertEquals(len(res), 1)
         # Delete the object
-        delete_force(self.ldb, "cn=%s,cn=Users,%s" % (object_name, self.base_dn))
+        delete_force(self.ldb, "cn={0!s},cn=Users,{1!s}".format(object_name, self.base_dn))
 
     def test_subClassOf(self):
         """ Testing usage of custom child schamaClass
@@ -225,7 +225,7 @@ name: """ + object_name + """
         class_ldap_display_name = class_name.replace("-", "")
 
         ldif = """
-dn: CN=%s,%s""" % (class_name, self.schema_dn) + """
+dn: CN={0!s},{1!s}""".format(class_name, self.schema_dn) + """
 objectClass: top
 objectClass: classSchema
 adminDescription: """ + class_name + """
@@ -242,7 +242,7 @@ systemOnly: FALSE
 
         # Search for created objectclass
         res = []
-        res = self.ldb.search("cn=%s,%s" % (class_name, self.schema_dn), scope=SCOPE_BASE,
+        res = self.ldb.search("cn={0!s},{1!s}".format(class_name, self.schema_dn), scope=SCOPE_BASE,
                               attrs=["lDAPDisplayName", "defaultObjectCategory",
                                      "schemaIDGUID", "distinguishedName"])
         self.assertEquals(len(res), 1)
@@ -261,7 +261,7 @@ schemaUpdateNow: 1
         object_name = "org" + time.strftime("%s", time.gmtime())
 
         ldif = """
-dn: OU=%s,%s""" % (object_name, self.base_dn) + """
+dn: OU={0!s},{1!s}""".format(object_name, self.base_dn) + """
 objectClass: """ + class_ldap_display_name + """
 ou: """ + object_name + """
 instanceType: 4
@@ -270,10 +270,10 @@ instanceType: 4
 
         # Search for created object
         res = []
-        res = self.ldb.search("ou=%s,%s" % (object_name, self.base_dn), scope=SCOPE_BASE, attrs=["dn"])
+        res = self.ldb.search("ou={0!s},{1!s}".format(object_name, self.base_dn), scope=SCOPE_BASE, attrs=["dn"])
         self.assertEquals(len(res), 1)
         # Delete the object
-        delete_force(self.ldb, "ou=%s,%s" % (object_name, self.base_dn))
+        delete_force(self.ldb, "ou={0!s},{1!s}".format(object_name, self.base_dn))
 
 
 class SchemaTests_msDS_IntId(samba.tests.TestCase):
@@ -302,7 +302,7 @@ schemaUpdateNow: 1
     def _make_obj_names(self, prefix):
         class_name = prefix + time.strftime("%s", time.gmtime())
         class_ldap_name = class_name.replace("-", "")
-        class_dn = "CN=%s,%s" % (class_name, self.schema_dn)
+        class_dn = "CN={0!s},{1!s}".format(class_name, self.schema_dn)
         return (class_name, class_ldap_name, class_dn)
 
     def _is_schema_base_object(self, ldb_msg):
@@ -548,7 +548,7 @@ systemOnly: FALSE
                     #self.assertTrue("msDS-IntId" in ldb_msg, "msDS-IntId expected on: %s" % ldb_msg.dn)
                     if "msDS-IntId" not in ldb_msg:
                         count = count + 1
-                        print "%3d warning: msDS-IntId expected on: %-30s %s" % (count, ldb_msg["attributeID"], ldb_msg["cn"])
+                        print "{0:3d} warning: msDS-IntId expected on: {1:<30!s} {2!s}".format(count, ldb_msg["attributeID"], ldb_msg["cn"])
             else:
                 self.assertTrue("msDS-IntId" not in ldb_msg)
 
@@ -573,12 +573,12 @@ class SchemaTests_msDS_isRODC(samba.tests.TestCase):
         res = self.ldb.search(self.base_dn, expression="objectClass=server",
                               attrs=["msDS-isRODC"], controls=["search_options:1:2"])
         for ldb_msg in res:
-            ntds_search_dn = "CN=NTDS Settings,%s" % ldb_msg['dn']
+            ntds_search_dn = "CN=NTDS Settings,{0!s}".format(ldb_msg['dn'])
             try:
                 res_check = self.ldb.search(ntds_search_dn, attrs=["objectCategory"])
             except LdbError, (num, _):
                 self.assertEquals(num, ERR_NO_SUCH_OBJECT)
-                print("Server entry %s doesn't have a NTDS settings object" % res[0]['dn'])
+                print("Server entry {0!s} doesn't have a NTDS settings object".format(res[0]['dn']))
             else:
                 self.assertTrue("objectCategory" in res_check[0])
                 self.assertTrue("msDS-isRODC" in ldb_msg)
@@ -588,15 +588,15 @@ class SchemaTests_msDS_isRODC(samba.tests.TestCase):
                               attrs=["serverReferenceBL","msDS-isRODC"], controls=["search_options:1:2"])
         for ldb_msg in res:
             if "serverReferenceBL" not in ldb_msg:
-                print("Computer entry %s doesn't have a serverReferenceBL attribute" % ldb_msg['dn'])
+                print("Computer entry {0!s} doesn't have a serverReferenceBL attribute".format(ldb_msg['dn']))
             else:
                 self.assertTrue("msDS-isRODC" in ldb_msg)
 
 if not "://" in host:
     if os.path.isfile(host):
-        host = "tdb://%s" % host
+        host = "tdb://{0!s}".format(host)
     else:
-        host = "ldap://%s" % host
+        host = "ldap://{0!s}".format(host)
 
 ldb_options = []
 if host.startswith("ldap://"):

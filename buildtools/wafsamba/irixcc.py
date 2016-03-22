@@ -23,7 +23,7 @@ def find_irixcc(conf):
 
     try:
         if Utils.cmd_output(cc + ['-c99'] + ['-version']) != '':
-            conf.fatal('irixcc %r was not found' % cc)
+            conf.fatal('irixcc {0!r} was not found'.format(cc))
     except ValueError:
         conf.fatal('irixcc -v could not be executed')
 

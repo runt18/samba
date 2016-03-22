@@ -81,7 +81,7 @@ def detect(conf):
 					complete = False
 	if not complete:
 		lst = [name for name, _, _ in _options if not env[name.upper()]]
-		raise Utils.WafError('Variable substitution failure %r' % lst)
+		raise Utils.WafError('Variable substitution failure {0!r}'.format(lst))
 
 def set_options(opt):
 
@@ -106,5 +106,5 @@ def set_options(opt):
 	for name, help, default in _options:
 		option_name = '--' + name
 		str_default = default
-		str_help = '%s [Default: %s]' % (help, str_default)
+		str_help = '{0!s} [Default: {1!s}]'.format(help, str_default)
 		dirs_options.add_option(option_name, help=str_help, default='', dest=name.upper())

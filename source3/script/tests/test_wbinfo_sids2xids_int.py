@@ -17,7 +17,7 @@ def fill_cache(inids, idtype='gid'):
     for inid in inids:
         if inid is None:
             continue
-        subprocess.Popen([wbinfo, '--%s-to-sid=%s' % (idtype, inid)],
+        subprocess.Popen([wbinfo, '--{0!s}-to-sid={1!s}'.format(idtype, inid)],
                          stdout=subprocess.PIPE).communicate()
 
 domain = subprocess.Popen([wbinfo, "--own-domain"],
@@ -70,10 +70,10 @@ def check_singular(sids, ids, idtype='gid'):
         if ids[i] is None:
             continue
 
-        outid = subprocess.Popen([wbinfo, '--sid-to-%s' % idtype, sid],
+        outid = subprocess.Popen([wbinfo, '--sid-to-{0!s}'.format(idtype), sid],
                                  stdout=subprocess.PIPE).communicate()[0].strip()
         if outid != ids[i]:
-            print "Expected %s, got %s\n" % (outid, ids[i])
+            print "Expected {0!s}, got {1!s}\n".format(outid, ids[i])
             flush_cache()
             sys.exit(1)
         i += 1
@@ -89,7 +89,7 @@ def check_multiple(sids, idtypes):
         result = line.split(' ')[2:]
 
         if result[0] != idtypes[i]:
-            print "Expected %s, got %s\n" % (idtypes[i], result[0])
+            print "Expected {0!s}, got {1!s}\n".format(idtypes[i], result[0])
             flush_cache()
             sys.exit(1)
         i += 1

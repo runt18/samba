@@ -63,7 +63,7 @@ def add_tarfile(tar, fname, abspath, basedir):
     try:
         tinfo = tar.gettarinfo(name=abspath, arcname=fname)
     except OSError:
-        Logs.error('Unable to find file %s - missing from git checkout?' % abspath)
+        Logs.error('Unable to find file {0!s} - missing from git checkout?'.format(abspath))
         sys.exit(1)
     tinfo.uid   = 0
     tinfo.gid   = 0
@@ -90,7 +90,7 @@ def vcs_dir_contents(path):
             break
         repo = os.path.dirname(repo)
     if repo == "/":
-        raise Exception("unsupported or no vcs for %s" % path)
+        raise Exception("unsupported or no vcs for {0!s}".format(path))
     return Utils.cmd_output(ls_files_cmd, cwd=cwd, env=env).split()
 
 
@@ -147,13 +147,13 @@ def dist(appname='', version=''):
         Logs.error('You must use samba_dist.DIST_DIRS() to set which directories to package')
         sys.exit(1)
 
-    dist_base = '%s-%s' % (appname, version)
+    dist_base = '{0!s}-{1!s}'.format(appname, version)
 
     if Options.options.SIGN_RELEASE:
-        dist_name = '%s.tar' % (dist_base)
+        dist_name = '{0!s}.tar'.format((dist_base))
         tar = tarfile.open(dist_name, 'w')
     else:
-        dist_name = '%s.tar.gz' % (dist_base)
+        dist_name = '{0!s}.tar.gz'.format((dist_base))
         tar = tarfile.open(dist_name, 'w:gz')
 
     blacklist = dist_blacklist.split()
@@ -168,7 +168,7 @@ def dist(appname='', version=''):
         try:
             files = vcs_dir_contents(absdir)
         except Exception, e:
-            Logs.error('unable to get contents of %s: %s' % (absdir, e))
+            Logs.error('unable to get contents of {0!s}: {1!s}'.format(absdir, e))
             sys.exit(1)
         add_files_to_tarball(tar, srcdir, dir, dist_base, destdir, blacklist, files)
 
@@ -213,10 +213,10 @@ def dist(appname='', version=''):
         uncompressed_tar.close()
         compressed_tar.close()
         os.unlink(dist_name)
-        Logs.info('Created %s.gz %s.asc' % (dist_name, dist_name))
+        Logs.info('Created {0!s}.gz {1!s}.asc'.format(dist_name, dist_name))
         dist_name = dist_name + '.gz'
     else:
-        Logs.info('Created %s' % dist_name)
+        Logs.info('Created {0!s}'.format(dist_name))
 
     return dist_name
 

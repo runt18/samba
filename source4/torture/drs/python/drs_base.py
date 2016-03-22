@@ -75,7 +75,7 @@ class DrsBaseTestCase(samba.tests.BlackboxTestCase):
         sam_db.modify(m)
 
     def _deleted_objects_dn(self, sam_ldb):
-        wkdn = "<WKGUID=18E2EA80684F11D2B9AA00C04F79F805,%s>" % self.domain_dn
+        wkdn = "<WKGUID=18E2EA80684F11D2B9AA00C04F79F805,{0!s}>".format(self.domain_dn)
         res = sam_ldb.search(base=wkdn,
                              scope=SCOPE_BASE,
                              controls=["show_deleted:1"])
@@ -83,7 +83,7 @@ class DrsBaseTestCase(samba.tests.BlackboxTestCase):
         return str(res[0]["dn"])
 
     def _lost_and_found_dn(self, sam_ldb, nc):
-        wkdn = "<WKGUID=%s,%s>" % (dsdb.DS_GUID_LOSTANDFOUND_CONTAINER, nc)
+        wkdn = "<WKGUID={0!s},{1!s}>".format(dsdb.DS_GUID_LOSTANDFOUND_CONTAINER, nc)
         res = sam_ldb.search(base=wkdn,
                              scope=SCOPE_BASE)
         self.assertEquals(len(res), 1)
@@ -97,10 +97,10 @@ class DrsBaseTestCase(samba.tests.BlackboxTestCase):
         samba_tool_cmd = os.path.abspath("./bin/samba-tool")
         # make command line credentials string
         creds = self.get_credentials()
-        cmdline_auth = "-U%s/%s%%%s" % (creds.get_domain(),
+        cmdline_auth = "-U{0!s}/{1!s}%{2!s}".format(creds.get_domain(),
                                         creds.get_username(), creds.get_password())
         # bin/samba-tool drs <drs_command> <cmdline_auth>
-        return "%s drs %s %s" % (samba_tool_cmd, drs_command, cmdline_auth)
+        return "{0!s} drs {1!s} {2!s}".format(samba_tool_cmd, drs_command, cmdline_auth)
 
     def _net_drs_replicate(self, DC, fromDC, nc_dn=None, forced=True, local=False, full_sync=False):
         if nc_dn is None:
@@ -114,17 +114,17 @@ class DrsBaseTestCase(samba.tests.BlackboxTestCase):
         if full_sync:
             samba_tool_cmdline += " --full-sync"
         # bin/samba-tool drs replicate <Dest_DC_NAME> <Src_DC_NAME> <Naming Context>
-        cmd_line = "%s %s %s %s" % (samba_tool_cmdline, DC, fromDC, nc_dn)
+        cmd_line = "{0!s} {1!s} {2!s} {3!s}".format(samba_tool_cmdline, DC, fromDC, nc_dn)
         return self.check_output(cmd_line)
 
     def _enable_inbound_repl(self, DC):
         # make base command line
         samba_tool_cmd = self._samba_tool_cmdline("options")
         # disable replication
-        self.check_run("%s %s --dsa-option=-DISABLE_INBOUND_REPL" %(samba_tool_cmd, DC))
+        self.check_run("{0!s} {1!s} --dsa-option=-DISABLE_INBOUND_REPL".format(samba_tool_cmd, DC))
 
     def _disable_inbound_repl(self, DC):
         # make base command line
         samba_tool_cmd = self._samba_tool_cmdline("options")
         # disable replication
-        self.check_run("%s %s --dsa-option=+DISABLE_INBOUND_REPL" %(samba_tool_cmd, DC))
+        self.check_run("{0!s} {1!s} --dsa-option=+DISABLE_INBOUND_REPL".format(samba_tool_cmd, DC))

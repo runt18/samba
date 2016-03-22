@@ -132,7 +132,7 @@ class cmd_dsacl_set(Command):
     def print_new_acl(self, samdb, object_dn):
         desc = self.read_descriptor(samdb, object_dn)
         desc_sddl = desc.as_sddl(self.get_domain_sid(samdb))
-        self.outf.write("new descriptor for %s:\n" % object_dn)
+        self.outf.write("new descriptor for {0!s}:\n".format(object_dn))
         self.outf.write(desc_sddl + "\n")
 
     def run(self, car, action, objectdn, trusteedn, sddl,
@@ -164,11 +164,11 @@ class cmd_dsacl_set(Command):
         if sddl:
             new_ace = sddl
         elif action == "allow":
-            new_ace = "(OA;;CR;%s;;%s)" % (cars[car], str(sid))
+            new_ace = "(OA;;CR;{0!s};;{1!s})".format(cars[car], str(sid))
         elif action == "deny":
-            new_ace = "(OD;;CR;%s;;%s)" % (cars[car], str(sid))
+            new_ace = "(OD;;CR;{0!s};;{1!s})".format(cars[car], str(sid))
         else:
-            raise CommandError("Wrong argument '%s'!" % action)
+            raise CommandError("Wrong argument '{0!s}'!".format(action))
 
         self.print_new_acl(samdb, objectdn)
         self.add_ace(samdb, objectdn, new_ace)

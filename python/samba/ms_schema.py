@@ -143,7 +143,7 @@ def __read_raw_entries(f):
 
                 entry.append(l)
             else:
-                print >>sys.stderr, "Invalid line: %s" % l,
+                print >>sys.stderr, "Invalid line: {0!s}".format(l),
                 sys.exit(1)
 
         if len(entry):
@@ -194,11 +194,11 @@ def __write_ldif_one(entry):
             vl = l[1]
 
         if l[0].lower() == 'omobjectclass':
-            out.append("%s:: %s" % (l[0], l[1]))
+            out.append("{0!s}:: {1!s}".format(l[0], l[1]))
             continue
 
         for v in vl:
-            out.append("%s: %s" % (l[0], v))
+            out.append("{0!s}: {1!s}".format(l[0], v))
 
 
     return "\n".join(out)
@@ -237,7 +237,7 @@ def __transform_entry(entry, objectClass):
 
 
     assert(cn)
-    entry.insert(0, ["dn", "CN=%s,${SCHEMADN}" % cn])
+    entry.insert(0, ["dn", "CN={0!s},${{SCHEMADN}}".format(cn)])
     entry.insert(1, ["objectClass", ["top", objectClass]])
     entry.insert(2, ["cn", cn])
     entry.insert(2, ["objectGUID", str(uuid.uuid4())])
@@ -284,7 +284,7 @@ if __name__ == '__main__':
         attr_file = sys.argv[1]
         classes_file = sys.argv[2]
     except IndexError:
-        print >>sys.stderr, "Usage: %s attr-file.txt classes-file.txt" % (sys.argv[0])
+        print >>sys.stderr, "Usage: {0!s} attr-file.txt classes-file.txt".format((sys.argv[0]))
         sys.exit(1)
 
     print read_ms_schema(attr_file, classes_file)

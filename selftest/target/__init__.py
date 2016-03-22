@@ -26,7 +26,7 @@ class EnvironmentDown(Exception):
     """Indicates an environment has gone down."""
 
     def __init__(self, msg):
-        super(EnvironmentDown, self).__init__("environment went down: %s" % msg)
+        super(EnvironmentDown, self).__init__("environment went down: {0!s}".format(msg))
 
 
 class UnsupportedEnvironment(Exception):
@@ -34,7 +34,7 @@ class UnsupportedEnvironment(Exception):
 
     def __init__(self, target, envname):
         super(UnsupportedEnvironment, self).__init__(
-            "Target %s does not support environment %s" % (target, envname))
+            "Target {0!s} does not support environment {1!s}".format(target, envname))
 
 
 class Target(object):

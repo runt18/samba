@@ -14,7 +14,7 @@ def SAMBA_PIDL(bld, pname, source,
 
     bname = source[0:-4]; # strip off the .idl suffix
     bname = os.path.basename(bname)
-    name = "%s_%s" % (pname, bname.upper())
+    name = "{0!s}_{1!s}".format(pname, bname.upper())
 
     if not SET_TARGET_TYPE(bld, name, 'PIDL'):
         return
@@ -62,9 +62,9 @@ def SAMBA_PIDL(bld, pname, source,
     cc = ""
     if bld.CONFIG_SET("CPP") and bld.CONFIG_GET("CPP") != "":
         if isinstance(bld.CONFIG_GET("CPP"), list):
-            cpp = 'CPP="%s"' % " ".join(bld.CONFIG_GET("CPP"))
+            cpp = 'CPP="{0!s}"'.format(" ".join(bld.CONFIG_GET("CPP")))
         else:
-            cpp = 'CPP="%s"' % bld.CONFIG_GET("CPP")
+            cpp = 'CPP="{0!s}"'.format(bld.CONFIG_GET("CPP"))
 
     if cpp == "CPP=xlc_r":
         cpp = ""
@@ -72,11 +72,11 @@ def SAMBA_PIDL(bld, pname, source,
 
     if bld.CONFIG_SET("CC"):
         if isinstance(bld.CONFIG_GET("CC"), list):
-            cc = 'CC="%s"' % " ".join(bld.CONFIG_GET("CC"))
+            cc = 'CC="{0!s}"'.format(" ".join(bld.CONFIG_GET("CC")))
         else:
-            cc = 'CC="%s"' % bld.CONFIG_GET("CC")
+            cc = 'CC="{0!s}"'.format(bld.CONFIG_GET("CC"))
 
-    t = bld(rule='cd .. && %s %s ${PERL} "${PIDL}" --quiet ${OPTIONS} --outputdir ${OUTPUTDIR} -- "${SRC[0].abspath(env)}"' % (cpp, cc),
+    t = bld(rule='cd .. && {0!s} {1!s} ${{PERL}} "${{PIDL}}" --quiet ${{OPTIONS}} --outputdir ${{OUTPUTDIR}} -- "${{SRC[0].abspath(env)}}"'.format(cpp, cc),
             ext_out    = '.c',
             before     = 'cc',
             update_outputs = True,
@@ -119,10 +119,10 @@ def collect(self):
     pidl_headers = LOCAL_CACHE(self.bld, 'PIDL_HEADERS')
     for (name, hd) in pidl_headers.items():
         y = self.bld.get_tgen_by_name(name)
-        self.bld.ASSERT(y is not None, 'Failed to find PIDL header %s' % name)
+        self.bld.ASSERT(y is not None, 'Failed to find PIDL header {0!s}'.format(name))
         y.post()
         for node in hd:
-            self.bld.ASSERT(node is not None, 'Got None as build node generating PIDL table for %s' % name)
+            self.bld.ASSERT(node is not None, 'Got None as build node generating PIDL table for {0!s}'.format(name))
             self.source += " " + node.relpath_gen(self.path)
 
 

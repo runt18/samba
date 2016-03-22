@@ -27,7 +27,7 @@ def scan(self):
 		if path:
 			for k in ['', '.tex', '.ltx']:
 				# add another loop for the tex include paths?
-				debug('tex: trying %s%s' % (path, k))
+				debug('tex: trying {0!s}{1!s}'.format(path, k))
 				try:
 					os.stat(abs+os.sep+path+k)
 				except OSError:
@@ -37,10 +37,10 @@ def scan(self):
 				if node:
 					nodes.append(node)
 			else:
-				debug('tex: could not find %s' % path)
+				debug('tex: could not find {0!s}'.format(path))
 				names.append(path)
 
-	debug("tex: found the following : %s and names %s" % (nodes, names))
+	debug("tex: found the following : {0!s} and names {1!s}".format(nodes, names))
 	return (nodes, names)
 
 latex_fun, _ = Task.compile_fun('latex', '${LATEX} ${LATEXFLAGS} ${SRCFILE}', shell=False)
@@ -82,7 +82,7 @@ def tex_build(task, command='LATEX'):
 	task.cwd = task.inputs[0].parent.abspath(task.env)
 
 
-	warn('first pass on %s' % command)
+	warn('first pass on {0!s}'.format(command))
 
 	task.env.env = {'TEXINPUTS': sr2}
 	task.env.SRCFILE = srcfile
@@ -106,7 +106,7 @@ def tex_build(task, command='LATEX'):
 			task.env.SRCFILE = docuname
 			ret = bibtex_fun(task)
 			if ret:
-				error('error when calling bibtex %s' % docuname)
+				error('error when calling bibtex {0!s}'.format(docuname))
 				return ret
 
 	# look on the filesystem if there is a .idx file to process
@@ -122,7 +122,7 @@ def tex_build(task, command='LATEX'):
 		task.env.env = {}
 		ret = makeindex_fun(task)
 		if ret:
-			error('error when calling makeindex %s' % idx_path)
+			error('error when calling makeindex {0!s}'.format(idx_path))
 			return ret
 
 
@@ -137,7 +137,7 @@ def tex_build(task, command='LATEX'):
 		try:
 			hash = Utils.h_file(aux_node.abspath(env))
 		except KeyError:
-			error('could not read aux.h -> %s' % aux_node.abspath(env))
+			error('could not read aux.h -> {0!s}'.format(aux_node.abspath(env)))
 			pass
 
 		# debug
@@ -148,13 +148,13 @@ def tex_build(task, command='LATEX'):
 			break
 
 		# run the command
-		warn('calling %s' % command)
+		warn('calling {0!s}'.format(command))
 
 		task.env.env = {'TEXINPUTS': sr2 + os.pathsep}
 		task.env.SRCFILE = srcfile
 		ret = fun(task)
 		if ret:
-			error('error when calling %s %s' % (command, latex_fun))
+			error('error when calling {0!s} {1!s}'.format(command, latex_fun))
 			return ret
 
 	return None # ok
@@ -196,7 +196,7 @@ def apply_tex(self):
 		base, ext = os.path.splitext(filename)
 
 		node = self.path.find_resource(filename)
-		if not node: raise Utils.WafError('cannot find %s' % filename)
+		if not node: raise Utils.WafError('cannot find {0!s}'.format(filename))
 
 		if self.type == 'latex':
 			task = self.create_task('latex', node, node.change_ext('.dvi'))

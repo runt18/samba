@@ -78,10 +78,10 @@ def test_smbclient(t):
     t.info('Testing smbclient')
     smbclient = t.getvar("smbclient")
     t.chdir('${PREFIX}')
-    t.cmd_contains("%s --version" % (smbclient), ["Version 4."])
-    t.cmd_contains('%s -L ${INTERFACE_IP} -U%%' % (smbclient), ["Domain=[${WIN_DOMAIN}]", "test", "IPC$", "Samba 4."],
+    t.cmd_contains("{0!s} --version".format((smbclient)), ["Version 4."])
+    t.cmd_contains('{0!s} -L ${{INTERFACE_IP}} -U%'.format((smbclient)), ["Domain=[${WIN_DOMAIN}]", "test", "IPC$", "Samba 4."],
                    casefold=True)
-    child = t.pexpect_spawn('%s //${HOSTNAME}.${WIN_REALM}/test -Uroot@${WIN_REALM}%%${PASSWORD2}' % (smbclient))
+    child = t.pexpect_spawn('{0!s} //${{HOSTNAME}}.${{WIN_REALM}}/test -Uroot@${{WIN_REALM}}%${{PASSWORD2}}'.format((smbclient)))
     child.expect("smb:")
     child.sendline("dir")
     child.expect("blocks available")
@@ -92,7 +92,7 @@ def test_smbclient(t):
     child.sendline("cd ..")
     child.sendline("rmdir testdir")
 
-    child = t.pexpect_spawn('%s //${HOSTNAME}.${WIN_REALM}/test -Uroot@${WIN_REALM}%%${PASSWORD2} -k' % (smbclient))
+    child = t.pexpect_spawn('{0!s} //${{HOSTNAME}}.${{WIN_REALM}}/test -Uroot@${{WIN_REALM}}%${{PASSWORD2}} -k'.format((smbclient)))
     child.expect("smb:")
     child.sendline("dir")
     child.expect("blocks available")
@@ -235,8 +235,8 @@ def test_s3(t):
         t.run_winjoin('WINDOWS7', realm, username=dom_username, password=dom_password)
         t.test_remote_smbclient("WINDOWS7", dom_username, dom_password)
         t.test_remote_smbclient('WINDOWS7', dom_username, dom_password, args='--option=clientntlmv2auth=no')
-        t.test_remote_smbclient('WINDOWS7', "%s@%s" % (dom_username, dom_realm), dom_password, args="-k")
-        t.test_remote_smbclient('WINDOWS7', "%s@%s" % (dom_username, dom_realm), dom_password, args="-k --option=clientusespnegoprincipal=yes")
+        t.test_remote_smbclient('WINDOWS7', "{0!s}@{1!s}".format(dom_username, dom_realm), dom_password, args="-k")
+        t.test_remote_smbclient('WINDOWS7', "{0!s}@{1!s}".format(dom_username, dom_realm), dom_password, args="-k --option=clientusespnegoprincipal=yes")
         t.test_net_use('WINDOWS7', dom_realm, t.getvar("W2K8R2A_DOMAIN"), 'root', '${PASSWORD2}')
 
     if t.have_var('WINXP_VM') and t.have_var('W2K8R2A_VM') and not t.skip("join_winxp_2008r2"):
@@ -254,8 +254,8 @@ def test_s3(t):
         t.run_winjoin('WINXP', realm, username=dom_username, password=dom_password)
         t.test_remote_smbclient('WINXP', dom_username, dom_password)
         t.test_remote_smbclient('WINXP', dom_username, dom_password, args='--option=clientntlmv2auth=no')
-        t.test_remote_smbclient('WINXP', "%s@%s" % (dom_username, dom_realm), dom_password, args="-k")
-        t.test_remote_smbclient('WINXP', "%s@%s" % (dom_username, dom_realm), dom_password, args="-k --clientusespnegoprincipal=yes")
+        t.test_remote_smbclient('WINXP', "{0!s}@{1!s}".format(dom_username, dom_realm), dom_password, args="-k")
+        t.test_remote_smbclient('WINXP', "{0!s}@{1!s}".format(dom_username, dom_realm), dom_password, args="-k --clientusespnegoprincipal=yes")
         t.test_net_use('WINXP', dom_realm, t.getvar("W2K8R2A_DOMAIN"), 'root', '${PASSWORD2}')
 
     t.info("S3 test: All OK")

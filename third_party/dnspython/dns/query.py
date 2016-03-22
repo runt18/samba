@@ -379,7 +379,7 @@ def xfr(where, zone, rdtype=dns.rdatatype.AXFR, rdclass=dns.rdataclass.IN,
     q = dns.message.make_query(zone, rdtype, rdclass)
     if rdtype == dns.rdatatype.IXFR:
         rrset = dns.rrset.from_text(zone, 0, 'IN', 'SOA',
-                                    '. . %u 0 0 0 0' % serial)
+                                    '. . {0:d} 0 0 0 0'.format(serial))
         q.authority.append(rrset)
     if not keyring is None:
         q.use_tsig(keyring, keyname, algorithm=keyalgorithm)

@@ -52,7 +52,7 @@ def SAMBA_CHECK_PYTHON_HEADERS(conf, mandatory=True):
         if conf.env['EXTRA_PYTHON']:
             extraversion = conf.all_envs['extrapython']['PYTHON_VERSION']
             if extraversion == conf.env['PYTHON_VERSION']:
-                raise Utils.WafError("extrapython %s is same as main python %s" % (
+                raise Utils.WafError("extrapython {0!s} is same as main python {1!s}".format(
                     extraversion, conf.env['PYTHON_VERSION']))
     else:
         conf.msg("python headers", "using cache")
@@ -97,7 +97,7 @@ def SAMBA_PYTHON(bld, name,
     # when we support static python modules we'll need to gather
     # the list from all the SAMBA_PYTHON() targets
     if init_function_sentinel is not None:
-        cflags += ' -DSTATIC_LIBPYTHON_MODULES=%s' % init_function_sentinel
+        cflags += ' -DSTATIC_LIBPYTHON_MODULES={0!s}'.format(init_function_sentinel)
 
     # From https://docs.python.org/2/c-api/arg.html:
     # Starting with Python 2.5 the type of the length argument to
@@ -113,7 +113,7 @@ def SAMBA_PYTHON(bld, name,
     source = bld.EXPAND_VARIABLES(source, vars=vars)
 
     if realname is not None:
-        link_name = 'python_modules/%s' % realname
+        link_name = 'python_modules/{0!s}'.format(realname)
     else:
         link_name = None
 

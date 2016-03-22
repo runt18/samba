@@ -15,15 +15,15 @@ n2_regexp = re.compile('<manvolnum>(.*)</manvolnum>', re.M)
 
 def postinstall_schemas(prog_name):
 	if Build.bld.is_install:
-		dir = Build.bld.get_install_path('${PREFIX}/etc/gconf/schemas/%s.schemas' % prog_name)
+		dir = Build.bld.get_install_path('${{PREFIX}}/etc/gconf/schemas/{0!s}.schemas'.format(prog_name))
 		if not Options.options.destdir:
 			# add the gconf schema
 			Utils.pprint('YELLOW', 'Installing GConf schema')
-			command = 'gconftool-2 --install-schema-file=%s 1> /dev/null' % dir
+			command = 'gconftool-2 --install-schema-file={0!s} 1> /dev/null'.format(dir)
 			ret = Utils.exec_command(command)
 		else:
 			Utils.pprint('YELLOW', 'GConf schema not installed. After install, run this:')
-			Utils.pprint('YELLOW', 'gconftool-2 --install-schema-file=%s' % dir)
+			Utils.pprint('YELLOW', 'gconftool-2 --install-schema-file={0!s}'.format(dir))
 
 def postinstall_icons():
 	dir = Build.bld.get_install_path('${DATADIR}/icons/hicolor')
@@ -31,19 +31,19 @@ def postinstall_icons():
 		if not Options.options.destdir:
 			# update the pixmap cache directory
 			Utils.pprint('YELLOW', "Updating Gtk icon cache.")
-			command = 'gtk-update-icon-cache -q -f -t %s' % dir
+			command = 'gtk-update-icon-cache -q -f -t {0!s}'.format(dir)
 			ret = Utils.exec_command(command)
 		else:
 			Utils.pprint('YELLOW', 'Icon cache not updated. After install, run this:')
-			Utils.pprint('YELLOW', 'gtk-update-icon-cache -q -f -t %s' % dir)
+			Utils.pprint('YELLOW', 'gtk-update-icon-cache -q -f -t {0!s}'.format(dir))
 
 def postinstall_scrollkeeper(prog_name):
 	if Build.bld.is_install:
 		# now the scrollkeeper update if we can write to the log file
 		if os.access('/var/log/scrollkeeper.log', os.W_OK):
 			dir1 = Build.bld.get_install_path('${PREFIX}/var/scrollkeeper')
-			dir2 = Build.bld.get_install_path('${DATADIR}/omf/%s' % prog_name)
-			command = 'scrollkeeper-update -q -p %s -o %s' % (dir1, dir2)
+			dir2 = Build.bld.get_install_path('${{DATADIR}}/omf/{0!s}'.format(prog_name))
+			command = 'scrollkeeper-update -q -p {0!s} -o {1!s}'.format(dir1, dir2)
 			ret = Utils.exec_command(command)
 
 def postinstall(prog_name='myapp', schemas=1, icons=1, scrollkeeper=1):
@@ -72,15 +72,15 @@ def apply_gnome_doc(self):
 		if not x == 'C':
 			tsk = self.create_task('xml2po')
 			node = self.path.find_resource(x+'/'+x+'.po')
-			src = self.path.find_resource('C/%s.xml' % self.doc_module)
-			out = self.path.find_or_declare('%s/%s.xml' % (x, self.doc_module))
+			src = self.path.find_resource('C/{0!s}.xml'.format(self.doc_module))
+			out = self.path.find_or_declare('{0!s}/{1!s}.xml'.format(x, self.doc_module))
 			tsk.set_inputs([node, src])
 			tsk.set_outputs(out)
 		else:
-			out = self.path.find_resource('%s/%s.xml' % (x, self.doc_module))
+			out = self.path.find_resource('{0!s}/{1!s}.xml'.format(x, self.doc_module))
 
 		tsk2 = self.create_task('xsltproc2po')
-		out2 = self.path.find_or_declare('%s/%s-%s.omf' % (x, self.doc_module, x))
+		out2 = self.path.find_or_declare('{0!s}/{1!s}-{2!s}.omf'.format(x, self.doc_module, x))
 		tsk2.set_outputs(out2)
 		node = self.path.find_resource(self.doc_module+".omf.in")
 		tsk2.inputs = [node, out]
@@ -88,7 +88,7 @@ def apply_gnome_doc(self):
 		tsk2.run_after.append(tsk)
 
 		if bld.is_install:
-			path = self.install_path + '/gnome/help/%s/%s' % (self.doc_module, x)
+			path = self.install_path + '/gnome/help/{0!s}/{1!s}'.format(self.doc_module, x)
 			bld.install_files(self.install_path + '/omf', out2, env=self.env)
 			for y in self.to_list(self.doc_figures):
 				try:
@@ -96,13 +96,13 @@ def apply_gnome_doc(self):
 					bld.install_as(path + '/' + y, self.path.abspath() + '/' + x + '/' + y)
 				except:
 					bld.install_as(path + '/' + y, self.path.abspath() + '/C/' + y)
-			bld.install_as(path + '/%s.xml' % self.doc_module, out.abspath(self.env))
+			bld.install_as(path + '/{0!s}.xml'.format(self.doc_module), out.abspath(self.env))
 			if x == 'C':
 				xmls = self.to_list(self.doc_includes)
 				xmls.append(self.doc_entities)
 				for z in xmls:
-					out = self.path.find_resource('%s/%s' % (x, z))
-					bld.install_as(path + '/%s' % z, out.abspath(self.env))
+					out = self.path.find_resource('{0!s}/{1!s}'.format(x, z))
+					bld.install_as(path + '/{0!s}'.format(z), out.abspath(self.env))
 
 # OBSOLETE
 class xml_to_taskgen(TaskGen.task_gen):
@@ -163,7 +163,7 @@ def apply_gnome_sgml2man(self):
 		name = out.name
 		ext = name[-1]
 		env = task.env
-		self.bld.install_files('${DATADIR}/man/man%s/' % ext, out, env)
+		self.bld.install_files('${{DATADIR}}/man/man{0!s}/'.format(ext), out, env)
 
 	self.bld.rescan(self.path)
 	for name in self.bld.cache_dir_contents[self.path.id]:

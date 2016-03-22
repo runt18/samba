@@ -85,7 +85,7 @@ class RRSIG(dns.rdata.Rdata):
         return self.type_covered
 
     def to_text(self, origin=None, relativize=True, **kw):
-        return '%s %d %d %d %s %s %d %s %s' % (
+        return '{0!s} {1:d} {2:d} {3:d} {4!s} {5!s} {6:d} {7!s} {8!s}'.format(
             dns.rdatatype.to_text(self.type_covered),
             self.algorithm,
             self.labels,

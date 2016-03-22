@@ -45,6 +45,6 @@ print lines[0],
 
 for key, value in subgraph.items():
     for n in value:
-        print '\t"%s" -> "%s"' % (key, n)
+        print '\t"{0!s}" -> "{1!s}"'.format(key, n)
 
 print lines[-1],

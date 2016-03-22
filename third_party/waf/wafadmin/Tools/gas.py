@@ -17,7 +17,7 @@ Task.simple_task_type('asm', as_str, 'PINK', ext_out='.o', shell=False)
 def asm_hook(self, node):
 	# create the compilation task: cpp or cc
 	try: obj_ext = self.obj_ext
-	except AttributeError: obj_ext = '_%d.o' % self.idx
+	except AttributeError: obj_ext = '_{0:d}.o'.format(self.idx)
 
 	task = self.create_task('asm', node, node.change_ext(obj_ext))
 	self.compiled_tasks.append(task)
@@ -29,7 +29,7 @@ def asm_hook(self, node):
 def asm_incflags(self):
 	self.env.append_value('_ASINCFLAGS', self.env.ASINCFLAGS)
 	var = ('cxx' in self.features) and 'CXX' or 'CC'
-	self.env.append_value('_ASINCFLAGS', self.env['_%sINCFLAGS' % var])
+	self.env.append_value('_ASINCFLAGS', self.env['_{0!s}INCFLAGS'.format(var)])
 
 def detect(conf):
 	conf.find_program(['gas', 'as'], var='AS')

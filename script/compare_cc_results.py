@@ -28,7 +28,7 @@ for fname in sys.argv[1:]:
     if base_fname:
         diff = list(difflib.unified_diff(base_lines,lines,base_fname,fname))
         if diff:
-            print 'configuration files %s and %s do not match' % (base_fname, fname)
+            print 'configuration files {0!s} and {1!s} do not match'.format(base_fname, fname)
             for l in diff:
                 sys.stdout.write(l)
             found_diff = True

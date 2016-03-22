@@ -20,10 +20,10 @@ def SET_TARGET_TYPE(ctx, target, value):
     '''set the target type of a target'''
     cache = LOCAL_CACHE(ctx, 'TARGET_TYPE')
     if target in cache and cache[target] != 'EMPTY':
-        Logs.error("ERROR: Target '%s' in directory %s re-defined as %s - was %s" % (target, ctx.curdir, value, cache[target]))
+        Logs.error("ERROR: Target '{0!s}' in directory {1!s} re-defined as {2!s} - was {3!s}".format(target, ctx.curdir, value, cache[target]))
         sys.exit(1)
     LOCAL_CACHE_SET(ctx, 'TARGET_TYPE', target, value)
-    debug("task_gen: Target '%s' created of type '%s' in %s" % (target, value, ctx.curdir))
+    debug("task_gen: Target '{0!s}' created of type '{1!s}' in {2!s}".format(target, value, ctx.curdir))
     return True
 
 
@@ -70,7 +70,7 @@ def install_rpath(target):
 
 def build_rpath(bld):
     '''the rpath value for build'''
-    rpaths = [os.path.normpath('%s/%s' % (bld.env.BUILD_DIRECTORY, d)) for d in ("shared", "shared/private")]
+    rpaths = [os.path.normpath('{0!s}/{1!s}'.format(bld.env.BUILD_DIRECTORY, d)) for d in ("shared", "shared/private")]
     bld.env['RPATH'] = []
     if bld.env.RPATH_ON_BUILD:
         return rpaths
@@ -100,7 +100,7 @@ def LOCAL_CACHE_SET(ctx, cachename, key, value):
 def ASSERT(ctx, expression, msg):
     '''a build assert call'''
     if not expression:
-        raise Utils.WafError("ERROR: %s\n" % msg)
+        raise Utils.WafError("ERROR: {0!s}\n".format(msg))
 Build.BuildContext.ASSERT = ASSERT
 
 
@@ -136,7 +136,7 @@ def process_depends_on(self):
         lst = self.to_list(self.depends_on)
         for x in lst:
             y = self.bld.get_tgen_by_name(x)
-            self.bld.ASSERT(y is not None, "Failed to find dependency %s of %s" % (x, self.name))
+            self.bld.ASSERT(y is not None, "Failed to find dependency {0!s} of {1!s}".format(x, self.name))
             y.post()
             if getattr(y, 'more_includes', None):
                   self.includes += " " + y.more_includes
@@ -198,7 +198,7 @@ def subst_vars_error(string, env):
         if re.match('\$\{\w+\}', v):
             vname = v[2:-1]
             if not vname in env:
-                raise KeyError("Failed to find variable %s in %s" % (vname, string))
+                raise KeyError("Failed to find variable {0!s} in {1!s}".format(vname, string))
             v = env[vname]
         out.append(v)
     return ''.join(out)
@@ -326,7 +326,7 @@ def EXPAND_VARIABLES(ctx, varstr, vars=None):
     # make sure there is nothing left. Also check for the common
     # typo of $( instead of ${
     if ret.find('${') != -1 or ret.find('$(') != -1:
-        Logs.error('Failed to substitute all variables in varstr=%s' % ret)
+        Logs.error('Failed to substitute all variables in varstr={0!s}'.format(ret))
         sys.exit(1)
     return ret
 Build.BuildContext.EXPAND_VARIABLES = EXPAND_VARIABLES
@@ -355,14 +355,14 @@ def RUN_PYTHON_TESTS(testfiles, pythonpath=None, extra_env=None):
     result = 0
     for interp in env.python_interpreters:
         for testfile in testfiles:
-            cmd = "PYTHONPATH=%s %s %s" % (pythonpath, interp, testfile)
+            cmd = "PYTHONPATH={0!s} {1!s} {2!s}".format(pythonpath, interp, testfile)
             if extra_env:
                 for key, value in extra_env.items():
-                    cmd = "%s=%s %s" % (key, value, cmd)
-            print('Running Python test with %s: %s' % (interp, testfile))
+                    cmd = "{0!s}={1!s} {2!s}".format(key, value, cmd)
+            print('Running Python test with {0!s}: {1!s}'.format(interp, testfile))
             ret = RUN_COMMAND(cmd)
             if ret:
-                print('Python test failed: %s' % cmd)
+                print('Python test failed: {0!s}'.format(cmd))
                 result = ret
     return result
 
@@ -591,9 +591,9 @@ def make_libname(ctx, name, nolibprefix=False, version=None, python=False):
         (root, ext) = os.path.splitext(libname)
         if ext == ".dylib":
             # special case - version goes before the prefix
-            libname = "%s.%s%s" % (root, version, ext)
+            libname = "{0!s}.{1!s}{2!s}".format(root, version, ext)
         else:
-            libname = "%s%s.%s" % (root, ext, version)
+            libname = "{0!s}{1!s}.{2!s}".format(root, ext, version)
     return libname
 Build.BuildContext.make_libname = make_libname
 
@@ -611,7 +611,7 @@ def get_tgt_list(bld):
             continue
         t = bld.get_tgen_by_name(tgt)
         if t is None:
-            Logs.error("Target %s of type %s has no task generator" % (tgt, type))
+            Logs.error("Target {0!s} of type {1!s} has no task generator".format(tgt, type))
             sys.exit(1)
         tgt_list.append(t)
     return tgt_list

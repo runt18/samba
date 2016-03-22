@@ -47,7 +47,7 @@ class NSEC(dns.rdata.Rdata):
                         bits.append(dns.rdatatype.to_text(window * 256 + \
                                                           i * 8 + j))
             text += (' ' + ' '.join(bits))
-        return '%s%s' % (next, text)
+        return '{0!s}{1!s}'.format(next, text)
 
     def from_text(cls, rdclass, rdtype, tok, origin = None, relativize = True):
         next = tok.get_name()
