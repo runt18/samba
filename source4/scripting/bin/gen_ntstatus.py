@@ -62,7 +62,7 @@ def transformErrorName( error_name ):
 def parseErrorDescriptions( file_contents, isWinError ):
     count = 0
     for line in file_contents:
-        if line == None or line == '\t' or line == "" or line == '\n':
+        if line is None or line == '\t' or line == "" or line == '\n':
             continue
         content = line.strip().split(None,1)
         # start new error definition ?
@@ -80,7 +80,7 @@ def parseErrorDescriptions( file_contents, isWinError ):
                 print "Error parsing file as line %d"%count
                 sys.exit()
             err = Errors[-1]
-            if err.err_define == None:
+            if err.err_define is None:
                 err.err_define = transformErrorName(content[0])
             else:
                 if len(content) > 0:
@@ -122,7 +122,7 @@ def parseHeaderFile(file_contents):
                 # "#define SOMETHING NT_STATUS( num1 | num2 )" etc...
                 err_code_string = contents[2].split('(')[1].split(')')[0]
                 err_code = parseErrCodeString( err_code_string ) 
-                if  err_code != None:
+                if  err_code is not None:
                     const_define = contents[1]
 #                    print "%s 0x%x"%(const_define, err_code)
                     DefineToErrCode[const_define] = err_code

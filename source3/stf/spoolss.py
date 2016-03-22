@@ -9,7 +9,7 @@ class PrintServerTest(comfychair.TestCase):
     def setUp(self):
         # TODO: create a test printer
         self.server = stf.get_server(platform = "nt")
-        self.require(self.server != None, "print server required")
+        self.require(self.server is not None, "print server required")
         # TODO: remove hardcoded printer name
         self.printername = "p"
         self.uncname = "\\\\%s\\%s" % \
@@ -20,7 +20,7 @@ class W2kPrintServerTest(comfychair.TestCase):
     def setUp(self):
         # TODO: create a test printer
         self.server = stf.get_server(platform = "nt5")
-        self.require(self.server != None, "print server required")
+        self.require(self.server is not None, "print server required")
         # TODO: remove hardcoded printer name
         self.printername = "p"
         self.uncname = "\\\\%s\\%s" % \

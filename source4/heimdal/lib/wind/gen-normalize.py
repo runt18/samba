@@ -156,7 +156,7 @@ def add(table, k, v):
         table[0] = v[0]
     else:
         i = int(k[0], 0x10) + 1
-        if table[i] == None:
+        if table[i] is None:
             table[i] = createTable()
         add(tables[table[i]], k[1:], v)
 
@@ -175,10 +175,10 @@ for k in sortedKeys(tables) :
     tableToNext[k] = len(next_table)
     l = t[1:]
     start = 0
-    while start < 16 and l[start] == None:
+    while start < 16 and l[start] is None:
         start += 1
     end = 16
-    while end > start and l[end - 1] == None:
+    while end > start and l[end - 1] is None:
         end -= 1
     tableStart[k] = start
     tableEnd[k]   = end

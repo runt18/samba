@@ -143,7 +143,7 @@ class Parallel(object):
 				self.frozen = []
 			elif not self.count:
 				(jobs, tmp) = self.manager.get_next_set()
-				if jobs != None: self.maxjobs = jobs
+				if jobs is not None: self.maxjobs = jobs
 				if tmp: self.outstanding += tmp
 				break
 
