@@ -371,12 +371,12 @@ def libname_msvc(self, libname, is_static=False, mandatory=False):
 
 	(lt_path, lt_libname, lt_static) = self.find_lt_names_msvc(lib, is_static)
 
-	if lt_path != None and lt_libname != None:
+	if lt_path is not None and lt_libname is not None:
 		if lt_static == True:
 			# file existance check has been made by find_lt_names
 			return os.path.join(lt_path,lt_libname)
 
-	if lt_path != None:
+	if lt_path is not None:
 		_libpaths=[lt_path] + self.env['LIBPATH']
 	else:
 		_libpaths=self.env['LIBPATH']

@@ -1,14 +1,14 @@
 #: E711
-if res == None:
+if res is None:
     pass
 #: E711
-if res != None:
+if res is not None:
     pass
 #: E711
-if None == res:
+if None is res:
     pass
 #: E711
-if None != res:
+if None is not res:
     pass
 
 #

@@ -10,6 +10,6 @@ from functools import (partial, reduce, wraps,
     cmp_to_key)   # noqa
 
 a = 1
-if a == None:   # noqa
+if a is None:   # noqa
     pass
 #:

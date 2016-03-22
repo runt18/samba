@@ -244,7 +244,7 @@ class Node(object):
         return ip in self.public_addresses
 
     def node_ip_coverage(self, ips=None):
-        return len([a for a in self.current_addresses if ips == None or a in ips])
+        return len([a for a in self.current_addresses if ips is None or a in ips])
 
     def set_imbalance(self, imbalance=-1):
         """Set the imbalance metric to the given value.  If none given

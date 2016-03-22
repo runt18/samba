@@ -170,7 +170,7 @@ class libtool_la_file:
 		libs = []
 		if self.dependency_libs:
 			libs = str(self.dependency_libs).strip().split()
-		if libs == None:
+		if libs is None:
 			libs = []
 		# add la lib and libdir
 		libs.insert(0, "-l%s" % self.linkname.strip())
